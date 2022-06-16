@@ -1,0 +1,6 @@
+git+https://github.com/edgemind-sas/mosaic.git
+tqdm
+statsmodels
+pandas
+plotly
+tabulate

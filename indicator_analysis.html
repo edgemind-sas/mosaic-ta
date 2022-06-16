@@ -1,0 +1,863 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Projet MOSAIC : Analyse technique - Notions fondamentales</title>
+<meta name="author" content="Roland Donat" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/readtheorg.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/js/readtheorg.js"></script>
+<link rel="stylesheet" type="text/css" href="https://edgemind-sas.github.io/visual-identity/official_docs/css/edgemind.css" />
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Projet MOSAIC : Analyse technique - Notions fondamentales</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table des matières</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#introduction">1. Introduction</a></li>
+<li><a href="#données-historiques-ohlcv">2. Données historiques OHLCV</a></li>
+<li><a href="#notations-mathématiques">3. Notations mathématiques</a>
+<ul>
+<li><a href="#notions-temporelles">3.1. Notions temporelles</a></li>
+<li><a href="#chandelier">3.2. Chandelier</a></li>
+<li><a href="#rendements">3.3. Rendements</a></li>
+</ul>
+</li>
+<li><a href="#extension-de-la-notion-de-rendements">4. Extension de la notion de rendements</a>
+<ul>
+<li><a href="#définitions">4.1. Définitions</a></li>
+<li><a href="#org0dc5e45">4.2. Rendement de clôture</a></li>
+<li><a href="#org830ddba">4.3. Rendement du minimum maximum</a></li>
+</ul>
+</li>
+<li><a href="#évaluation-de-la-performance-des-indicateurs">5. Évaluation de la performance des indicateurs</a>
+<ul>
+<li><a href="#méthodologie-générale">5.1. Méthodologie générale</a></li>
+<li><a href="#critères-dévaluation">5.2. Critères d'évaluation</a>
+<ul>
+<li><a href="#score-des-rendements-extrêmes">5.2.1. Score des rendements extrêmes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org395db15">6. Environnement technique</a></li>
+<li><a href="#org1301325">7. Références</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-introduction" class="outline-2">
+<h2 id="introduction"><span class="section-number-2">1.</span> Introduction</h2>
+<div class="outline-text-2" id="text-introduction">
+<p>
+Dans le domaine de l'analyse des marchés financiers, l'analyse technique
+correspond à un ensemble d'outils dont le but est de prédire les
+rendements futurs des actifs financiers. Les analyses reposent sur
+l'étude des historiques des données de marché disponibles,
+principalement la cotation et le volume des actifs considérés.
+</p>
+
+<p>
+La grande majorité des méthodologies présentées reposent sur la
+construction d'indicateurs particuliers jugés pertinents par leurs
+auteurs. Toutefois, l'évaluation de ces indicateurs n'est réalisée que
+sur la base de backtesting empiriques sur des périodes choisies
+arbitrairement et relativement courtes lorsqu'il s'agit d'analyses
+intra-journalières. Comme les auteurs de l'article <a href="#citeproc_bib_item_1">[1]</a>, nous partageons le constat que l'évaluation des performances de
+l'analyse technique nécessite une consolidation mathématique. Pour ce
+faire, nous proposons de développer une stratégie d'évaluation des
+indicateurs techniques innovante fondée sur l'analyse de la distribution
+conditionnelle des rendements par rapport aux indicateurs observés.
+</p>
+
+<p>
+Ce document a pour objectif de présenter notre démarche de développement
+et d'évaluation d'indicateurs techniques pour l'analyse technique des
+cryptoactifs.
+</p>
+</div>
+</div>
+
+<div id="outline-container-données-historiques-ohlcv" class="outline-2">
+<h2 id="données-historiques-ohlcv"><span class="section-number-2">2.</span> Données historiques OHLCV</h2>
+<div class="outline-text-2" id="text-données-historiques-ohlcv">
+<p>
+L'évolution de la cotation d'un actif au cours du temps est usuellement
+présentée sous la forme de données, dites au format OHLCV (de l'anglais
+<i>open</i>, <i>high</i>, <i>low</i>, <i>close</i>, <i>volume</i>). Il s'agit d'un format
+pratique permettant de représenter des séries temporelles d'une manière
+particulière. En effet, le format OHLC (la partie volume n'est pas
+concernée par la subtilité du format) représente l'évolution d'une
+mesure au cours d'intervalles de temps réguliers successifs caractérisés
+par une période d'échantillonnage notée \(\Delta t\) (e.g. une minute,
+cinq minutes, une heure, une journée, etc).
+</p>
+
+<p>
+Typiquement, les données OHLCV contiennent les variables suivantes : 
+</p>
+<ul class="org-ul">
+<li><code>timestamp</code> : timestamp caractérisant le début de la période de mesure (par exemple exprimé en
+millisecondes), la fin étant déterminée par la période d'échantillonnage \(\Delta t\) utilisée.</li>
+<li><code>open</code> : valeur de l'actif au début de la période.</li>
+<li><code>high</code> : valeur maximum de l'actif atteinte sur la période.</li>
+<li><code>low</code> : valeur mimimum de l'actif atteinte sur la période.</li>
+<li><code>close</code> : valeur de l'actif à la fin de la période.</li>
+<li><code>volume</code> : montant cumulé des ventes et des achats de l'actif sur la période.</li>
+</ul>
+
+<p>
+Il est courant de visualiser les données OHLC à l'aide du graphique, dit
+en chandeliers. En fonction, des valeurs d'ouverture (<i>open</i>) et de
+fermeture (<i>close</i>), on parle également de chandeliers haussiers et
+baissiers, cf. Figure <a href="#org1e87552">1</a>.
+</p>
+
+
+<div id="org1e87552" class="figure">
+<p><img src="./fig/candle.jpg" alt="candle.jpg" />
+</p>
+<p><span class="figure-number">Figure&nbsp;1&nbsp;: </span>Représentation du symbole de chandelier.</p>
+</div>
+
+<p>
+Dans un diagramme en chandelier, on retrouve les données OHLC mais
+également les notions de : 
+</p>
+<ul class="org-ul">
+<li>corps (<i>body</i>) représentant la distance entre la cotation d'ouverture et de fermeture de l'actif
+sur une période ;</li>
+<li>mèches ou ombres supérieures (<i>upper shadow</i>) représentant la distance entre la partie haute du
+corps et la cotation la plus haute sur une période ;</li>
+<li>mèches ou ombres inférieures (<i>lower shadow</i>) représentant la distance entre la partie basse du
+corps et la cotation la plus basse sur une période ;</li>
+</ul>
+
+<p>
+Le tableau suivant donne un aperçu des premières données de cotation du
+BTC par rapport à l'USDC de l'année 2021 avec une période
+d'échantillonnage \(\Delta t =\) 5 minutes.
+</p>
+
+<style type="text/css">
+</style>
+<table id="T_c634d">
+  <thead>
+    <tr>
+      <th class="blank level0" >&nbsp;</th>
+      <th id="T_c634d_level0_col0" class="col_heading level0 col0" >open</th>
+      <th id="T_c634d_level0_col1" class="col_heading level0 col1" >high</th>
+      <th id="T_c634d_level0_col2" class="col_heading level0 col2" >low</th>
+      <th id="T_c634d_level0_col3" class="col_heading level0 col3" >close</th>
+      <th id="T_c634d_level0_col4" class="col_heading level0 col4" >volume</th>
+    </tr>
+    <tr>
+      <th class="index_name level0" >time</th>
+      <th class="blank col0" >&nbsp;</th>
+      <th class="blank col1" >&nbsp;</th>
+      <th class="blank col2" >&nbsp;</th>
+      <th class="blank col3" >&nbsp;</th>
+      <th class="blank col4" >&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_c634d_level0_row0" class="row_heading level0 row0" >2021-01-01 00:00:00+00:00</th>
+      <td id="T_c634d_row0_col0" class="data row0 col0" >28 964.54</td>
+      <td id="T_c634d_row0_col1" class="data row0 col1" >29 064.55</td>
+      <td id="T_c634d_row0_col2" class="data row0 col2" >28 958.66</td>
+      <td id="T_c634d_row0_col3" class="data row0 col3" >29 018.17</td>
+      <td id="T_c634d_row0_col4" class="data row0 col4" >8.77</td>
+    </tr>
+    <tr>
+      <th id="T_c634d_level0_row1" class="row_heading level0 row1" >2021-01-01 00:05:00+00:00</th>
+      <td id="T_c634d_row1_col0" class="data row1 col0" >28 993.74</td>
+      <td id="T_c634d_row1_col1" class="data row1 col1" >28 996.04</td>
+      <td id="T_c634d_row1_col2" class="data row1 col2" >28 890.99</td>
+      <td id="T_c634d_row1_col3" class="data row1 col3" >28 914.30</td>
+      <td id="T_c634d_row1_col4" class="data row1 col4" >11.15</td>
+    </tr>
+    <tr>
+      <th id="T_c634d_level0_row2" class="row_heading level0 row2" >2021-01-01 00:10:00+00:00</th>
+      <td id="T_c634d_row2_col0" class="data row2 col0" >28 902.53</td>
+      <td id="T_c634d_row2_col1" class="data row2 col1" >28 908.49</td>
+      <td id="T_c634d_row2_col2" class="data row2 col2" >28 741.86</td>
+      <td id="T_c634d_row2_col3" class="data row2 col3" >28 790.00</td>
+      <td id="T_c634d_row2_col4" class="data row2 col4" >4.58</td>
+    </tr>
+    <tr>
+      <th id="T_c634d_level0_row3" class="row_heading level0 row3" >2021-01-01 00:15:00+00:00</th>
+      <td id="T_c634d_row3_col0" class="data row3 col0" >28 798.99</td>
+      <td id="T_c634d_row3_col1" class="data row3 col1" >28 891.63</td>
+      <td id="T_c634d_row3_col2" class="data row3 col2" >28 798.29</td>
+      <td id="T_c634d_row3_col3" class="data row3 col3" >28 884.38</td>
+      <td id="T_c634d_row3_col4" class="data row3 col4" >4.31</td>
+    </tr>
+    <tr>
+      <th id="T_c634d_level0_row4" class="row_heading level0 row4" >2021-01-01 00:20:00+00:00</th>
+      <td id="T_c634d_row4_col0" class="data row4 col0" >28 845.04</td>
+      <td id="T_c634d_row4_col1" class="data row4 col1" >28 886.67</td>
+      <td id="T_c634d_row4_col2" class="data row4 col2" >28 789.15</td>
+      <td id="T_c634d_row4_col3" class="data row4 col3" >28 885.73</td>
+      <td id="T_c634d_row4_col4" class="data row4 col4" >13.21</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+Par exemple, la première ligne du tableau signifie que le 01/01/2021 :
+</p>
+
+<ul class="org-ul">
+<li>à 00:00:00, le prix d'un BTC était de 28964,54 USDC ;</li>
+<li>à 00:05:00, le prix d'un BTC était entre 29018,17 USDC (fermeture
+période) et 28993,74 USDC (ouverture période suivante) ;</li>
+<li>entre 00:00:00 et 00:05:00 le prix d'un BTC est passé par un minimum
+28958,66 USDC et un maximum de 29064,55 USDC.</li>
+</ul>
+
+<p>
+Le marché BTC/USDC étant ouvert 24h/24 et 7j/7, nous devrions observer
+\(\text{close}(t-1)\) égale à \(\text{open}(t)\) pour tout \(t\). Toutefois,
+la collecte des données n'étant pas instantanée, il est fréquent
+d'observer de légères différences entre le cours d'ouverture de la
+période courante et le cours de fermeture de la période précédente.
+</p>
+</div>
+</div>
+
+<div id="outline-container-notations-mathématiques" class="outline-2">
+<h2 id="notations-mathématiques"><span class="section-number-2">3.</span> Notations mathématiques</h2>
+<div class="outline-text-2" id="text-notations-mathématiques">
+</div>
+
+<div id="outline-container-notions-temporelles" class="outline-3">
+<h3 id="notions-temporelles"><span class="section-number-3">3.1.</span> Notions temporelles</h3>
+<div class="outline-text-3" id="text-notions-temporelles">
+<p>
+Nous avons introduit précédemment la période d'échantillonnage des
+données \(\Delta t\). On note également \(t_{0}\) la première date
+d'échantillonnage. Dans l'exemple de données précédent, on rappelle que
+\(\Delta t = 5\) minutes et que \(t_{0} =\) 2021-01-01 00:00:00.
+</p>
+
+<p>
+Nous introduisons ensuite l'indice \(p \ge 0\) permettant de référencer la
+\(p\) -ème période d'observation des données, i.e. entre
+\(t_{0} + p\Delta t\) et \(t_{0} + (p+1)\Delta t\). En reprenant l'exemple
+précédent, on a :
+</p>
+<ul class="org-ul">
+<li>1er période d'observation \(p = 0\) : période entre 2021-01-01 00:00:00 et 2021-01-01 00:05:00 ;</li>
+<li>5ème période d'observation \(p = 4\) : période entre 2021-01-01 00:15:00 et 2021-01-01 00:20:00.</li>
+</ul>
+
+<p>
+Les données OHLCV sont notées dans la suite comme suit :
+</p>
+<ul class="org-ul">
+<li>\(\text{o}_{p}\) : cotation de l'actif à l'ouverture de la période \(p\), i.e. à \(t = t_{0} +  p\Delta
+  t\) ;</li>
+<li>\(\text{c}_{p}\) : cotation de l'actif à la fermeture de la période \(p\), i.e. à \(t = t_{0} +
+  (p+1)\Delta t\) ;</li>
+<li>\(\text{h}_{p}\) : cotation maximum de l'actif sur la période \(p\) ;</li>
+<li>\(\text{l}_{p}\) : cotation mimimum de l'actif sur la période \(p\) ;</li>
+<li>\(\text{v}_{p}\) : volume échangé de l'actif la période \(p\).</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-chandelier" class="outline-3">
+<h3 id="chandelier"><span class="section-number-3">3.2.</span> Chandelier</h3>
+<div class="outline-text-3" id="text-chandelier">
+<p>
+En plus des notations précédentes, nous pouvons introduire différentes
+grandeurs associées aux parties du diagramme en chandelier.
+</p>
+
+<p>
+En considérant, le chandelier représentant une donnée OHLC à la période
+\(p\), nous avons :<br />
+</p>
+<ul class="org-ul">
+<li>Le corps \(\text{b}_{p} = \text{c}_{p} - \text{o}_{p}\).</li>
+<li>L'ombre inférieure \(\text{s}_{p}^{\ell} = \min\{\text{c}_{p}, \text{o}_{p}\} - \text{l}_{p}\).</li>
+<li>L'ombre supérieure \(\text{s}_{p}^{u} = \text{h}_{p} - \max\{\text{c}_{p}, \text{o}_{p}\}\).</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-rendements" class="outline-3">
+<h3 id="rendements"><span class="section-number-3">3.3.</span> Rendements</h3>
+<div class="outline-text-3" id="text-rendements">
+<p>
+On note enfin \(r_{p}\) la variation relative de la cotation d'un actif
+entre deux périodes consécutives, on parle également de rendement (ou
+<i>returns</i> en anglais) sur la période \(p\). Nous avons donc pour tout
+\(p \ge 1\) :
+\[
+r_{p} = \frac{\text{c}_{p}}{\text{c}_{p - 1}} - 1.
+\]
+La quantité \(r_{p}\) est donc positive si le BTC gagne en valeur par
+rapport à l'USDC sur la période \(p\) et négative sinon. Le rendement
+représente l'indicateur principal au coeur de toutes les analyses
+financières réalisées sur un actif donnée.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-extension-de-la-notion-de-rendements" class="outline-2">
+<h2 id="extension-de-la-notion-de-rendements"><span class="section-number-2">4.</span> Extension de la notion de rendements</h2>
+<div class="outline-text-2" id="text-extension-de-la-notion-de-rendements">
+</div>
+
+<div id="outline-container-définitions" class="outline-3">
+<h3 id="définitions"><span class="section-number-3">4.1.</span> Définitions</h3>
+<div class="outline-text-3" id="text-définitions">
+<p>
+Le calcul des rendements est une étape fondamentale dans l'analyse d'un
+actif au cours du temps. La définition d'un rendement proposée dans la
+section précédente se limite au rendement sur le cours de clôture et à
+deux périodes successives.
+</p>
+
+<p>
+En effet, nous allons étendre la définition des rendements :
+</p>
+<ul class="org-ul">
+<li>d'une part, aux cotations maximum et minimum ;</li>
+<li>et d'autre part, entre deux périodes \(p\) et \(p + k\) données.</li>
+</ul>
+
+<p>
+Nous illustrerons les différentes notions en reprenant l'extrait de
+cotation BTC/USDC du Table.
+</p>
+
+<div>                        <script type="text/javascript">window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script src="https://cdn.plot.ly/plotly-2.12.1.min.js"></script>                <div id="c7d8cf6a-2457-414a-a29d-f5f9c6f36fd6" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script type="text/javascript">                                    window.PLOTLYENV=window.PLOTLYENV || {};                                    if (document.getElementById("c7d8cf6a-2457-414a-a29d-f5f9c6f36fd6")) {                    Plotly.newPlot(                        "c7d8cf6a-2457-414a-a29d-f5f9c6f36fd6",                        [{"close":[29018.17,28914.3,28790.0,28884.38,28885.73],"high":[29064.55,28996.04,28908.49,28891.63,28886.67],"low":[28958.66,28890.99,28741.86,28798.29,28789.15],"name":"OHLC","open":[28964.54,28993.74,28902.53,28798.99,28845.04],"x":["2021-01-01T00:00:00+00:00","2021-01-01T00:05:00+00:00","2021-01-01T00:10:00+00:00","2021-01-01T00:15:00+00:00","2021-01-01T00:20:00+00:00"],"type":"candlestick"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmapgl":[{"type":"heatmapgl","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"title":{"text":"Exemple de donn\u00e9es OHLC sur l'actif BTC/USDC"},"yaxis":{"title":{"text":"USDC"}},"xaxis":{"title":{"text":"Temps"}}},                        {"displayModeBar": false, "responsive": true}                    )                };                            </script>        </div>
+</div>
+</div>
+
+<div id="outline-container-org0dc5e45" class="outline-3">
+<h3 id="org0dc5e45"><span class="section-number-3">4.2.</span> Rendement de clôture</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+Débutons donc par définir le rendement de clôture entre deux périodes \(p\) et \(p+k\) comme suit :
+</p>
+\begin{equation}
+\rho^{\text{c}}_{p + k} = 
+\begin{cases}
+\frac{\text{c}_{p + k}}{\text{c}_{p-1}} - 1 & \quad k \ge 0 \\
+\frac{\text{c}_{p }}{\text{c}_{p + k - 1}} - 1 & \quad k < 0.
+\end{cases}
+\end{equation}
+
+<p>
+À noter que \(k\) est un nombre entier permettant de définir le nombre
+de périodes futures ou passées à prendre en compte pour le calcul du
+rendement.
+</p>
+
+<p>
+<b>Exemples</b>
+</p>
+
+<p>
+Rendements de clôture calculés sur les données de l'exemple précédent et
+sur différents horizons :
+</p>
+
+<style type="text/css">
+</style>
+<table id="T_8de00">
+  <thead>
+    <tr>
+      <th class="index_name level0" >period</th>
+      <th id="T_8de00_level0_col0" class="col_heading level0 col0" >-3</th>
+      <th id="T_8de00_level0_col1" class="col_heading level0 col1" >-2</th>
+      <th id="T_8de00_level0_col2" class="col_heading level0 col2" >-1</th>
+      <th id="T_8de00_level0_col3" class="col_heading level0 col3" >0</th>
+      <th id="T_8de00_level0_col4" class="col_heading level0 col4" >1</th>
+      <th id="T_8de00_level0_col5" class="col_heading level0 col5" >2</th>
+      <th id="T_8de00_level0_col6" class="col_heading level0 col6" >3</th>
+    </tr>
+    <tr>
+      <th class="index_name level0" >time</th>
+      <th class="blank col0" >&nbsp;</th>
+      <th class="blank col1" >&nbsp;</th>
+      <th class="blank col2" >&nbsp;</th>
+      <th class="blank col3" >&nbsp;</th>
+      <th class="blank col4" >&nbsp;</th>
+      <th class="blank col5" >&nbsp;</th>
+      <th class="blank col6" >&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_8de00_level0_row0" class="row_heading level0 row0" >2021-01-01 00:00:00+00:00</th>
+      <td id="T_8de00_row0_col0" class="data row0 col0" ></td>
+      <td id="T_8de00_row0_col1" class="data row0 col1" ></td>
+      <td id="T_8de00_row0_col2" class="data row0 col2" ></td>
+      <td id="T_8de00_row0_col3" class="data row0 col3" ></td>
+      <td id="T_8de00_row0_col4" class="data row0 col4" ></td>
+      <td id="T_8de00_row0_col5" class="data row0 col5" ></td>
+      <td id="T_8de00_row0_col6" class="data row0 col6" ></td>
+    </tr>
+    <tr>
+      <th id="T_8de00_level0_row1" class="row_heading level0 row1" >2021-01-01 00:05:00+00:00</th>
+      <td id="T_8de00_row1_col0" class="data row1 col0" ></td>
+      <td id="T_8de00_row1_col1" class="data row1 col1" ></td>
+      <td id="T_8de00_row1_col2" class="data row1 col2" ></td>
+      <td id="T_8de00_row1_col3" class="data row1 col3" >-0.358%</td>
+      <td id="T_8de00_row1_col4" class="data row1 col4" >-0.786%</td>
+      <td id="T_8de00_row1_col5" class="data row1 col5" >-0.461%</td>
+      <td id="T_8de00_row1_col6" class="data row1 col6" >-0.456%</td>
+    </tr>
+    <tr>
+      <th id="T_8de00_level0_row2" class="row_heading level0 row2" >2021-01-01 00:10:00+00:00</th>
+      <td id="T_8de00_row2_col0" class="data row2 col0" ></td>
+      <td id="T_8de00_row2_col1" class="data row2 col1" ></td>
+      <td id="T_8de00_row2_col2" class="data row2 col2" >-0.786%</td>
+      <td id="T_8de00_row2_col3" class="data row2 col3" >-0.430%</td>
+      <td id="T_8de00_row2_col4" class="data row2 col4" >-0.103%</td>
+      <td id="T_8de00_row2_col5" class="data row2 col5" >-0.099%</td>
+      <td id="T_8de00_row2_col6" class="data row2 col6" ></td>
+    </tr>
+    <tr>
+      <th id="T_8de00_level0_row3" class="row_heading level0 row3" >2021-01-01 00:15:00+00:00</th>
+      <td id="T_8de00_row3_col0" class="data row3 col0" ></td>
+      <td id="T_8de00_row3_col1" class="data row3 col1" >-0.461%</td>
+      <td id="T_8de00_row3_col2" class="data row3 col2" >-0.103%</td>
+      <td id="T_8de00_row3_col3" class="data row3 col3" >0.328%</td>
+      <td id="T_8de00_row3_col4" class="data row3 col4" >0.333%</td>
+      <td id="T_8de00_row3_col5" class="data row3 col5" ></td>
+      <td id="T_8de00_row3_col6" class="data row3 col6" ></td>
+    </tr>
+    <tr>
+      <th id="T_8de00_level0_row4" class="row_heading level0 row4" >2021-01-01 00:20:00+00:00</th>
+      <td id="T_8de00_row4_col0" class="data row4 col0" >-0.456%</td>
+      <td id="T_8de00_row4_col1" class="data row4 col1" >-0.099%</td>
+      <td id="T_8de00_row4_col2" class="data row4 col2" >0.333%</td>
+      <td id="T_8de00_row4_col3" class="data row4 col3" >0.005%</td>
+      <td id="T_8de00_row4_col4" class="data row4 col4" ></td>
+      <td id="T_8de00_row4_col5" class="data row4 col5" ></td>
+      <td id="T_8de00_row4_col6" class="data row4 col6" ></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+En prenant la période \(p\) = 2021-01-01T00:05:00 et un horizon \(k = 0\),
+le rendement de clôture \(\rho^{\text{c}}_{p} = r_{p}\) correspond au
+rapport entre la clôture de la période 2021-01-01T00:05:00 et la clôture
+de la période 2021-01-01T00:00:00, soit :
+\[
+\rho^{\text{c}}_{p} = \frac{\text{c}_{p}}{\text{c}_{p-1}} = \frac{28914.30}{29018.17} - 1 \simeq -0.003579 \simeq -0.358 \%
+\]
+</p>
+
+<p>
+En prenant la période \(p\) = 2021-01-01T00:10:00 et un horizon \(k = 2\),
+le rendement de clôture \(\rho^{\text{c}}_{k+2}\) correspond au rapport
+entre la clôture de la période 2021-01-01T00:20:00 et la clôture de la
+période 2021-01-01T00:05:00, soit :
+\[
+\rho^{\text{c}}_{p + 2} = \frac{\text{c}_{p+2}}{\text{c}_{p-1}} = \frac{28885.73}{28914.30} - 1 \simeq -0.000988 \simeq -0.099 \%
+\]
+</p>
+
+<p>
+En prenant la période \(p\) = 2021-01-01T00:20:00 et un horizon \(k = -3\),
+le rendement de clôture \(\rho^{\text{c}}_{k-3}\) correspond au rapport
+entre la clôture de la période 2021-01-01T00:20:00 et la clôture de la
+période 2021-01-01T00:00:00, soit :
+\[
+\rho^{\text{c}}_{p - 3} = \frac{\text{c}_{p}}{\text{c}_{p-4}} = \frac{28885.73}{29018.17} - 1 \simeq -0.00456 \simeq -0.456 \%
+\]
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org830ddba" class="outline-3">
+<h3 id="org830ddba"><span class="section-number-3">4.3.</span> Rendement du minimum maximum</h3>
+<div class="outline-text-3" id="text-4-3">
+<p>
+Le rendement du maximum entre deux périodes \(p\) et \(p+k\) est défini par :
+</p>
+
+\begin{equation}
+\rho^{\text{h}}_{p + k} = 
+\begin{cases}
+\frac{\max_{p \le i \le p + k}\text{h}_{i}}{\text{c}_{p-1}} - 1 & \quad k \ge 0 \\
+\frac{\max_{p - k \le i \le p}\text{h}_{i}}{\text{c}_{p + k - 1}} - 1 & \quad k < 0.
+\end{cases}
+\end{equation}
+
+<p>
+Et par analogie, on définit le rendement du minimum entre deux périodes \(p\) et \(p+k\) :
+</p>
+
+\begin{equation}
+\rho^{\text{l}}_{p + k} = 
+\begin{cases}
+\frac{\min_{p \le i \le p + k}\text{h}_{i}}{\text{c}_{p-1}} - 1 & \quad k \ge 0 \\
+\frac{\min_{p - k \le i \le p}\text{h}_{i}}{\text{c}_{p + k - 1}} - 1 & \quad k < 0.
+\end{cases}
+\end{equation}
+
+<p>
+<b>Exemples</b>
+</p>
+
+<p>
+Rendements du maximum calculés sur les données de l'exemple précédent et
+sur différents horizons :
+</p>
+
+<style type="text/css">
+</style>
+<table id="T_63780">
+  <thead>
+    <tr>
+      <th class="index_name level0" >period</th>
+      <th id="T_63780_level0_col0" class="col_heading level0 col0" >-3</th>
+      <th id="T_63780_level0_col1" class="col_heading level0 col1" >0</th>
+      <th id="T_63780_level0_col2" class="col_heading level0 col2" >1</th>
+      <th id="T_63780_level0_col3" class="col_heading level0 col3" >2</th>
+    </tr>
+    <tr>
+      <th class="index_name level0" >time</th>
+      <th class="blank col0" >&nbsp;</th>
+      <th class="blank col1" >&nbsp;</th>
+      <th class="blank col2" >&nbsp;</th>
+      <th class="blank col3" >&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_63780_level0_row0" class="row_heading level0 row0" >2021-01-01 00:00:00+00:00</th>
+      <td id="T_63780_row0_col0" class="data row0 col0" ></td>
+      <td id="T_63780_row0_col1" class="data row0 col1" ></td>
+      <td id="T_63780_row0_col2" class="data row0 col2" ></td>
+      <td id="T_63780_row0_col3" class="data row0 col3" ></td>
+    </tr>
+    <tr>
+      <th id="T_63780_level0_row1" class="row_heading level0 row1" >2021-01-01 00:05:00+00:00</th>
+      <td id="T_63780_row1_col0" class="data row1 col0" ></td>
+      <td id="T_63780_row1_col1" class="data row1 col1" >-0.076%</td>
+      <td id="T_63780_row1_col2" class="data row1 col2" >-0.076%</td>
+      <td id="T_63780_row1_col3" class="data row1 col3" >-0.076%</td>
+    </tr>
+    <tr>
+      <th id="T_63780_level0_row2" class="row_heading level0 row2" >2021-01-01 00:10:00+00:00</th>
+      <td id="T_63780_row2_col0" class="data row2 col0" ></td>
+      <td id="T_63780_row2_col1" class="data row2 col1" >-0.020%</td>
+      <td id="T_63780_row2_col2" class="data row2 col2" >-0.020%</td>
+      <td id="T_63780_row2_col3" class="data row2 col3" >-0.020%</td>
+    </tr>
+    <tr>
+      <th id="T_63780_level0_row3" class="row_heading level0 row3" >2021-01-01 00:15:00+00:00</th>
+      <td id="T_63780_row3_col0" class="data row3 col0" ></td>
+      <td id="T_63780_row3_col1" class="data row3 col1" >0.353%</td>
+      <td id="T_63780_row3_col2" class="data row3 col2" >0.353%</td>
+      <td id="T_63780_row3_col3" class="data row3 col3" ></td>
+    </tr>
+    <tr>
+      <th id="T_63780_level0_row4" class="row_heading level0 row4" >2021-01-01 00:20:00+00:00</th>
+      <td id="T_63780_row4_col0" class="data row4 col0" >-0.076%</td>
+      <td id="T_63780_row4_col1" class="data row4 col1" >0.008%</td>
+      <td id="T_63780_row4_col2" class="data row4 col2" ></td>
+      <td id="T_63780_row4_col3" class="data row4 col3" ></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+Rendements du manimum calculés sur les mêmes horizons :
+</p>
+
+<style type="text/css">
+</style>
+<table id="T_a3b50">
+  <thead>
+    <tr>
+      <th class="index_name level0" >period</th>
+      <th id="T_a3b50_level0_col0" class="col_heading level0 col0" >-3</th>
+      <th id="T_a3b50_level0_col1" class="col_heading level0 col1" >0</th>
+      <th id="T_a3b50_level0_col2" class="col_heading level0 col2" >1</th>
+      <th id="T_a3b50_level0_col3" class="col_heading level0 col3" >2</th>
+    </tr>
+    <tr>
+      <th class="index_name level0" >time</th>
+      <th class="blank col0" >&nbsp;</th>
+      <th class="blank col1" >&nbsp;</th>
+      <th class="blank col2" >&nbsp;</th>
+      <th class="blank col3" >&nbsp;</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_a3b50_level0_row0" class="row_heading level0 row0" >2021-01-01 00:00:00+00:00</th>
+      <td id="T_a3b50_row0_col0" class="data row0 col0" ></td>
+      <td id="T_a3b50_row0_col1" class="data row0 col1" ></td>
+      <td id="T_a3b50_row0_col2" class="data row0 col2" ></td>
+      <td id="T_a3b50_row0_col3" class="data row0 col3" ></td>
+    </tr>
+    <tr>
+      <th id="T_a3b50_level0_row1" class="row_heading level0 row1" >2021-01-01 00:05:00+00:00</th>
+      <td id="T_a3b50_row1_col0" class="data row1 col0" ></td>
+      <td id="T_a3b50_row1_col1" class="data row1 col1" >-0.438%</td>
+      <td id="T_a3b50_row1_col2" class="data row1 col2" >-0.952%</td>
+      <td id="T_a3b50_row1_col3" class="data row1 col3" >-0.952%</td>
+    </tr>
+    <tr>
+      <th id="T_a3b50_level0_row2" class="row_heading level0 row2" >2021-01-01 00:10:00+00:00</th>
+      <td id="T_a3b50_row2_col0" class="data row2 col0" ></td>
+      <td id="T_a3b50_row2_col1" class="data row2 col1" >-0.596%</td>
+      <td id="T_a3b50_row2_col2" class="data row2 col2" >-0.596%</td>
+      <td id="T_a3b50_row2_col3" class="data row2 col3" >-0.596%</td>
+    </tr>
+    <tr>
+      <th id="T_a3b50_level0_row3" class="row_heading level0 row3" >2021-01-01 00:15:00+00:00</th>
+      <td id="T_a3b50_row3_col0" class="data row3 col0" ></td>
+      <td id="T_a3b50_row3_col1" class="data row3 col1" >0.029%</td>
+      <td id="T_a3b50_row3_col2" class="data row3 col2" >-0.003%</td>
+      <td id="T_a3b50_row3_col3" class="data row3 col3" ></td>
+    </tr>
+    <tr>
+      <th id="T_a3b50_level0_row4" class="row_heading level0 row4" >2021-01-01 00:20:00+00:00</th>
+      <td id="T_a3b50_row4_col0" class="data row4 col0" >-0.952%</td>
+      <td id="T_a3b50_row4_col1" class="data row4 col1" >-0.330%</td>
+      <td id="T_a3b50_row4_col2" class="data row4 col2" ></td>
+      <td id="T_a3b50_row4_col3" class="data row4 col3" ></td>
+    </tr>
+  </tbody>
+</table>
+
+
+<p>
+En prenant la période \(p\) = 2021-01-01T00:05:00 et un horizon \(k = 0\),
+le rendement du maximum \(\rho^{\text{h}}_{p} = r_{p}\) correspond au
+rapport entre la cotation maximum de la période 2021-01-01T00:05:00 et
+la clôture de la période 2021-01-01T00:00:00, soit :
+\[
+\rho^{\text{h}}_{p} = \frac{\text{h}_{p}}{\text{c}_{p-1}} = \frac{28996.04}{29018.17} - 1 \simeq -0.000762 \simeq -0.076 \%
+\]
+</p>
+
+<p>
+Le rendement du minimum correspondant est :
+\[
+\rho^{\text{l}}_{p} = \frac{\text{l}_{p}}{\text{c}_{p-1}} = \frac{28890.99}{29018.17} - 1 \simeq -0.00438 \simeq -0.44 \%
+\]
+</p>
+
+<p>
+En prenant la période \(p\) = 2021-01-01T00:10:00 et un horizon \(k = 2\),
+le rendement du maximum \(\rho^{\text{h}}_{k+2}\) correspond au rapport
+entre la cotation maximum entre les périodes 2021-01-01T00:10:00 et
+2021-01-01T00:20:00, et la clôture de la période 2021-01-01T00:05:00,
+soit :
+\[
+\rho^{\text{h}}_{p + 2} = \frac{\max\{\text{h}_{p}, \text{h}_{p+1}, \text{h}_{p+2}\}}{\text{c}_{p-1}} = \frac{\text{h}_{p}}{\text{c}_{p-1}} = \frac{28908.49}{28914.30} - 1 \simeq -0.000201 \simeq -0.02 \%
+\]
+</p>
+
+<p>
+Le rendement du minimum correspondant est :
+\[
+\rho^{\text{l}}_{p + 2} = \frac{\max\{\text{l}_{p}, \text{l}_{p+1}, \text{l}_{p+2}\}}{\text{c}_{p-1}} = \frac{\text{l}_{p}}{\text{c}_{p-1}} = \frac{28741.86}{28914.30} - 1 \simeq -0.00596 \simeq -0.59 \%
+\]
+</p>
+
+<p>
+En prenant la période \(p\) = 2021-01-01T00:20:00 et un horizon \(k = -3\),
+le rendement du maximum \(\rho^{\text{h}}_{k-3}\) correspond au rapport
+entre la cotation maximum entre les périodes 2021-01-01T00:05:00 et
+2021-01-01T00:20:00, et la clôture de la période 2021-01-01T00:00:00,
+soit :
+\[
+\rho^{\text{h}}_{p - 3} = \frac{\max\{\text{h}_{p-3}, \text{h}_{p-2}, \text{h}_{p-1}, \text{h}_{p}\}}{\text{c}_{p-4}} = \frac{\text{h}_{p-3}}{\text{c}_{p-4}} = \frac{28996.04}{29018.17} - 1 \simeq -0.000762 \simeq -0.076 \%
+\]
+</p>
+
+<p>
+Le rendement du minimum correspondant est :
+\[
+\rho^{\text{l}}_{p - 3} = \frac{\max\{\text{l}_{p-3}, \text{l}_{p-2}, \text{l}_{p-1}, \text{l}_{p}\}}{\text{c}_{p-4}} = \frac{\text{l}_{p-2}}{\text{c}_{p-4}} = \frac{28741.86}{29018.17} - 1 \simeq -0.00952 \simeq -0.95 \%
+\]
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-évaluation-de-la-performance-des-indicateurs" class="outline-2">
+<h2 id="évaluation-de-la-performance-des-indicateurs"><span class="section-number-2">5.</span> Évaluation de la performance des indicateurs</h2>
+<div class="outline-text-2" id="text-évaluation-de-la-performance-des-indicateurs">
+</div>
+
+<div id="outline-container-méthodologie-générale" class="outline-3">
+<h3 id="méthodologie-générale"><span class="section-number-3">5.1.</span> Méthodologie générale</h3>
+<div class="outline-text-3" id="text-méthodologie-générale">
+<p>
+La méthodologie d'évaluation proposée repose sur le protocole suivant :
+</p>
+<ol class="org-ol">
+<li>Collecter des données historiques :
+<ul class="org-ul">
+<li>Sélection de l'actif étudié, e.g. BTC/USDC.</li>
+<li>Choisir la période d'échantillonnage \(\Delta t\) considérée. En fonction des stratégies, \(\Delta
+     t\) peut être plus ou moins grand, e.g. 1 min, 5 min, 1 heure, 1 journée, 1 semaine, etc.</li>
+</ul></li>
+<li>Fixer un horizon de prédiction \(k \ge 0\). Cet horizon indique qu'à chaque période \(p\), l'objectif
+est d'étudier la distribution des rendements futurs à l'instant \(p + k\Delta t\).</li>
+<li>Calculer les rendements à horizon \(p+k\) à chaque période \(p\) à partir des données historiques.</li>
+<li>Calculer les indicateurs à étudier sur les données historiques considérées.</li>
+<li>Estimer la loi conditionnelle des rendements futurs par rapport aux indicateurs étudier :
+<ul class="org-ul">
+<li>Choix de la loi conditionnelle : par défaut, le modèle bayésien optimal sera utilisé.</li>
+<li>Discrétiser si besoin les indicateurs à étudier en cohérence avec le choix précédent.</li>
+<li>Estimer la distribution conditionnelle des rendements à partir des données considérées.</li>
+</ul></li>
+<li>Évaluer le lien de causalité entre indicateurs et explication des rendements.</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-critères-dévaluation" class="outline-3">
+<h3 id="critères-dévaluation"><span class="section-number-3">5.2.</span> Critères d'évaluation</h3>
+<div class="outline-text-3" id="text-critères-dévaluation">
+</div>
+
+<div id="outline-container-score-des-rendements-extrêmes" class="outline-4">
+<h4 id="score-des-rendements-extrêmes"><span class="section-number-4">5.2.1.</span> Score des rendements extrêmes</h4>
+<div class="outline-text-4" id="text-score-des-rendements-extrêmes">
+<p>
+Considérons les variables aléatoires \(R^{\text{c}}_{p + k}\), \(R^{\text{h}}_{p + k}\),
+\(R^{\text{l}}_{p + k}\) représentant les rendements de clôture, du maximum et du minimum à horizon 
+\(k\). 
+</p>
+
+<p>
+On note alors :
+</p>
+<ul class="org-ul">
+<li>\(\rho^{\text{h}}_{p + k,\alpha}\) le quantile de niveau \(\alpha\) du rendement du maximum à
+l'horizon \(k\), i.e. \(\alpha = P(R^{\text{h}}_{p + k} \le \rho^{\text{h}}_{p + k,\alpha})\) ;</li>
+<li>\(\rho^{\text{l}}_{p + k,\alpha}\) le quantile de niveau \(\alpha\) du rendement du minimum à
+l'horizon \(k\), i.e. \(\alpha = P(R^{\text{l}}_{p + k} \le \rho^{\text{l}}_{p + k,\alpha})\) ;</li>
+</ul>
+
+<p>
+La Figure <a href="#orgef45672">2</a> illustrent graphiquement les notions précédentes.
+</p>
+
+
+<div id="orgef45672" class="figure">
+<p><img src="./fig/rho_hl_quant.png" alt="rho_hl_quant.png" />
+</p>
+<p><span class="figure-number">Figure&nbsp;2&nbsp;: </span>Représentation graphique des quantiles \(\rho^{\text{h}}_{p + k,\alpha}\) et \(\rho^{\text{l}}_{p + k,\alpha}\).</p>
+</div>
+
+
+<p>
+Le score des rendements extrêmes (<i>Extreme Returns Score</i>) au niveau \(\alpha\),
+noté \(\text{ERS}_{p+k, \alpha}\), est défini comme suit :
+\[
+\text{ERS}_{p+k, \alpha} = (1 - \alpha) \rho^{\text{h}}_{p + k,\alpha} + \alpha \rho^{\text{l}}_{p + k,\alpha} 
+\]
+</p>
+
+<p>
+Du point de vue financier, ce score s'interprète comme le rendement
+espéré résultant d'une prise de profit sur le rendement du maximum au
+niveau \(\alpha\) et des pertes sur le rendement du minimum au niveau
+\(\alpha\).
+</p>
+
+<p>
+<b>TODO</b> - Se documenter sur la notion d'"expectiles" et comparer avec le
+score précédent :
+<a href="https://getd.libs.uga.edu/pdfs/anderson_andrew_l_201212_ms.pdf">https://getd.libs.uga.edu/pdfs/anderson_andrew_l_201212_ms.pdf</a> - Se
+documenter sur la notion de Conditional Value at Risk :
+<a href="https://www.investopedia.com/terms/c/conditional_value_at_risk.asp">https://www.investopedia.com/terms/c/conditional_value_at_risk.asp</a>
+</p>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org395db15" class="outline-2">
+<h2 id="org395db15"><span class="section-number-2">6.</span> Environnement technique</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+Les librairies <code>Python</code> utilisées dans les traitements présentés dans ce document sont :
+</p>
+<style type="text/css">
+</style>
+<table id="T_674ce">
+  <thead>
+    <tr>
+      <th id="T_674ce_level0_col0" class="col_heading level0 col0" >Library</th>
+      <th id="T_674ce_level0_col1" class="col_heading level0 col1" >Version</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td id="T_674ce_row0_col0" class="data row0 col0" >MOSAIC</td>
+      <td id="T_674ce_row0_col1" class="data row0 col1" >0.0.7</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+
+<div id="outline-container-org1301325" class="outline-2">
+<h2 id="org1301325"><span class="section-number-2">7.</span> Références</h2>
+<div class="outline-text-2" id="text-7">
+<style>.csl-left-margin{float: left; padding-right: 0em;}
+ .csl-right-inline{margin: 0 0 0 1em;}</style><div class="csl-bib-body">
+  <div class="csl-entry"><a id="citeproc_bib_item_1"></a>
+    <div class="csl-left-margin">[1]</div><div class="csl-right-inline">R. T. Farias Nazário, J. L. e Silva, V. A. Sobreiro, and H. Kimura, “A literature review of technical analysis on stock markets,” <i>The quarterly review of economics and finance</i>, vol. 66, pp. 115–126, Nov. 2017, doi: <a href="https://doi.org/10.1016/j.qref.2017.01.014">10.1016/j.qref.2017.01.014</a>.</div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
