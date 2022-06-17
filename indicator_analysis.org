@@ -1,0 +1,709 @@
+# -*- coding: utf-8 -*-
+#+TITLE: Projet MOSAIC : Analyse technique - Notions fondamentales
+#+AUTHOR: Roland Donat
+#+EMAIL: roland.donat@edgemind.fr
+# #+DATE: 
+
+# ==============================================
+# Document Configuration
+# ======================
+# Orgmode
+:CONFIG:
+#+LANGUAGE: fr
+#+OPTIONS: H:3 num:t toc:t \n:nil @:t ::t |:t ^:{} f:t TeX:t author:t d:nil timestamp:nil
+#+OPTIONS: html-postamble:nil
+#+STARTUP: content 
+#+STARTUP: hidestars
+#+DRAWERS: CONFIG OPTIONS CACHE MACROS
+#+TODO: TODO(t) INPROGRESS(p) | DONE(d)
+#+BIND: org-latex-table-scientific-notation "{%s}E{%s}"
+#+csl-style: ieee.csl
+:END:
+
+# LaTeX
+# -----
+# Class parameters
+:CONFIG:
+#+LaTeX_CLASS: edgemind-note
+#+LaTeX_CLASS_OPTIONS: [a4paper,twoside,11pt]
+#+LATEX_HEADER: \thelang{FR}
+#+LATEX_HEADER: \thesubtitle{}
+#+LATEX_HEADER: \version{1.0}
+:END:
+# Packages
+:CONFIG:
+#+LATEX_HEADER: \usepackage[french]{babel}
+#+LATEX_HEADER: \usepackage{graphicx}
+#+LATEX_HEADER: \usepackage{amssymb}
+#+LATEX_HEADER: \usepackage{amsmath}
+#+LATEX_HEADER: \usepackage{amsfonts}
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \usepackage{verbatim}
+#+LATEX_HEADER: \usepackage{tabularx}
+#+LATEX_HEADER: \usepackage{float}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \usepackage{natbib}
+#+LATEX_HEADER: \usepackage{subfig}
+#+LATEX_HEADER: \usepackage{booktabs}
+#+LATEX_HEADER: \usepackage{minted}
+:END:
+# Layout
+:CONFIG:
+# Figures path
+#+LATEX_HEADER: % Graphics path
+#+LATEX_HEADER: \graphicspath{ 
+#+LATEX_HEADER:   {./fig/}
+#+LATEX_HEADER: }
+
+# Colors
+#+LATEX_HEADER: \definecolor{almostwhite}        {rgb}{0.85,0.85,0.85}
+
+# Minted
+# To control spaces between minted block
+#+LATEX_HEADER: \AtBeginEnvironment{snugshade*}{\vspace{-1.25\FrameSep}}
+#+LATEX_HEADER: \AfterEndEnvironment{snugshade*}{\vspace{-2\FrameSep}}
+# #+LATEX_HEADER: \usemintedstyle{monokai}
+# #+LATEX_HEADER: \renewcommand{\theFancyVerbLine}{\sffamily \footnotesize {\color{EMLogoBlue}\oldstylenums{\arabic{FancyVerbLine}}}}
+
+# Captions
+#+LATEX_HEADER: \captionsetup[table]{position=bottom,margin=90pt,font=small,labelfont=bf,labelsep=endash,format=plain}
+#+LATEX_HEADER: \captionsetup[figure]{position=bottom,margin=90pt,font=small,labelfont=bf,labelsep=endash,format=plain}
+#+LATEX_HEADER: \captionsetup[subfloat]{margin=0pt,font=footnotesize}
+
+# Geometry
+#+LATEX_HEADER: \usepackage{geometry}
+#+LATEX_HEADER: \geometry{
+#+LATEX_HEADER: %  nohead,
+#+LATEX_HEADER:   top=2.25cm, 
+#+LATEX_HEADER:   bottom=2.25cm, 
+#+LATEX_HEADER:  left=2.5cm, 
+#+LATEX_HEADER:  right=2.5cm}
+
+#+LATEX_HEADER: \usepackage{setspace}
+#+LATEX_HEADER: \onehalfspacing
+#+LATEX_HEADER: % Supprime l'indentation
+#+LATEX_HEADER: \setlength{\parindent}{0pt}
+#+LATEX_HEADER: % Espacement entre les paragraphes
+#+LATEX_HEADER: \setlength{\parskip}{2ex}
+
+# List layout
+#+LATEX_HEADER: \frenchbsetup{ListOldLayout=true} %FBReduceListSpacing=true,CompactItemize=false}
+
+# References
+#+LATEX: \renewcommand*{\refname}{}*
+:END:
+# LaTeX Compilator
+:CONFIG:
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-latex-listings 'minted
+      org-latex-minted-options nil ;; '(("frame" "lines")))
+      org-latex-pdf-process
+      '("xelatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+        "bibtex %b"
+        "xelatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+        "xelatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
+#+END_SRC
+:END:
+
+# HTML
+# ----
+:CONFIG:
+# Org HTML Macros
+#+MACRO: NEWLINE @@latex:\\@@ @@html:<br>@@
+#+MACRO: HTMLFONTSIZE @@html:<font size="$2">$1</font>@@
+#+MACRO: SUBTITLE @@html:<div class="slidesubtitle">$1</div>@@
+
+# HTML options
+# ------------
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://edgemind-sas.github.io/visual-identity/official_docs/css/edgemind.css" />
+:END:
+
+# Publishing
+# ----------
+:CONFIG:
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+;; Define some export options here since in org-publish-project-alist some of them are not taken into account
+;; e.g. with-toc nil
+(defun my-html-export-options (plist backend)
+  (cond 
+    ((equal backend 'html)
+     (plist-put plist :with-toc t)
+     (plist-put plist :section-numbers nil)
+     (plist-put plist :with-author t)
+     (plist-put plist :with-email t)
+     (plist-put plist :with-date t)
+     ))
+  plist)
+
+(setq org-publish-project-alist
+      '(
+	
+        ("main"
+         :base-directory "./"
+         :include ("rb_mod_stoch.org")
+         :publishing-directory "./"
+         :recursive nil
+         :publishing-function org-html-publish-to-html
+         :preparation-function (lambda () (setq org-export-filter-options-functions '(my-html-export-options)))
+         :auto-preamble t
+         :html-head  "<link rel='stylesheet' type='text/css' href='edgemind.css' />"
+         :htmlized-source 
+	 :section-numbers nil
+         )
+        ("td-html"
+         :base-directory "./td/"
+         :base-extension "org"
+         :publishing-directory "./td"
+         :recursive t
+         :publishing-function org-html-publish-to-html
+         :preparation-function (lambda () (setq org-export-filter-options-functions '(my-html-export-options)))
+         :auto-preamble t
+         :html-head  "<link rel='stylesheet' type='text/css' href='edgemind.css' />"
+         :htmlized-source 
+         )
+
+	 ;; pdf
+        ("td-pdf"
+         :base-directory "./td/"
+         :base-extension "org"
+         :publishing-directory "./td"
+         :recursive t
+         :publishing-function org-latex-publish-to-pdf
+         )
+
+	 ("td-attach"
+	 :base-directory "./td/"
+	 :base-extension "xdsl\\|txt\\|csv\\|py\\|png"
+         :publishing-directory "./td"
+	 :recursive t
+	 :publishing-function org-publish-attachment
+	 )
+
+	 ("cours-attach"
+	 :base-directory "./cours/"
+	 :base-extension "pdf\\|xdsl\\|txt\\|csv\\|py"
+         :publishing-directory "./cours"
+	 :recursive t
+	 :publishing-function org-publish-attachment
+	 )
+
+        ("projet-html"
+         :base-directory "./projet/"
+         :base-extension "org"
+         :publishing-directory "./projet"
+         :recursive t
+         :publishing-function org-html-publish-to-html
+         :preparation-function (lambda () (setq org-export-filter-options-functions '(my-html-export-options)))
+         :auto-preamble t
+         :html-head  "<link rel='stylesheet' type='text/css' href='edgemind.css' />"
+         :htmlized-source 
+         )
+
+	 ("projet-attach"
+	 :base-directory "./projet/"
+	 :base-extension "xdsl\\|txt\\|csv"
+         :publishing-directory "./projet"
+	 :recursive t
+	 :publishing-function org-publish-attachment
+	 )
+
+	 ("css"
+         :base-directory "./css/"
+         :base-extension "css"
+         :publishing-directory "./www/css"
+         :publishing-function org-publish-attachment)
+	 
+	 ;("rb_mod_stoch" :components ("main" "td-pdf" "td-html" "td-attach" "cours-attach" "projet-html" "projet-attach" "css"))
+	 ;("rb_mod_stoch" :components ("main" "td-pdf" "td-html" "projet-html"))
+	 ("rb_mod_stoch" :components ("main"))
+
+      ))
+#+END_SRC
+:END:
+
+# ==============================================
+# Document starts here
+# ====================
+
+#+LATEX: \clearpage
+
+# Configuration de l'environnement                           
+# --------------------------------
+
+#+BEGIN_SRC python :session indicator_analysis :results silent :exports results :tangle indicator_analysis.py 
+import os
+import sys
+# Add custom Python path
+sys.path.append(os.path.join("lib"))
+import tqdm
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+import plotly.io as pio
+import importlib
+# Custom remote librairies
+import mosaic
+import mosaic.utils as mu
+import mosaic.config as mc
+import mosaic.indicator as mi
+mc.MosaicConfig().from_yaml_filename(os.path.join("config", "server-config.yaml"))
+# Custom local librairies
+importlib.reload(mu)
+importlib.reload(mc)
+importlib.reload(mi)
+#+END_SRC
+
+* Biblio                                                           :noexport:
+
+* Introduction
+   :PROPERTIES:
+   :CUSTOM_ID: introduction
+   :END:
+   
+Dans le domaine de l'analyse des marchés financiers, l'analyse technique
+correspond à un ensemble d'outils dont le but est de prédire les
+rendements futurs des actifs financiers. Les analyses reposent sur
+l'étude des historiques des données de marché disponibles,
+principalement la cotation et le volume des actifs considérés.
+
+La grande majorité des méthodologies présentées reposent sur la
+construction d'indicateurs particuliers jugés pertinents par leurs
+auteurs. Toutefois, l'évaluation de ces indicateurs n'est réalisée que
+sur la base de backtesting empiriques sur des périodes choisies
+arbitrairement et relativement courtes lorsqu'il s'agit d'analyses
+intra-journalières. Comme les auteurs de l'article [[citenum:&farias_nazario_literature_2017]], nous partageons le constat que l'évaluation des performances de
+l'analyse technique nécessite une consolidation mathématique. Pour ce
+faire, nous proposons de développer une stratégie d'évaluation des
+indicateurs techniques innovante fondée sur l'analyse de la distribution
+conditionnelle des rendements par rapport aux indicateurs observés.
+
+Ce document a pour objectif de présenter notre démarche de développement
+et d'évaluation d'indicateurs techniques pour l'analyse technique des
+cryptoactifs.
+
+* Données historiques OHLCV
+   :PROPERTIES:
+   :CUSTOM_ID: données-historiques-ohlcv
+   :END:
+
+L'évolution de la cotation d'un actif au cours du temps est usuellement
+présentée sous la forme de données, dites au format OHLCV (de l'anglais
+/open/, /high/, /low/, /close/, /volume/). Il s'agit d'un format
+pratique permettant de représenter des séries temporelles d'une manière
+particulière. En effet, le format OHLC (la partie volume n'est pas
+concernée par la subtilité du format) représente l'évolution d'une
+mesure au cours d'intervalles de temps réguliers successifs caractérisés
+par une période d'échantillonnage notée $\Delta t$ (e.g. une minute,
+cinq minutes, une heure, une journée, etc).
+
+Typiquement, les données OHLCV contiennent les variables suivantes : 
+- =timestamp= : timestamp caractérisant le début de la période de mesure (par exemple exprimé en
+  millisecondes), la fin étant déterminée par la période d'échantillonnage $\Delta t$ utilisée. 
+- =open= : valeur de l'actif au début de la période. 
+- =high= : valeur maximum de l'actif atteinte sur la période. 
+- =low= : valeur mimimum de l'actif atteinte sur la période. 
+- =close= : valeur de l'actif à la fin de la période. 
+- =volume= : montant cumulé des ventes et des achats de l'actif sur la période.
+
+Il est courant de visualiser les données OHLC à l'aide du graphique, dit
+en chandeliers. En fonction, des valeurs d'ouverture (/open/) et de
+fermeture (/close/), on parle également de chandeliers haussiers et
+baissiers, cf. Figure ref:fig-candles.
+
+#+NAME: fig-candles
+#+CAPTION: Représentation du symbole de chandelier.
+[[./fig/candle.jpg]]
+
+Dans un diagramme en chandelier, on retrouve les données OHLC mais
+également les notions de : 
+- corps (/body/) représentant la distance entre la cotation d'ouverture et de fermeture de l'actif
+  sur une période ; 
+- mèches ou ombres supérieures (/upper shadow/) représentant la distance entre la partie haute du
+  corps et la cotation la plus haute sur une période ; 
+- mèches ou ombres inférieures (/lower shadow/) représentant la distance entre la partie basse du
+  corps et la cotation la plus basse sur une période ;
+
+Le tableau suivant donne un aperçu des premières données de cotation du
+BTC par rapport à l'USDC de l'année 2021 avec une période
+d'échantillonnage $\Delta t =$ 5 minutes.
+
+#+BEGIN_SRC python :session indicator_analysis :results html :exports results :tangle indicator_analysis.py 
+config = {
+    "collection": "crypto",
+    "name": "ohlcv",
+    "tags": {
+        "period": "5m",
+        "exchange": "binance",
+        "base": "BTC",
+        "quote": "USDC",
+    },
+    "values": ["open", "high", "low", "close", "volume"],
+    "start_date": '2021-01-01 00:00:00',
+    "stop_date": '2021-01-02 00:00:00',
+}
+
+ohlcv_format_ex_df = mi.get_data(**config)
+
+ohlcv_format_ex_df.head().style.format(precision=2, thousands=" ").to_html()
+#+END_SRC
+
+#+RESULTS:
+
+Par exemple, la première ligne du tableau signifie que le 01/01/2021 :
+
+- à 00:00:00, le prix d'un BTC était de 28964,54 USDC ;
+- à 00:05:00, le prix d'un BTC était entre 29018,17 USDC (fermeture
+  période) et 28993,74 USDC (ouverture période suivante) ;
+- entre 00:00:00 et 00:05:00 le prix d'un BTC est passé par un minimum
+  28958,66 USDC et un maximum de 29064,55 USDC.
+
+Le marché BTC/USDC étant ouvert 24h/24 et 7j/7, nous devrions observer
+$\text{close}(t-1)$ égale à $\text{open}(t)$ pour tout $t$. Toutefois,
+la collecte des données n'étant pas instantanée, il est fréquent
+d'observer de légères différences entre le cours d'ouverture de la
+période courante et le cours de fermeture de la période précédente.
+
+* Notations mathématiques
+   :PROPERTIES:
+   :CUSTOM_ID: notations-mathématiques
+   :END:
+
+** Notions temporelles
+    :PROPERTIES:
+    :CUSTOM_ID: notions-temporelles
+    :END:
+
+Nous avons introduit précédemment la période d'échantillonnage des
+données $\Delta t$. On note également $t_{0}$ la première date
+d'échantillonnage. Dans l'exemple de données précédent, on rappelle que
+$\Delta t = 5$ minutes et que $t_{0} =$ 2021-01-01 00:00:00.
+
+Nous introduisons ensuite l'indice $p \ge 0$ permettant de référencer la
+$p$ -ème période d'observation des données, i.e. entre
+$t_{0} + p\Delta t$ et $t_{0} + (p+1)\Delta t$. En reprenant l'exemple
+précédent, on a :
+- 1er période d'observation $p = 0$ : période entre 2021-01-01 00:00:00 et 2021-01-01 00:05:00 ;
+- 5ème période d'observation $p = 4$ : période entre 2021-01-01 00:15:00 et 2021-01-01 00:20:00.
+
+Les données OHLCV sont notées dans la suite comme suit :
+- $\text{o}_{p}$ : cotation de l'actif à l'ouverture de la période $p$, i.e. à $t = t_{0} +  p\Delta
+  t$ ;
+- $\text{c}_{p}$ : cotation de l'actif à la fermeture de la période $p$, i.e. à $t = t_{0} +
+  (p+1)\Delta t$ ;
+- $\text{h}_{p}$ : cotation maximum de l'actif sur la période $p$ ;
+- $\text{l}_{p}$ : cotation mimimum de l'actif sur la période $p$ ;
+- $\text{v}_{p}$ : volume échangé de l'actif la période $p$.
+
+** Chandelier
+    :PROPERTIES:
+    :CUSTOM_ID: chandelier
+    :END:
+
+En plus des notations précédentes, nous pouvons introduire différentes
+grandeurs associées aux parties du diagramme en chandelier.
+
+En considérant, le chandelier représentant une donnée OHLC à la période
+$p$, nous avons :\\
+- Le corps $\text{b}_{p} = \text{c}_{p} - \text{o}_{p}$.
+- L'ombre inférieure $\text{s}_{p}^{\ell} = \min\{\text{c}_{p}, \text{o}_{p}\} - \text{l}_{p}$.
+- L'ombre supérieure $\text{s}_{p}^{u} = \text{h}_{p} - \max\{\text{c}_{p}, \text{o}_{p}\}$.
+
+** Rendements
+    :PROPERTIES:
+    :CUSTOM_ID: rendements
+    :END:
+
+On note enfin $r_{p}$ la variation relative de la cotation d'un actif
+entre deux périodes consécutives, on parle également de rendement (ou
+/returns/ en anglais) sur la période $p$. Nous avons donc pour tout
+$p \ge 1$ :
+$$
+r_{p} = \frac{\text{c}_{p}}{\text{c}_{p - 1}} - 1.
+$$
+La quantité $r_{p}$ est donc positive si le BTC gagne en valeur par
+rapport à l'USDC sur la période $p$ et négative sinon. Le rendement
+représente l'indicateur principal au coeur de toutes les analyses
+financières réalisées sur un actif donnée.
+
+* Extension de la notion de rendements
+   :PROPERTIES:
+   :CUSTOM_ID: extension-de-la-notion-de-rendements
+   :END:
+
+** Définitions
+    :PROPERTIES:
+    :CUSTOM_ID: définitions
+    :END:
+
+Le calcul des rendements est une étape fondamentale dans l'analyse d'un
+actif au cours du temps. La définition d'un rendement proposée dans la
+section précédente se limite au rendement sur le cours de clôture et à
+deux périodes successives.
+
+En effet, nous allons étendre la définition des rendements :
+- d'une part, aux cotations maximum et minimum ;
+- et d'autre part, entre deux périodes $p$ et $p + k$ données.
+
+Dans les paragraphes suivants, nous illustrerons les différentes rendements sur l'extrait
+de cotation BTC/USDC suivant.
+#+NAME: fig_ohlcv_ex
+#+BEGIN_SRC python :session indicator_analysis :results html :exports results :tangle indicator_analysis.py 
+data_ohlcv_ex_5 = ohlcv_format_ex_df.head()
+fig = mu.plotly_ohlcv(data_ohlcv_ex_5,
+                      layout=dict(title="Exemple de données OHLC sur l'actif BTC/USDC",
+                                  yaxis_title="USDC",
+                                  xaxis_title="Temps"))
+
+pio.to_html(fig, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
+
+** Rendement de clôture
+
+Débutons donc par définir le rendement de clôture entre deux périodes $p$ et $p+k$ (cf. Figure
+ref:fig_rho_c_p_k) comme suit :
+\begin{equation}
+\rho^{\text{c}}_{p + k} = 
+\begin{cases}
+\frac{\text{c}_{p + k}}{\text{c}_{p-1}} - 1 & \quad k \ge 0 \\
+\frac{\text{c}_{p }}{\text{c}_{p + k - 1}} - 1 & \quad k < 0.
+\end{cases}
+\end{equation}
+
+À noter que $k$ est un nombre entier permettant de définir le nombre
+de périodes futures ou passées à prendre en compte pour le calcul du
+rendement.
+
+#+NAME: fig_rho_c_p_k
+#+CAPTION: Illustration graphique du calcul d'un rendement de clôture.
+[[./fig/rho_c_p_k.png]]
+
+*Exemples*
+
+Rendements de clôture calculés sur les données de l'exemple précédent et
+sur différents horizons :
+
+#+BEGIN_SRC python :session indicator_analysis :results html :exports results :tangle indicator_analysis.py 
+mi.ReturnsCloseIndicator(horizon=[-3,-2,-1,0,1,2,3]).compute(data_ohlcv_ex_5)\
+  .style.format('{0:.3%}',  na_rep='').to_html()
+#+END_SRC
+
+#+RESULTS:
+
+En prenant la période $p$ = 2021-01-01T00:05:00 et un horizon $k = 0$,
+le rendement de clôture $\rho^{\text{c}}_{p} = r_{p}$ correspond au
+rapport entre la clôture de la période 2021-01-01T00:05:00 et la clôture
+de la période 2021-01-01T00:00:00, soit :
+$$
+\rho^{\text{c}}_{p} = \frac{\text{c}_{p}}{\text{c}_{p-1}} = \frac{28914.30}{29018.17} - 1 \simeq -0.003579 \simeq -0.358 \%
+$$
+
+En prenant la période $p$ = 2021-01-01T00:10:00 et un horizon $k = 2$,
+le rendement de clôture $\rho^{\text{c}}_{k+2}$ correspond au rapport
+entre la clôture de la période 2021-01-01T00:20:00 et la clôture de la
+période 2021-01-01T00:05:00, soit :
+$$
+\rho^{\text{c}}_{p + 2} = \frac{\text{c}_{p+2}}{\text{c}_{p-1}} = \frac{28885.73}{28914.30} - 1 \simeq -0.000988 \simeq -0.099 \%
+$$
+
+En prenant la période $p$ = 2021-01-01T00:20:00 et un horizon $k = -3$,
+le rendement de clôture $\rho^{\text{c}}_{k-3}$ correspond au rapport
+entre la clôture de la période 2021-01-01T00:20:00 et la clôture de la
+période 2021-01-01T00:00:00, soit :
+$$
+\rho^{\text{c}}_{p - 3} = \frac{\text{c}_{p}}{\text{c}_{p-4}} = \frac{28885.73}{29018.17} - 1 \simeq -0.00456 \simeq -0.456 \%
+$$
+
+
+** Rendement du maximum et du minimum
+
+Le rendement du maximum entre deux périodes $p$ et $p+k$ (cf. Figure ref:fig_rho_h_p_k) est défini par :
+\begin{equation}
+\rho^{\text{h}}_{p + k} = 
+\begin{cases}
+\frac{\max_{p \le i \le p + k}\text{h}_{i}}{\text{c}_{p-1}} - 1 & \quad k \ge 0 \\
+\frac{\max_{p - k \le i \le p}\text{h}_{i}}{\text{c}_{p + k - 1}} - 1 & \quad k < 0.
+\end{cases}
+\end{equation}
+
+#+NAME: fig_rho_h_p_k
+#+CAPTION: Illustration graphique du calcul d'un rendement du maximum.
+[[./fig/rho_h_p_k.png]]
+
+
+Et par analogie, on définit le rendement du minimum entre deux périodes $p$ et $p+k$ (cf. Figure
+ref:fig_rho_l_p_k) :
+\begin{equation}
+\rho^{\text{l}}_{p + k} = 
+\begin{cases}
+\frac{\min_{p \le i \le p + k}\text{h}_{i}}{\text{c}_{p-1}} - 1 & \quad k \ge 0 \\
+\frac{\min_{p - k \le i \le p}\text{h}_{i}}{\text{c}_{p + k - 1}} - 1 & \quad k < 0.
+\end{cases}
+\end{equation}
+
+#+NAME: fig_rho_l_p_k
+#+CAPTION: Illustration graphique du calcul d'un rendement du minimum.
+[[./fig/rho_l_p_k.png]]
+
+*Exemples*
+
+Rendements du maximum calculés sur les données de l'exemple précédent et
+sur différents horizons :
+
+#+BEGIN_SRC python :session indicator_analysis :results html :exports results :tangle indicator_analysis.py 
+mi.ReturnsHighIndicator(horizon=[-3,0,1,2]).compute(data_ohlcv_ex_5)\
+                                           .style.format('{0:.3%}',  na_rep='').to_html()
+#+END_SRC
+
+#+RESULTS:
+#+begin_export html
+#+end_export
+
+Rendements du manimum calculés sur les mêmes horizons :
+
+#+BEGIN_SRC python :session indicator_analysis :results html :exports results :tangle indicator_analysis.py
+mi.ReturnsLowIndicator(horizon=[-3,0,1,2]).compute(data_ohlcv_ex_5)\
+                                           .style.format('{0:.3%}',  na_rep='').to_html()
+#+END_SRC
+
+
+En prenant la période $p$ = 2021-01-01T00:05:00 et un horizon $k = 0$,
+le rendement du maximum $\rho^{\text{h}}_{p} = r_{p}$ correspond au
+rapport entre la cotation maximum de la période 2021-01-01T00:05:00 et
+la clôture de la période 2021-01-01T00:00:00, soit :
+$$
+\rho^{\text{h}}_{p} = \frac{\text{h}_{p}}{\text{c}_{p-1}} = \frac{28996.04}{29018.17} - 1 \simeq -0.000762 \simeq -0.076 \%
+$$
+
+Le rendement du minimum correspondant est :
+$$
+\rho^{\text{l}}_{p} = \frac{\text{l}_{p}}{\text{c}_{p-1}} = \frac{28890.99}{29018.17} - 1 \simeq -0.00438 \simeq -0.44 \%
+$$
+
+En prenant la période $p$ = 2021-01-01T00:10:00 et un horizon $k = 2$,
+le rendement du maximum $\rho^{\text{h}}_{k+2}$ correspond au rapport
+entre la cotation maximum entre les périodes 2021-01-01T00:10:00 et
+2021-01-01T00:20:00, et la clôture de la période 2021-01-01T00:05:00,
+soit :
+$$
+\rho^{\text{h}}_{p + 2} = \frac{\max\{\text{h}_{p}, \text{h}_{p+1}, \text{h}_{p+2}\}}{\text{c}_{p-1}} = \frac{\text{h}_{p}}{\text{c}_{p-1}} = \frac{28908.49}{28914.30} - 1 \simeq -0.000201 \simeq -0.02 \%
+$$
+
+Le rendement du minimum correspondant est :
+$$
+\rho^{\text{l}}_{p + 2} = \frac{\max\{\text{l}_{p}, \text{l}_{p+1}, \text{l}_{p+2}\}}{\text{c}_{p-1}} = \frac{\text{l}_{p}}{\text{c}_{p-1}} = \frac{28741.86}{28914.30} - 1 \simeq -0.00596 \simeq -0.59 \%
+$$
+
+En prenant la période $p$ = 2021-01-01T00:20:00 et un horizon $k = -3$,
+le rendement du maximum $\rho^{\text{h}}_{k-3}$ correspond au rapport
+entre la cotation maximum entre les périodes 2021-01-01T00:05:00 et
+2021-01-01T00:20:00, et la clôture de la période 2021-01-01T00:00:00,
+soit :
+$$
+\rho^{\text{h}}_{p - 3} = \frac{\max\{\text{h}_{p-3}, \text{h}_{p-2}, \text{h}_{p-1}, \text{h}_{p}\}}{\text{c}_{p-4}} = \frac{\text{h}_{p-3}}{\text{c}_{p-4}} = \frac{28996.04}{29018.17} - 1 \simeq -0.000762 \simeq -0.076 \%
+$$
+
+Le rendement du minimum correspondant est :
+$$
+\rho^{\text{l}}_{p - 3} = \frac{\max\{\text{l}_{p-3}, \text{l}_{p-2}, \text{l}_{p-1}, \text{l}_{p}\}}{\text{c}_{p-4}} = \frac{\text{l}_{p-2}}{\text{c}_{p-4}} = \frac{28741.86}{29018.17} - 1 \simeq -0.00952 \simeq -0.95 \%
+$$
+
+* Évaluation de la performance des indicateurs
+   :PROPERTIES:
+   :CUSTOM_ID: évaluation-de-la-performance-des-indicateurs
+   :END:
+
+** Méthodologie générale
+    :PROPERTIES:
+    :CUSTOM_ID: méthodologie-générale
+    :END:
+
+La méthodologie d'évaluation proposée repose sur le protocole suivant :
+1. Collecter des données historiques :
+   - Sélection de l'actif étudié, e.g. BTC/USDC.
+   - Choisir la période d'échantillonnage $\Delta t$ considérée. En fonction des stratégies, $\Delta
+     t$ peut être plus ou moins grand, e.g. 1 min, 5 min, 1 heure, 1 journée, 1 semaine, etc.
+1. Fixer un horizon de prédiction $k \ge 0$. Cet horizon indique qu'à chaque période $p$, l'objectif
+   est d'étudier la distribution des rendements futurs à l'instant $p + k\Delta t$.
+1. Calculer les rendements à horizon $p+k$ à chaque période $p$ à partir des données historiques.
+1. Calculer les indicateurs à étudier sur les données historiques considérées.
+1. Estimer la loi conditionnelle des rendements futurs par rapport aux indicateurs étudier :
+   - Choix de la loi conditionnelle : par défaut, le modèle bayésien optimal sera utilisé.
+   - Discrétiser si besoin les indicateurs à étudier en cohérence avec le choix précédent.
+   - Estimer la distribution conditionnelle des rendements à partir des données considérées.
+1. Évaluer le lien de causalité entre indicateurs et explication des rendements.
+
+** Critères d'évaluation
+    :PROPERTIES:
+    :CUSTOM_ID: critères-dévaluation
+    :END:
+
+*** Score des rendements extrêmes
+     :PROPERTIES:
+     :CUSTOM_ID: score-des-rendements-extrêmes
+     :END:
+
+Considérons les variables aléatoires $R^{\text{c}}_{p + k}$, $R^{\text{h}}_{p + k}$,
+$R^{\text{l}}_{p + k}$ représentant les rendements de clôture, du maximum et du minimum à horizon 
+$k$. 
+
+On note alors :
+- $\rho^{\text{l}}_{p + k,\alpha}$ le quantile de niveau $\alpha$ du rendement du minimum à
+  l'horizon $k$, i.e. $\alpha = P(R^{\text{l}}_{p + k} \le \rho^{\text{l}}_{p + k,\alpha})$ ;
+- $\rho^{\text{h}}_{p + k,\alpha}$ le quantile de niveau $\alpha$ du rendement du maximum à
+  l'horizon $k$, i.e. $\alpha = P(R^{\text{h}}_{p + k} \le \rho^{\text{h}}_{p + k,\alpha})$ ;
+
+La Figure ref:fig_rho_hl_quant illustrent graphiquement les notions précédentes.
+
+#+NAME: fig_rho_hl_quant
+#+CAPTION: Représentation graphique des quantiles $\rho^{\text{h}}_{p + k,\alpha}$ et $\rho^{\text{l}}_{p + k,\alpha}$.
+[[./fig/rho_hl_quant.png]]
+
+
+Le score des rendements extrêmes (/Extreme Returns Score/) au niveau $\alpha$,
+noté $\text{ERS}_{p+k, \alpha}$, est défini comme suit :
+$$
+\text{ERS}_{p+k, \alpha} = (1 - \alpha) \rho^{\text{h}}_{p + k,\alpha} + \alpha \rho^{\text{l}}_{p + k,\alpha} 
+$$
+
+Du point de vue financier, ce score s'interprète comme le rendement
+espéré résultant d'une prise de profit sur le rendement du maximum au
+niveau $\alpha$ et des pertes sur le rendement du minimum au niveau
+$\alpha$, cf. Figure ref:fig_ers_tp_sl.
+
+#+NAME: fig_ers_tp_sl
+#+CAPTION: Illustration du calcul des bornes de ventes sur gain (/take profit/) ou perte (/stop loss/) suite à l'achat à la période $p$ d'un actif au prix $Q_{p}$.
+[[./fig/ers_tp_sl.png]]
+
+
+*TODO* - Se documenter sur la notion d'"expectiles" et comparer avec le
+score précédent :
+https://getd.libs.uga.edu/pdfs/anderson_andrew_l_201212_ms.pdf - Se
+documenter sur la notion de Conditional Value at Risk :
+https://www.investopedia.com/terms/c/conditional_value_at_risk.asp
+
+
+* Environnement technique
+
+Les librairies =Python= utilisées dans les traitements présentés dans ce document sont :
+#+BEGIN_SRC python :session indicator_analysis :results html :exports results :tangle indicator_analysis.py 
+print(f"MOSAIC library version: {mosaic.__version__}")
+
+lib_dict = [
+    {"desc": "MOSAIC", "module": mosaic}
+    ]
+
+pd.DataFrame([{"Library": lib["desc"], "Version": getattr(lib["module"], "__version__")}
+              for lib in lib_dict])\
+  .style.hide_index().to_html()
+#+END_SRC
+
+#+RESULTS:
+
+
+* Références
+
+[[bibliography:MOSAIC.bib]]
+
