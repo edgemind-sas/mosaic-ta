@@ -56,22 +56,21 @@
 <li><a href="#extension-de-la-notion-de-rendements">4. Extension de la notion de rendements</a>
 <ul>
 <li><a href="#définitions">4.1. Définitions</a></li>
-<li><a href="#org1d2852c">4.2. Rendement de clôture</a></li>
-<li><a href="#org206eb53">4.3. Rendement du maximum et du minimum</a></li>
+<li><a href="#orgc222816">4.2. Rendement de clôture</a></li>
+<li><a href="#org2d0ea98">4.3. Rendement du maximum et du minimum</a></li>
 </ul>
 </li>
-<li><a href="#évaluation-de-la-performance-des-indicateurs">5. Évaluation de la performance des indicateurs</a>
+<li><a href="#évaluation-de-la-performance-des-indicateurs">5. Indicateurs et évaluation</a>
 <ul>
-<li><a href="#méthodologie-générale">5.1. Méthodologie générale</a></li>
-<li><a href="#critères-dévaluation">5.2. Critères d'évaluation</a>
-<ul>
-<li><a href="#score-des-rendements-extrêmes">5.2.1. Score des rendements extrêmes</a></li>
+<li><a href="#sec:strat_fi_intro">5.1. Problématique</a></li>
+<li><a href="#org63a0402">5.2. Formalisation</a></li>
+<li><a href="#orgd9b81ec">5.3. Score WER</a></li>
+<li><a href="#orgecd913d">5.4. Score AWER</a></li>
+<li><a href="#méthodologie-générale">5.5. Méthodologie d'évaluation</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li><a href="#orgd3bbe54">6. Environnement technique</a></li>
-<li><a href="#org4a1ba85">7. Références</a></li>
+<li><a href="#org0a65d3a">6. Environnement technique</a></li>
+<li><a href="#org49e24bc">7. Références</a></li>
 </ul>
 </div>
 </div>
@@ -140,11 +139,11 @@ millisecondes), la fin étant déterminée par la période d'échantillonnage \(
 Il est courant de visualiser les données OHLC à l'aide du graphique, dit
 en chandeliers. En fonction, des valeurs d'ouverture (<i>open</i>) et de
 fermeture (<i>close</i>), on parle également de chandeliers haussiers et
-baissiers, cf. Figure <a href="#org296ce19">1</a>.
+baissiers, cf. Figure <a href="#org08df093">1</a>.
 </p>
 
 
-<div id="org296ce19" class="figure">
+<div id="org08df093" class="figure">
 <p><img src="./fig/candle.jpg" alt="candle.jpg" />
 </p>
 <p><span class="figure-number">Figure&nbsp;1&nbsp;: </span>Représentation du symbole de chandelier.</p>
@@ -171,15 +170,15 @@ d'échantillonnage \(\Delta t =\) 5 minutes.
 
 <style type="text/css">
 </style>
-<table id="T_0a5df">
+<table id="T_cd1c3">
   <thead>
     <tr>
       <th class="blank level0" >&nbsp;</th>
-      <th id="T_0a5df_level0_col0" class="col_heading level0 col0" >open</th>
-      <th id="T_0a5df_level0_col1" class="col_heading level0 col1" >high</th>
-      <th id="T_0a5df_level0_col2" class="col_heading level0 col2" >low</th>
-      <th id="T_0a5df_level0_col3" class="col_heading level0 col3" >close</th>
-      <th id="T_0a5df_level0_col4" class="col_heading level0 col4" >volume</th>
+      <th id="T_cd1c3_level0_col0" class="col_heading level0 col0" >open</th>
+      <th id="T_cd1c3_level0_col1" class="col_heading level0 col1" >high</th>
+      <th id="T_cd1c3_level0_col2" class="col_heading level0 col2" >low</th>
+      <th id="T_cd1c3_level0_col3" class="col_heading level0 col3" >close</th>
+      <th id="T_cd1c3_level0_col4" class="col_heading level0 col4" >volume</th>
     </tr>
     <tr>
       <th class="index_name level0" >time</th>
@@ -192,44 +191,44 @@ d'échantillonnage \(\Delta t =\) 5 minutes.
   </thead>
   <tbody>
     <tr>
-      <th id="T_0a5df_level0_row0" class="row_heading level0 row0" >2021-01-01 00:00:00+00:00</th>
-      <td id="T_0a5df_row0_col0" class="data row0 col0" >28 964.54</td>
-      <td id="T_0a5df_row0_col1" class="data row0 col1" >29 064.55</td>
-      <td id="T_0a5df_row0_col2" class="data row0 col2" >28 958.66</td>
-      <td id="T_0a5df_row0_col3" class="data row0 col3" >29 018.17</td>
-      <td id="T_0a5df_row0_col4" class="data row0 col4" >8.77</td>
+      <th id="T_cd1c3_level0_row0" class="row_heading level0 row0" >2021-01-01 00:00:00+00:00</th>
+      <td id="T_cd1c3_row0_col0" class="data row0 col0" >28 964.54</td>
+      <td id="T_cd1c3_row0_col1" class="data row0 col1" >29 064.55</td>
+      <td id="T_cd1c3_row0_col2" class="data row0 col2" >28 958.66</td>
+      <td id="T_cd1c3_row0_col3" class="data row0 col3" >29 018.17</td>
+      <td id="T_cd1c3_row0_col4" class="data row0 col4" >8.77</td>
     </tr>
     <tr>
-      <th id="T_0a5df_level0_row1" class="row_heading level0 row1" >2021-01-01 00:05:00+00:00</th>
-      <td id="T_0a5df_row1_col0" class="data row1 col0" >28 993.74</td>
-      <td id="T_0a5df_row1_col1" class="data row1 col1" >28 996.04</td>
-      <td id="T_0a5df_row1_col2" class="data row1 col2" >28 890.99</td>
-      <td id="T_0a5df_row1_col3" class="data row1 col3" >28 914.30</td>
-      <td id="T_0a5df_row1_col4" class="data row1 col4" >11.15</td>
+      <th id="T_cd1c3_level0_row1" class="row_heading level0 row1" >2021-01-01 00:05:00+00:00</th>
+      <td id="T_cd1c3_row1_col0" class="data row1 col0" >28 993.74</td>
+      <td id="T_cd1c3_row1_col1" class="data row1 col1" >28 996.04</td>
+      <td id="T_cd1c3_row1_col2" class="data row1 col2" >28 890.99</td>
+      <td id="T_cd1c3_row1_col3" class="data row1 col3" >28 914.30</td>
+      <td id="T_cd1c3_row1_col4" class="data row1 col4" >11.15</td>
     </tr>
     <tr>
-      <th id="T_0a5df_level0_row2" class="row_heading level0 row2" >2021-01-01 00:10:00+00:00</th>
-      <td id="T_0a5df_row2_col0" class="data row2 col0" >28 902.53</td>
-      <td id="T_0a5df_row2_col1" class="data row2 col1" >28 908.49</td>
-      <td id="T_0a5df_row2_col2" class="data row2 col2" >28 741.86</td>
-      <td id="T_0a5df_row2_col3" class="data row2 col3" >28 790.00</td>
-      <td id="T_0a5df_row2_col4" class="data row2 col4" >4.58</td>
+      <th id="T_cd1c3_level0_row2" class="row_heading level0 row2" >2021-01-01 00:10:00+00:00</th>
+      <td id="T_cd1c3_row2_col0" class="data row2 col0" >28 902.53</td>
+      <td id="T_cd1c3_row2_col1" class="data row2 col1" >28 908.49</td>
+      <td id="T_cd1c3_row2_col2" class="data row2 col2" >28 741.86</td>
+      <td id="T_cd1c3_row2_col3" class="data row2 col3" >28 790.00</td>
+      <td id="T_cd1c3_row2_col4" class="data row2 col4" >4.58</td>
     </tr>
     <tr>
-      <th id="T_0a5df_level0_row3" class="row_heading level0 row3" >2021-01-01 00:15:00+00:00</th>
-      <td id="T_0a5df_row3_col0" class="data row3 col0" >28 798.99</td>
-      <td id="T_0a5df_row3_col1" class="data row3 col1" >28 891.63</td>
-      <td id="T_0a5df_row3_col2" class="data row3 col2" >28 798.29</td>
-      <td id="T_0a5df_row3_col3" class="data row3 col3" >28 884.38</td>
-      <td id="T_0a5df_row3_col4" class="data row3 col4" >4.31</td>
+      <th id="T_cd1c3_level0_row3" class="row_heading level0 row3" >2021-01-01 00:15:00+00:00</th>
+      <td id="T_cd1c3_row3_col0" class="data row3 col0" >28 798.99</td>
+      <td id="T_cd1c3_row3_col1" class="data row3 col1" >28 891.63</td>
+      <td id="T_cd1c3_row3_col2" class="data row3 col2" >28 798.29</td>
+      <td id="T_cd1c3_row3_col3" class="data row3 col3" >28 884.38</td>
+      <td id="T_cd1c3_row3_col4" class="data row3 col4" >4.31</td>
     </tr>
     <tr>
-      <th id="T_0a5df_level0_row4" class="row_heading level0 row4" >2021-01-01 00:20:00+00:00</th>
-      <td id="T_0a5df_row4_col0" class="data row4 col0" >28 845.04</td>
-      <td id="T_0a5df_row4_col1" class="data row4 col1" >28 886.67</td>
-      <td id="T_0a5df_row4_col2" class="data row4 col2" >28 789.15</td>
-      <td id="T_0a5df_row4_col3" class="data row4 col3" >28 885.73</td>
-      <td id="T_0a5df_row4_col4" class="data row4 col4" >13.21</td>
+      <th id="T_cd1c3_level0_row4" class="row_heading level0 row4" >2021-01-01 00:20:00+00:00</th>
+      <td id="T_cd1c3_row4_col0" class="data row4 col0" >28 845.04</td>
+      <td id="T_cd1c3_row4_col1" class="data row4 col1" >28 886.67</td>
+      <td id="T_cd1c3_row4_col2" class="data row4 col2" >28 789.15</td>
+      <td id="T_cd1c3_row4_col3" class="data row4 col3" >28 885.73</td>
+      <td id="T_cd1c3_row4_col4" class="data row4 col4" >13.21</td>
     </tr>
   </tbody>
 </table>
@@ -279,7 +278,7 @@ précédent, on a :
 </p>
 <ul class="org-ul">
 <li>1er période d'observation \(p = 0\) : période entre 2021-01-01 00:00:00 et 2021-01-01 00:05:00 ;</li>
-<li>5ème période d'observation \(p = 4\) : période entre 2021-01-01 00:15:00 et 2021-01-01 00:20:00.</li>
+<li>5ème période d'observation \(p = 4\) : période entre 2021-01-01 00:20:00 et 2021-01-01 00:25:00.</li>
 </ul>
 
 <p>
@@ -365,16 +364,16 @@ Dans les paragraphes suivants, nous illustrerons les différentes rendements sur
 de cotation BTC/USDC suivant.
 </p>
 <div>                        <script type="text/javascript">window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
-        <script src="https://cdn.plot.ly/plotly-2.12.1.min.js"></script>                <div id="df9ecfb7-973f-4500-868e-27a51c218473" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script type="text/javascript">                                    window.PLOTLYENV=window.PLOTLYENV || {};                                    if (document.getElementById("df9ecfb7-973f-4500-868e-27a51c218473")) {                    Plotly.newPlot(                        "df9ecfb7-973f-4500-868e-27a51c218473",                        [{"close":[29018.17,28914.3,28790.0,28884.38,28885.73],"high":[29064.55,28996.04,28908.49,28891.63,28886.67],"low":[28958.66,28890.99,28741.86,28798.29,28789.15],"name":"OHLC","open":[28964.54,28993.74,28902.53,28798.99,28845.04],"x":["2021-01-01T00:00:00+00:00","2021-01-01T00:05:00+00:00","2021-01-01T00:10:00+00:00","2021-01-01T00:15:00+00:00","2021-01-01T00:20:00+00:00"],"type":"candlestick"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmapgl":[{"type":"heatmapgl","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"title":{"text":"Exemple de donn\u00e9es OHLC sur l'actif BTC/USDC"},"yaxis":{"title":{"text":"USDC"}},"xaxis":{"title":{"text":"Temps"}}},                        {"displayModeBar": false, "responsive": true}                    )                };                            </script>        </div>
+        <script src="https://cdn.plot.ly/plotly-2.12.1.min.js"></script>                <div id="25582ba7-be73-44df-a799-d14d549ac328" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script type="text/javascript">                                    window.PLOTLYENV=window.PLOTLYENV || {};                                    if (document.getElementById("25582ba7-be73-44df-a799-d14d549ac328")) {                    Plotly.newPlot(                        "25582ba7-be73-44df-a799-d14d549ac328",                        [{"close":[29018.17,28914.3,28790.0,28884.38,28885.73],"high":[29064.55,28996.04,28908.49,28891.63,28886.67],"low":[28958.66,28890.99,28741.86,28798.29,28789.15],"name":"OHLC","open":[28964.54,28993.74,28902.53,28798.99,28845.04],"x":["2021-01-01T00:00:00+00:00","2021-01-01T00:05:00+00:00","2021-01-01T00:10:00+00:00","2021-01-01T00:15:00+00:00","2021-01-01T00:20:00+00:00"],"type":"candlestick"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmapgl":[{"type":"heatmapgl","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"title":{"text":"Exemple de donn\u00e9es OHLC sur l'actif BTC/USDC"},"yaxis":{"title":{"text":"USDC"}},"xaxis":{"title":{"text":"Temps"}}},                        {"displayModeBar": false, "responsive": true}                    )                };                            </script>        </div>
 </div>
 </div>
 
-<div id="outline-container-org1d2852c" class="outline-3">
-<h3 id="org1d2852c"><span class="section-number-3">4.2.</span> Rendement de clôture</h3>
+<div id="outline-container-orgc222816" class="outline-3">
+<h3 id="orgc222816"><span class="section-number-3">4.2.</span> Rendement de clôture</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 Débutons donc par définir le rendement de clôture entre deux périodes \(p\) et \(p+k\) (cf. Figure
-<a href="#org4fd77d0">2</a>) comme suit :
+<a href="#org0b12c7e">2</a>) comme suit :
 </p>
 \begin{equation}
 \rho^{\text{c}}_{p + k} = 
@@ -391,7 +390,7 @@ rendement.
 </p>
 
 
-<div id="org4fd77d0" class="figure">
+<div id="org0b12c7e" class="figure">
 <p><img src="./fig/rho_c_p_k.png" alt="rho_c_p_k.png" />
 </p>
 <p><span class="figure-number">Figure&nbsp;2&nbsp;: </span>Illustration graphique du calcul d'un rendement de clôture.</p>
@@ -408,17 +407,17 @@ sur différents horizons :
 
 <style type="text/css">
 </style>
-<table id="T_8f752">
+<table id="T_c6bb9">
   <thead>
     <tr>
       <th class="index_name level0" >period</th>
-      <th id="T_8f752_level0_col0" class="col_heading level0 col0" >-3</th>
-      <th id="T_8f752_level0_col1" class="col_heading level0 col1" >-2</th>
-      <th id="T_8f752_level0_col2" class="col_heading level0 col2" >-1</th>
-      <th id="T_8f752_level0_col3" class="col_heading level0 col3" >0</th>
-      <th id="T_8f752_level0_col4" class="col_heading level0 col4" >1</th>
-      <th id="T_8f752_level0_col5" class="col_heading level0 col5" >2</th>
-      <th id="T_8f752_level0_col6" class="col_heading level0 col6" >3</th>
+      <th id="T_c6bb9_level0_col0" class="col_heading level0 col0" >-3</th>
+      <th id="T_c6bb9_level0_col1" class="col_heading level0 col1" >-2</th>
+      <th id="T_c6bb9_level0_col2" class="col_heading level0 col2" >-1</th>
+      <th id="T_c6bb9_level0_col3" class="col_heading level0 col3" >0</th>
+      <th id="T_c6bb9_level0_col4" class="col_heading level0 col4" >1</th>
+      <th id="T_c6bb9_level0_col5" class="col_heading level0 col5" >2</th>
+      <th id="T_c6bb9_level0_col6" class="col_heading level0 col6" >3</th>
     </tr>
     <tr>
       <th class="index_name level0" >time</th>
@@ -433,54 +432,54 @@ sur différents horizons :
   </thead>
   <tbody>
     <tr>
-      <th id="T_8f752_level0_row0" class="row_heading level0 row0" >2021-01-01 00:00:00+00:00</th>
-      <td id="T_8f752_row0_col0" class="data row0 col0" ></td>
-      <td id="T_8f752_row0_col1" class="data row0 col1" ></td>
-      <td id="T_8f752_row0_col2" class="data row0 col2" ></td>
-      <td id="T_8f752_row0_col3" class="data row0 col3" ></td>
-      <td id="T_8f752_row0_col4" class="data row0 col4" ></td>
-      <td id="T_8f752_row0_col5" class="data row0 col5" ></td>
-      <td id="T_8f752_row0_col6" class="data row0 col6" ></td>
+      <th id="T_c6bb9_level0_row0" class="row_heading level0 row0" >2021-01-01 00:00:00+00:00</th>
+      <td id="T_c6bb9_row0_col0" class="data row0 col0" ></td>
+      <td id="T_c6bb9_row0_col1" class="data row0 col1" ></td>
+      <td id="T_c6bb9_row0_col2" class="data row0 col2" ></td>
+      <td id="T_c6bb9_row0_col3" class="data row0 col3" ></td>
+      <td id="T_c6bb9_row0_col4" class="data row0 col4" ></td>
+      <td id="T_c6bb9_row0_col5" class="data row0 col5" ></td>
+      <td id="T_c6bb9_row0_col6" class="data row0 col6" ></td>
     </tr>
     <tr>
-      <th id="T_8f752_level0_row1" class="row_heading level0 row1" >2021-01-01 00:05:00+00:00</th>
-      <td id="T_8f752_row1_col0" class="data row1 col0" ></td>
-      <td id="T_8f752_row1_col1" class="data row1 col1" ></td>
-      <td id="T_8f752_row1_col2" class="data row1 col2" ></td>
-      <td id="T_8f752_row1_col3" class="data row1 col3" >-0.358%</td>
-      <td id="T_8f752_row1_col4" class="data row1 col4" >-0.786%</td>
-      <td id="T_8f752_row1_col5" class="data row1 col5" >-0.461%</td>
-      <td id="T_8f752_row1_col6" class="data row1 col6" >-0.456%</td>
+      <th id="T_c6bb9_level0_row1" class="row_heading level0 row1" >2021-01-01 00:05:00+00:00</th>
+      <td id="T_c6bb9_row1_col0" class="data row1 col0" ></td>
+      <td id="T_c6bb9_row1_col1" class="data row1 col1" ></td>
+      <td id="T_c6bb9_row1_col2" class="data row1 col2" ></td>
+      <td id="T_c6bb9_row1_col3" class="data row1 col3" >-0.358%</td>
+      <td id="T_c6bb9_row1_col4" class="data row1 col4" >-0.786%</td>
+      <td id="T_c6bb9_row1_col5" class="data row1 col5" >-0.461%</td>
+      <td id="T_c6bb9_row1_col6" class="data row1 col6" >-0.456%</td>
     </tr>
     <tr>
-      <th id="T_8f752_level0_row2" class="row_heading level0 row2" >2021-01-01 00:10:00+00:00</th>
-      <td id="T_8f752_row2_col0" class="data row2 col0" ></td>
-      <td id="T_8f752_row2_col1" class="data row2 col1" ></td>
-      <td id="T_8f752_row2_col2" class="data row2 col2" >-0.786%</td>
-      <td id="T_8f752_row2_col3" class="data row2 col3" >-0.430%</td>
-      <td id="T_8f752_row2_col4" class="data row2 col4" >-0.103%</td>
-      <td id="T_8f752_row2_col5" class="data row2 col5" >-0.099%</td>
-      <td id="T_8f752_row2_col6" class="data row2 col6" ></td>
+      <th id="T_c6bb9_level0_row2" class="row_heading level0 row2" >2021-01-01 00:10:00+00:00</th>
+      <td id="T_c6bb9_row2_col0" class="data row2 col0" ></td>
+      <td id="T_c6bb9_row2_col1" class="data row2 col1" ></td>
+      <td id="T_c6bb9_row2_col2" class="data row2 col2" >-0.786%</td>
+      <td id="T_c6bb9_row2_col3" class="data row2 col3" >-0.430%</td>
+      <td id="T_c6bb9_row2_col4" class="data row2 col4" >-0.103%</td>
+      <td id="T_c6bb9_row2_col5" class="data row2 col5" >-0.099%</td>
+      <td id="T_c6bb9_row2_col6" class="data row2 col6" ></td>
     </tr>
     <tr>
-      <th id="T_8f752_level0_row3" class="row_heading level0 row3" >2021-01-01 00:15:00+00:00</th>
-      <td id="T_8f752_row3_col0" class="data row3 col0" ></td>
-      <td id="T_8f752_row3_col1" class="data row3 col1" >-0.461%</td>
-      <td id="T_8f752_row3_col2" class="data row3 col2" >-0.103%</td>
-      <td id="T_8f752_row3_col3" class="data row3 col3" >0.328%</td>
-      <td id="T_8f752_row3_col4" class="data row3 col4" >0.333%</td>
-      <td id="T_8f752_row3_col5" class="data row3 col5" ></td>
-      <td id="T_8f752_row3_col6" class="data row3 col6" ></td>
+      <th id="T_c6bb9_level0_row3" class="row_heading level0 row3" >2021-01-01 00:15:00+00:00</th>
+      <td id="T_c6bb9_row3_col0" class="data row3 col0" ></td>
+      <td id="T_c6bb9_row3_col1" class="data row3 col1" >-0.461%</td>
+      <td id="T_c6bb9_row3_col2" class="data row3 col2" >-0.103%</td>
+      <td id="T_c6bb9_row3_col3" class="data row3 col3" >0.328%</td>
+      <td id="T_c6bb9_row3_col4" class="data row3 col4" >0.333%</td>
+      <td id="T_c6bb9_row3_col5" class="data row3 col5" ></td>
+      <td id="T_c6bb9_row3_col6" class="data row3 col6" ></td>
     </tr>
     <tr>
-      <th id="T_8f752_level0_row4" class="row_heading level0 row4" >2021-01-01 00:20:00+00:00</th>
-      <td id="T_8f752_row4_col0" class="data row4 col0" >-0.456%</td>
-      <td id="T_8f752_row4_col1" class="data row4 col1" >-0.099%</td>
-      <td id="T_8f752_row4_col2" class="data row4 col2" >0.333%</td>
-      <td id="T_8f752_row4_col3" class="data row4 col3" >0.005%</td>
-      <td id="T_8f752_row4_col4" class="data row4 col4" ></td>
-      <td id="T_8f752_row4_col5" class="data row4 col5" ></td>
-      <td id="T_8f752_row4_col6" class="data row4 col6" ></td>
+      <th id="T_c6bb9_level0_row4" class="row_heading level0 row4" >2021-01-01 00:20:00+00:00</th>
+      <td id="T_c6bb9_row4_col0" class="data row4 col0" >-0.456%</td>
+      <td id="T_c6bb9_row4_col1" class="data row4 col1" >-0.099%</td>
+      <td id="T_c6bb9_row4_col2" class="data row4 col2" >0.333%</td>
+      <td id="T_c6bb9_row4_col3" class="data row4 col3" >0.005%</td>
+      <td id="T_c6bb9_row4_col4" class="data row4 col4" ></td>
+      <td id="T_c6bb9_row4_col5" class="data row4 col5" ></td>
+      <td id="T_c6bb9_row4_col6" class="data row4 col6" ></td>
     </tr>
   </tbody>
 </table>
@@ -518,11 +517,11 @@ période 2021-01-01T00:00:00, soit :
 </div>
 
 
-<div id="outline-container-org206eb53" class="outline-3">
-<h3 id="org206eb53"><span class="section-number-3">4.3.</span> Rendement du maximum et du minimum</h3>
+<div id="outline-container-org2d0ea98" class="outline-3">
+<h3 id="org2d0ea98"><span class="section-number-3">4.3.</span> Rendement du maximum et du minimum</h3>
 <div class="outline-text-3" id="text-4-3">
 <p>
-Le rendement du maximum entre deux périodes \(p\) et \(p+k\) (cf. Figure <a href="#org3eb2dbc">3</a>) est défini par :
+Le rendement du maximum entre deux périodes \(p\) et \(p+k\) (cf. Figure <a href="#orgcbc4373">3</a>) est défini par :
 </p>
 \begin{equation}
 \rho^{\text{h}}_{p + k} = 
@@ -533,7 +532,7 @@ Le rendement du maximum entre deux périodes \(p\) et \(p+k\) (cf. Figure <a hre
 \end{equation}
 
 
-<div id="org3eb2dbc" class="figure">
+<div id="orgcbc4373" class="figure">
 <p><img src="./fig/rho_h_p_k.png" alt="rho_h_p_k.png" />
 </p>
 <p><span class="figure-number">Figure&nbsp;3&nbsp;: </span>Illustration graphique du calcul d'un rendement du maximum.</p>
@@ -542,7 +541,7 @@ Le rendement du maximum entre deux périodes \(p\) et \(p+k\) (cf. Figure <a hre
 
 <p>
 Et par analogie, on définit le rendement du minimum entre deux périodes \(p\) et \(p+k\) (cf. Figure
-<a href="#orgca447b4">4</a>) :
+<a href="#org1436b0f">4</a>) :
 </p>
 \begin{equation}
 \rho^{\text{l}}_{p + k} = 
@@ -553,7 +552,7 @@ Et par analogie, on définit le rendement du minimum entre deux périodes \(p\) 
 \end{equation}
 
 
-<div id="orgca447b4" class="figure">
+<div id="org1436b0f" class="figure">
 <p><img src="./fig/rho_l_p_k.png" alt="rho_l_p_k.png" />
 </p>
 <p><span class="figure-number">Figure&nbsp;4&nbsp;: </span>Illustration graphique du calcul d'un rendement du minimum.</p>
@@ -570,14 +569,14 @@ sur différents horizons :
 
 <style type="text/css">
 </style>
-<table id="T_cd80b">
+<table id="T_fd32b">
   <thead>
     <tr>
       <th class="index_name level0" >period</th>
-      <th id="T_cd80b_level0_col0" class="col_heading level0 col0" >-3</th>
-      <th id="T_cd80b_level0_col1" class="col_heading level0 col1" >0</th>
-      <th id="T_cd80b_level0_col2" class="col_heading level0 col2" >1</th>
-      <th id="T_cd80b_level0_col3" class="col_heading level0 col3" >2</th>
+      <th id="T_fd32b_level0_col0" class="col_heading level0 col0" >-3</th>
+      <th id="T_fd32b_level0_col1" class="col_heading level0 col1" >0</th>
+      <th id="T_fd32b_level0_col2" class="col_heading level0 col2" >1</th>
+      <th id="T_fd32b_level0_col3" class="col_heading level0 col3" >2</th>
     </tr>
     <tr>
       <th class="index_name level0" >time</th>
@@ -589,57 +588,57 @@ sur différents horizons :
   </thead>
   <tbody>
     <tr>
-      <th id="T_cd80b_level0_row0" class="row_heading level0 row0" >2021-01-01 00:00:00+00:00</th>
-      <td id="T_cd80b_row0_col0" class="data row0 col0" ></td>
-      <td id="T_cd80b_row0_col1" class="data row0 col1" ></td>
-      <td id="T_cd80b_row0_col2" class="data row0 col2" ></td>
-      <td id="T_cd80b_row0_col3" class="data row0 col3" ></td>
+      <th id="T_fd32b_level0_row0" class="row_heading level0 row0" >2021-01-01 00:00:00+00:00</th>
+      <td id="T_fd32b_row0_col0" class="data row0 col0" ></td>
+      <td id="T_fd32b_row0_col1" class="data row0 col1" ></td>
+      <td id="T_fd32b_row0_col2" class="data row0 col2" ></td>
+      <td id="T_fd32b_row0_col3" class="data row0 col3" ></td>
     </tr>
     <tr>
-      <th id="T_cd80b_level0_row1" class="row_heading level0 row1" >2021-01-01 00:05:00+00:00</th>
-      <td id="T_cd80b_row1_col0" class="data row1 col0" ></td>
-      <td id="T_cd80b_row1_col1" class="data row1 col1" >-0.076%</td>
-      <td id="T_cd80b_row1_col2" class="data row1 col2" >-0.076%</td>
-      <td id="T_cd80b_row1_col3" class="data row1 col3" >-0.076%</td>
+      <th id="T_fd32b_level0_row1" class="row_heading level0 row1" >2021-01-01 00:05:00+00:00</th>
+      <td id="T_fd32b_row1_col0" class="data row1 col0" ></td>
+      <td id="T_fd32b_row1_col1" class="data row1 col1" >-0.076%</td>
+      <td id="T_fd32b_row1_col2" class="data row1 col2" >-0.076%</td>
+      <td id="T_fd32b_row1_col3" class="data row1 col3" >-0.076%</td>
     </tr>
     <tr>
-      <th id="T_cd80b_level0_row2" class="row_heading level0 row2" >2021-01-01 00:10:00+00:00</th>
-      <td id="T_cd80b_row2_col0" class="data row2 col0" ></td>
-      <td id="T_cd80b_row2_col1" class="data row2 col1" >-0.020%</td>
-      <td id="T_cd80b_row2_col2" class="data row2 col2" >-0.020%</td>
-      <td id="T_cd80b_row2_col3" class="data row2 col3" >-0.020%</td>
+      <th id="T_fd32b_level0_row2" class="row_heading level0 row2" >2021-01-01 00:10:00+00:00</th>
+      <td id="T_fd32b_row2_col0" class="data row2 col0" ></td>
+      <td id="T_fd32b_row2_col1" class="data row2 col1" >-0.020%</td>
+      <td id="T_fd32b_row2_col2" class="data row2 col2" >-0.020%</td>
+      <td id="T_fd32b_row2_col3" class="data row2 col3" >-0.020%</td>
     </tr>
     <tr>
-      <th id="T_cd80b_level0_row3" class="row_heading level0 row3" >2021-01-01 00:15:00+00:00</th>
-      <td id="T_cd80b_row3_col0" class="data row3 col0" ></td>
-      <td id="T_cd80b_row3_col1" class="data row3 col1" >0.353%</td>
-      <td id="T_cd80b_row3_col2" class="data row3 col2" >0.353%</td>
-      <td id="T_cd80b_row3_col3" class="data row3 col3" ></td>
+      <th id="T_fd32b_level0_row3" class="row_heading level0 row3" >2021-01-01 00:15:00+00:00</th>
+      <td id="T_fd32b_row3_col0" class="data row3 col0" ></td>
+      <td id="T_fd32b_row3_col1" class="data row3 col1" >0.353%</td>
+      <td id="T_fd32b_row3_col2" class="data row3 col2" >0.353%</td>
+      <td id="T_fd32b_row3_col3" class="data row3 col3" ></td>
     </tr>
     <tr>
-      <th id="T_cd80b_level0_row4" class="row_heading level0 row4" >2021-01-01 00:20:00+00:00</th>
-      <td id="T_cd80b_row4_col0" class="data row4 col0" >-0.076%</td>
-      <td id="T_cd80b_row4_col1" class="data row4 col1" >0.008%</td>
-      <td id="T_cd80b_row4_col2" class="data row4 col2" ></td>
-      <td id="T_cd80b_row4_col3" class="data row4 col3" ></td>
+      <th id="T_fd32b_level0_row4" class="row_heading level0 row4" >2021-01-01 00:20:00+00:00</th>
+      <td id="T_fd32b_row4_col0" class="data row4 col0" >-0.076%</td>
+      <td id="T_fd32b_row4_col1" class="data row4 col1" >0.008%</td>
+      <td id="T_fd32b_row4_col2" class="data row4 col2" ></td>
+      <td id="T_fd32b_row4_col3" class="data row4 col3" ></td>
     </tr>
   </tbody>
 </table>
 
 <p>
-Rendements du manimum calculés sur les mêmes horizons :
+Rendements du minimum calculés sur les mêmes horizons :
 </p>
 
 <style type="text/css">
 </style>
-<table id="T_6134d">
+<table id="T_23cfc">
   <thead>
     <tr>
       <th class="index_name level0" >period</th>
-      <th id="T_6134d_level0_col0" class="col_heading level0 col0" >-3</th>
-      <th id="T_6134d_level0_col1" class="col_heading level0 col1" >0</th>
-      <th id="T_6134d_level0_col2" class="col_heading level0 col2" >1</th>
-      <th id="T_6134d_level0_col3" class="col_heading level0 col3" >2</th>
+      <th id="T_23cfc_level0_col0" class="col_heading level0 col0" >-3</th>
+      <th id="T_23cfc_level0_col1" class="col_heading level0 col1" >0</th>
+      <th id="T_23cfc_level0_col2" class="col_heading level0 col2" >1</th>
+      <th id="T_23cfc_level0_col3" class="col_heading level0 col3" >2</th>
     </tr>
     <tr>
       <th class="index_name level0" >time</th>
@@ -651,39 +650,39 @@ Rendements du manimum calculés sur les mêmes horizons :
   </thead>
   <tbody>
     <tr>
-      <th id="T_6134d_level0_row0" class="row_heading level0 row0" >2021-01-01 00:00:00+00:00</th>
-      <td id="T_6134d_row0_col0" class="data row0 col0" ></td>
-      <td id="T_6134d_row0_col1" class="data row0 col1" ></td>
-      <td id="T_6134d_row0_col2" class="data row0 col2" ></td>
-      <td id="T_6134d_row0_col3" class="data row0 col3" ></td>
+      <th id="T_23cfc_level0_row0" class="row_heading level0 row0" >2021-01-01 00:00:00+00:00</th>
+      <td id="T_23cfc_row0_col0" class="data row0 col0" ></td>
+      <td id="T_23cfc_row0_col1" class="data row0 col1" ></td>
+      <td id="T_23cfc_row0_col2" class="data row0 col2" ></td>
+      <td id="T_23cfc_row0_col3" class="data row0 col3" ></td>
     </tr>
     <tr>
-      <th id="T_6134d_level0_row1" class="row_heading level0 row1" >2021-01-01 00:05:00+00:00</th>
-      <td id="T_6134d_row1_col0" class="data row1 col0" ></td>
-      <td id="T_6134d_row1_col1" class="data row1 col1" >-0.438%</td>
-      <td id="T_6134d_row1_col2" class="data row1 col2" >-0.952%</td>
-      <td id="T_6134d_row1_col3" class="data row1 col3" >-0.952%</td>
+      <th id="T_23cfc_level0_row1" class="row_heading level0 row1" >2021-01-01 00:05:00+00:00</th>
+      <td id="T_23cfc_row1_col0" class="data row1 col0" ></td>
+      <td id="T_23cfc_row1_col1" class="data row1 col1" >-0.438%</td>
+      <td id="T_23cfc_row1_col2" class="data row1 col2" >-0.952%</td>
+      <td id="T_23cfc_row1_col3" class="data row1 col3" >-0.952%</td>
     </tr>
     <tr>
-      <th id="T_6134d_level0_row2" class="row_heading level0 row2" >2021-01-01 00:10:00+00:00</th>
-      <td id="T_6134d_row2_col0" class="data row2 col0" ></td>
-      <td id="T_6134d_row2_col1" class="data row2 col1" >-0.596%</td>
-      <td id="T_6134d_row2_col2" class="data row2 col2" >-0.596%</td>
-      <td id="T_6134d_row2_col3" class="data row2 col3" >-0.596%</td>
+      <th id="T_23cfc_level0_row2" class="row_heading level0 row2" >2021-01-01 00:10:00+00:00</th>
+      <td id="T_23cfc_row2_col0" class="data row2 col0" ></td>
+      <td id="T_23cfc_row2_col1" class="data row2 col1" >-0.596%</td>
+      <td id="T_23cfc_row2_col2" class="data row2 col2" >-0.596%</td>
+      <td id="T_23cfc_row2_col3" class="data row2 col3" >-0.596%</td>
     </tr>
     <tr>
-      <th id="T_6134d_level0_row3" class="row_heading level0 row3" >2021-01-01 00:15:00+00:00</th>
-      <td id="T_6134d_row3_col0" class="data row3 col0" ></td>
-      <td id="T_6134d_row3_col1" class="data row3 col1" >0.029%</td>
-      <td id="T_6134d_row3_col2" class="data row3 col2" >-0.003%</td>
-      <td id="T_6134d_row3_col3" class="data row3 col3" ></td>
+      <th id="T_23cfc_level0_row3" class="row_heading level0 row3" >2021-01-01 00:15:00+00:00</th>
+      <td id="T_23cfc_row3_col0" class="data row3 col0" ></td>
+      <td id="T_23cfc_row3_col1" class="data row3 col1" >0.029%</td>
+      <td id="T_23cfc_row3_col2" class="data row3 col2" >-0.003%</td>
+      <td id="T_23cfc_row3_col3" class="data row3 col3" ></td>
     </tr>
     <tr>
-      <th id="T_6134d_level0_row4" class="row_heading level0 row4" >2021-01-01 00:20:00+00:00</th>
-      <td id="T_6134d_row4_col0" class="data row4 col0" >-0.952%</td>
-      <td id="T_6134d_row4_col1" class="data row4 col1" >-0.330%</td>
-      <td id="T_6134d_row4_col2" class="data row4 col2" ></td>
-      <td id="T_6134d_row4_col3" class="data row4 col3" ></td>
+      <th id="T_23cfc_level0_row4" class="row_heading level0 row4" >2021-01-01 00:20:00+00:00</th>
+      <td id="T_23cfc_row4_col0" class="data row4 col0" >-0.952%</td>
+      <td id="T_23cfc_row4_col1" class="data row4 col1" >-0.330%</td>
+      <td id="T_23cfc_row4_col2" class="data row4 col2" ></td>
+      <td id="T_23cfc_row4_col3" class="data row4 col3" ></td>
     </tr>
   </tbody>
 </table>
@@ -745,16 +744,253 @@ Le rendement du minimum correspondant est :
 </div>
 </div>
 
+
 <div id="outline-container-évaluation-de-la-performance-des-indicateurs" class="outline-2">
-<h2 id="évaluation-de-la-performance-des-indicateurs"><span class="section-number-2">5.</span> Évaluation de la performance des indicateurs</h2>
+<h2 id="évaluation-de-la-performance-des-indicateurs"><span class="section-number-2">5.</span> Indicateurs et évaluation</h2>
 <div class="outline-text-2" id="text-évaluation-de-la-performance-des-indicateurs">
 </div>
 
+
+<div id="outline-container-sec:strat_fi_intro" class="outline-3">
+<h3 id="sec:strat_fi_intro"><span class="section-number-3">5.1.</span> Problématique</h3>
+<div class="outline-text-3" id="text-sec:strat_fi_intro">
+<p>
+Un des objectifs du projet MOSAIC est d'élaborer des politiques décisionnelles d'investissements
+auto-adaptatives sur les marchés financiers, en particulier ceux des crytoactifs. Un investissement
+de type achat/vente <sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup> (en anglais <i>long position</i>) se caractérise par le fait
+d'acheter une certaine quantité d'un actif afin de le vendre ultérieurement dans le but de faire une
+plus-value.
+</p>
+
+<p>
+En pratique, une politique d'investissement correspond donc à des règles d'achat et de vente d'un ou plusieurs
+actifs sur une durée donnée. Ces règles peuvent être établies de différentes manières,
+e.g. par expertise, suite à l'occurrence d'un ou plusieurs événements macroéconomiques, en fonction
+de l'évolution de la cotation, etc. 
+</p>
+
+<p>
+La stratégie que nous développons consiste à construire des règles d'achat et de vente
+s'appuyant sur l'analyse prévisionnelle des rendements futurs espérés (à un horizon fixe) suite à
+l'observation de divers indicateurs. Il est à noter que la notion d'indicateur peut se généraliser à la notion
+d'information disponible au moment d'appliquer des règles d'achat/vente. Par ailleurs, afin de simplifier la
+problématique, nous considérons que les indicateurs prennent leurs valeurs dans des domaines discrets et
+finis. Par exemple, nous pourrions construire nos stratégies d'achat/vente à partir de l'observation
+des deux indicateurs suivants :
+</p>
+<ul class="org-ul">
+<li>couleur du chandelier précédent à valeurs dans \(\{\text{vert},\text{rouge}\}\) ;</li>
+<li>signe du rendement sur les 3 périodes précédentes à valeurs dans \(\{+,-\}\).</li>
+</ul>
+<p>
+Dans ce cas, nous pouvons construire un indicateur agrégé ayant six configurations \(\{(\text{vert}, +),
+(\text{vert}, -), (\text{rouge}, +), (\text{rouge}, -)\}\) permettant de représenter toute l'information
+observable à partir des deux indicateurs précédents.
+</p>
+
+<p>
+La question de la pertinence des indicateurs utilisés dans une stratégie d'investissement se pose
+alors naturellement. Dans le secteur de la finance, il est courant d'évaluer une stratégie d'investissement en
+appliquant cette dernière sur des historiques de cotations (<i>back testing</i>) afin de simuler des
+décisions d'achat/vente et calculer le rendement correspondant. Toutefois, ces techniques de <i>back
+testing</i> s'avèrent relativement complexes à mettre en place et ne permettent pas de dissocier
+l'apport des indicateurs utilisés par rapport à celui de la stratégie décisionnelle sur la
+performance simulée.
+</p>
+
+<p>
+Par conséquent, sans remettre en question le principe essentiel de <i>back testing</i>, le but est ici de
+proposer une méthodologie ciblée sur l'évaluation quantitative des indicateurs. Pour ce faire, nous
+considérons une stratégie d'investissement de référence qui sera utilisée pour évaluer tous les
+indicateurs. Cette stratégie repose sur trois paramètres :
+</p>
+<ul class="org-ul">
+<li>une borne de prise de profit (<i>take profit</i> en anglais) qui désigne le prix auquel nous
+vendrons notre actif si celui-ci prend de la valeur ;</li>
+<li>une borne de contrôle des pertes (<i>stop loss</i> en anglais) qui désigne le prix auquel nous
+vendrons notre actif si celui-ci perd de la valeur ;</li>
+<li>un horizon temporel au bout duquel nous vendrons l'actif au prix du marché.</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org63a0402" class="outline-3">
+<h3 id="org63a0402"><span class="section-number-3">5.2.</span> Formalisation</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+Considérons tout d'abord les variables aléatoires suivantes :
+</p>
+<ul class="org-ul">
+<li>\(R^{\text{c}}_{p+k}\) représentant le rendement de clôture entre les périodes \(p\) et \(p+k\) ;</li>
+<li>\(R^{\text{h}}_{p+k}\) représentant le rendement du maximum entre les périodes \(p\) et \(p+k\) ;</li>
+<li>\(R^{\text{l}}_{p+k}\) représentant le rendement du minimum entre à la période \(p\) et \(p+k\).</li>
+</ul>
+
+<p>
+Nous désignons par \(\mathcal{S}\) la stratégie d'investissement de référence introduite dans la
+Section <a href="#sec:strat_fi_intro">5.1</a>. Nous pouvons alors évaluer le rendement de cette 
+stratégie suite à l'achat de l'actif étudié à la période \(p\). Ce rendement, noté
+\(R^{\mathcal{S}}_{p+k}\), est une variable aléatoire définie comme suit : 
+</p>
+\begin{equation}
+\label{eq:RSpk}
+R^{\mathcal{S}}_{p+k} =
+\begin{cases}
+\rho^{+} & \text{si}~ R^{\text{h}}_{p+k} > \rho^{+}~\text{et}~ R^{\text{l}}_{p+k} > \rho^{-}, \\
+\rho^{-} & \text{si}~ R^{\text{l}}_{p+k} < \rho^{-}, \\
+R^{\text{c}}_{p+k} & \text{sinon},
+\end{cases}
+\end{equation}
+<p>
+où :
+</p>
+<ul class="org-ul">
+<li>\(\rho^{+}, \rho^{-}\) sont les rendements de prise de profit et de contrôle des
+pertes considérés dans la stratégie ;</li>
+<li>\(k\) correspond au nombre de périodes au bout duquel l'actif sera vendu au rendement du
+marché, i.e. \(R^{\text{c}}_{p+k}\), si les seuils de rendement \(\rho^{+}\) et
+\(\rho^{-}\) ne sont pas atteint entre les périodes \(p\) et \(p+k\).</li>
+</ul>
+
+
+<p>
+Nous cherchons à présent à construire un score représentatif de la performance d'un ou
+ plusieurs indicateurs dans la cadre de la stratégie d'investissement de référence
+ précédente. Notons \(I_{p}\) la variable aléatoire représentant la configuration des indicateurs
+ considérés (l'information disponible) à la période \(p\). La variable \(I_{p}\) est à valeurs dans
+ l'ensemble fini des configurations possibles \(\mathcal{I} = \{i_{1}, \ldots, i_{M}\}\). En reprenant
+ l'exemple de la Section <a href="#sec:strat_fi_intro">5.1</a>, \(M=6\) et \(\mathcal{I} = \{(\text{vert}, +),
+ (\text{vert}, -), (\text{rouge}, +), (\text{rouge}, -)\}\). 
+</p>
+
+<p>
+Le score de performance proposé consiste à évaluer l'espérance des rendements de la stratégie
+\(\mathcal{S}\) entre la période \(p\) et \(p+k\) conditionnellement à chaque configuration d'indicateurs
+observée à la période \(p-1\). Autrement dit, pour toute configuration d'indicateurs \(i_{m} \in
+\mathcal{I}\), nous avons :
+</p>
+
+\begin{equation}
+\label{orgc15ca15}
+\mathbb{E}[R^{\mathcal{S}}_{p+k} | i_{m}] = \pi^{+}_{i_{m}} \rho^{+}  + \pi^{-}_{i_{m}} \rho^{-}  + (1 - \pi^{+}_{i_{m}} - \pi^{-}_{i_{m}})\overline{\rho}^{\text{c}}_{p+k | i_{m}},
+\end{equation}
+<p>
+avec :
+</p>
+<ul class="org-ul">
+<li>\(\pi^{+}_{i_{m}} = P(R^{\text{h}}_{p+k} > \rho^{+} ; R^{\text{l}}_{p+k} > \rho^{-} | i_{m})\) ;</li>
+<li>\(\pi^{-}_{i_{m}} = P(R^{\text{l}}_{p+k} < \rho^{-} | i_{m})\) ;</li>
+<li>\(\overline{\rho}^{\text{c}}_{p+k | i_{m}} = \mathbb{E}[R^{\text{c}}_{p+k} | i_{m}]\).</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orgd9b81ec" class="outline-3">
+<h3 id="orgd9b81ec"><span class="section-number-3">5.3.</span> Score WER</h3>
+<div class="outline-text-3" id="text-5-3">
+<p>
+À partir de l'expression \eqref{orgc15ca15}, nous construisons le score des rendements
+extrêmes pondérés (<i>weighted extreme returns</i> en anglais) en fixant les seuils rendements \(\rho^{+}\)
+et \(\rho^{-}\) comme suit :
+</p>
+<ul class="org-ul">
+<li>\(\rho^{+} = \rho^{\text{h}}_{p + k,\alpha|i_{m}}\) le quantile de niveau \(\alpha\) du rendement du maximum à
+l'horizon \(k\), i.e. \(\alpha = P(R^{\text{h}}_{p + k} \le \rho^{\text{h}}_{p + k,\alpha}|i_{m})\).</li>
+<li>\(\rho^{-} = \rho^{\text{l}}_{p + k,1 - \beta|i_{m}}\) le quantile de niveau \(1 - \beta\) du rendement du minimum à
+l'horizon \(k\), i.e. \(1 - \beta = P(R^{\text{l}}_{p + k} \le \rho^{\text{l}}_{p + k,1 - \beta}|i_{m})\) ;</li>
+</ul>
+
+<p>
+Ce score de performance, noté WER, se calcule donc pour chaque configuration d'indicateurs \(i_{m} \in
+\mathcal{I}\) de la manière suivante :
+</p>
+\begin{equation}
+\label{org7be9750}
+\text{WER}(\alpha,\beta, k, i_{m}) = \rho^{\text{h}}_{p + k,\alpha|i_{m}} \pi^{+}_{i_{m}} + \rho^{\text{l}}_{p + k,1 - \beta|i_{m}} \pi^{-}_{i_{m}} + (1 - \pi^{+}_{i_{m}} - \pi^{-}_{i_{m}})\overline{\rho}^{\text{c}}_{p+k | i_{m}} - \text{WER}_{\text{ref}}(\alpha,\beta, k),
+\end{equation}
+<p>
+en posant \(\text{WER}_{\text{ref}}(\alpha,\beta, k)\) le score des rendements extrêmes de référence
+<i>a priori</i>, i.e. sans tenir compte du conditionnement par rapport aux indicateurs observés.
+</p>
+
+<p>
+<span class="underline">Interprétation du score :</span>
+</p>
+<ul class="org-ul">
+<li>Le score WER est lié au rendement espéré résultant d'une prise
+de profit sur le rendement du maximum au niveau \(\alpha\) et des pertes sur le rendement du minimum
+au niveau \(\beta\).</li>
+<li>Les niveaux \(\alpha\) et \(\beta\) contrôlent la prise de risque et les gains espérés de la stratégie
+d'investissement (cf. Figure <a href="#orgdf883ba">5</a> pour une illustration des quantiles
+\(\rho^{\text{h}}_{p + k,\alpha|i_{m}}\) et \(\rho^{\text{l}}_{p + k, 1-\beta|i_{m}}\).</li>
+<li>Prendre \(\alpha\) proche de 0 signifie un seuil de prise de profit bas (donc un
+gain espéré faible) mais avec probabilité élevée, i.e. on gagne peu mais
+souvent. À l'inverse, prendre \(\alpha\) proche de 1 signifie un seuil de prise de profit haut (donc un
+gain espéré important) mais avec probabilité faible, i.e. on gagne beaucoup mais
+rarement.</li>
+<li>Prendre \(\beta\) proche de 0 signifie un seuil de contrôle des pertes petit 
+mais avec une probabilité élevée, i.e. on risque de perdre peu mais
+souvent. À l'inverse, prendre \(\beta\) proche de 1 signifie un seuil de contrôle des pertes grand
+mais avec une probabilité faible, i.e. on risque de perdre beaucoup mais 
+rarement.</li>
+<li>Le terme \(\text{WER}(\alpha,\beta, k, i_{m})\) permet de pénaliser le score de la configuration
+\(i_{m}\) en le corrigeant avec le score obtenu sans indicateur.</li>
+</ul>
+
+
+<div id="orgdf883ba" class="figure">
+<p><img src="./fig/rho_hl_quant.png" alt="rho_hl_quant.png" />
+</p>
+<p><span class="figure-number">Figure&nbsp;5&nbsp;: </span>Représentation graphique des quantiles \(\rho^{\text{h}}_{p + k,\alpha}\) et \(\rho^{\text{l}}_{p + k,\alpha}\).</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgecd913d" class="outline-3">
+<h3 id="orgecd913d"><span class="section-number-3">5.4.</span> Score AWER</h3>
+<div class="outline-text-3" id="text-5-4">
+<p>
+Une variante du score WER \eqref{org7be9750} consiste à lier les niveaux de risques \(\alpha\) et \(\beta\) de
+sorte que \(\beta = 1 - \alpha\).
+</p>
+
+<p>
+Ce score, noté AWER pour (<i>asymetric weighted extreme returns</i> en anglais), est défini pour chaque configuration d'indicateurs \(i_{m} \in
+\mathcal{I}\) par :
+</p>
+\begin{equation}
+\label{orgc1d4f8a}
+\text{AWER}(\alpha, k, i_{m}) = \rho^{\text{h}}_{p + k,\alpha|i_{m}} \pi^{+}_{i_{m}} + \rho^{\text{l}}_{p + k,\alpha|i_{m}} \pi^{-}_{i_{m}} +  (1 - \pi^{+}_{i_{m}} - \pi^{-}_{i_{m}})\overline{\rho}^{\text{c}}_{p+k | i_{m}} - \text{SWER}_{\text{ref}}(\alpha, k),
+\end{equation}
+<p>
+en posant \(\text{AWER}_{\text{ref}}(\alpha, k)\) le score des rendements extrêmes symétrique de référence.
+</p>
+
+<p>
+L'interprétation du score AWER est analogue à celle du score WER. La différence entre les deux
+scores consiste à imposer une distribution des risques entre la prise de profit et le contrôle des
+pertes. Autrement dit, si on décide d'évaluer un indicateur en supposant une prise de profit faible
+mais fréquente (i.e. \(\alpha\) proche de 0) alors les pertes pourront être importantes mais rares
+(i.e. \(\beta\) proche de 1). En fixant, la stratégie associée à \(\alpha = 0.5\) permet de considérer
+un risque équilibré entre perte et profit. 
+</p>
+</div>
+</div>
+
 <div id="outline-container-méthodologie-générale" class="outline-3">
-<h3 id="méthodologie-générale"><span class="section-number-3">5.1.</span> Méthodologie générale</h3>
+<h3 id="méthodologie-générale"><span class="section-number-3">5.5.</span> Méthodologie d'évaluation</h3>
 <div class="outline-text-3" id="text-méthodologie-générale">
 <p>
-La méthodologie d'évaluation proposée repose sur le protocole suivant :
+Dans cette section, nous proposons une méthodologie d'évaluation d'indicateurs reposant sur le score
+AWER. Les différents termes du score sont évalués de manière empirique à partir d'un historique de
+données sur l'actif étudié.
+</p>
+
+<p>
+Soit un indicateur \(I\) à valeurs dans \(\mathcal{I} = \{i_{1}, \ldots, i_{M}\}\), le protocole
+d'évaluation se déroule de la manière suivante :
 </p>
 <ol class="org-ol">
 <li>Collecter des données historiques :
@@ -763,112 +999,40 @@ La méthodologie d'évaluation proposée repose sur le protocole suivant :
 <li>Choisir la période d'échantillonnage \(\Delta t\) considérée. En fonction des stratégies, \(\Delta
      t\) peut être plus ou moins grand, e.g. 1 min, 5 min, 1 heure, 1 journée, 1 semaine, etc.</li>
 </ul></li>
-<li>Fixer un horizon de prédiction \(k \ge 0\). Cet horizon indique qu'à chaque période \(p\), l'objectif
-est d'étudier la distribution des rendements futurs à l'instant \(p + k\Delta t\).</li>
-<li>Calculer les rendements à horizon \(p+k\) à chaque période \(p\) à partir des données historiques.</li>
-<li>Calculer les indicateurs à étudier sur les données historiques considérées.</li>
-<li>Estimer la loi conditionnelle des rendements futurs par rapport aux indicateurs étudier :
-<ul class="org-ul">
-<li>Choix de la loi conditionnelle : par défaut, le modèle bayésien optimal sera utilisé.</li>
-<li>Discrétiser si besoin les indicateurs à étudier en cohérence avec le choix précédent.</li>
-<li>Estimer la distribution conditionnelle des rendements à partir des données considérées.</li>
-</ul></li>
-<li>Évaluer le lien de causalité entre indicateurs et explication des rendements.</li>
+<li>Fixer un horizon \(k \ge 0\) définissant le temps maximum de conservation de l'actif avant sa vente
+au prix du marché.</li>
+<li>Fixer le niveau de risque \(\alpha\) de la stratégie d'investissement de référence utilisée de
+manière sous-jacente par le score ACER.</li>
+<li>Pour chaque configuration \(i_{m} \in \mathcal{I}\) de l'indicateur étudié :
+<ol class="org-ol">
+<li>Estimer les rendements à horizon \(p+k\) conditionnellement à l'observation de la configuration
+\(i_{m}\) à la période \(p-1\) à partir des données historiques.</li>
+<li>Estimer empiriquement le score AWER</li>
+</ol></li>
 </ol>
 </div>
 </div>
-
-<div id="outline-container-critères-dévaluation" class="outline-3">
-<h3 id="critères-dévaluation"><span class="section-number-3">5.2.</span> Critères d'évaluation</h3>
-<div class="outline-text-3" id="text-critères-dévaluation">
 </div>
 
-<div id="outline-container-score-des-rendements-extrêmes" class="outline-4">
-<h4 id="score-des-rendements-extrêmes"><span class="section-number-4">5.2.1.</span> Score des rendements extrêmes</h4>
-<div class="outline-text-4" id="text-score-des-rendements-extrêmes">
-<p>
-Considérons les variables aléatoires \(R^{\text{c}}_{p + k}\), \(R^{\text{h}}_{p + k}\),
-\(R^{\text{l}}_{p + k}\) représentant les rendements de clôture, du maximum et du minimum à horizon 
-\(k\). 
-</p>
-
-<p>
-On note alors :
-</p>
-<ul class="org-ul">
-<li>\(\rho^{\text{l}}_{p + k,\alpha}\) le quantile de niveau \(\alpha\) du rendement du minimum à
-l'horizon \(k\), i.e. \(\alpha = P(R^{\text{l}}_{p + k} \le \rho^{\text{l}}_{p + k,\alpha})\) ;</li>
-<li>\(\rho^{\text{h}}_{p + k,\alpha}\) le quantile de niveau \(\alpha\) du rendement du maximum à
-l'horizon \(k\), i.e. \(\alpha = P(R^{\text{h}}_{p + k} \le \rho^{\text{h}}_{p + k,\alpha})\) ;</li>
-</ul>
-
-<p>
-La Figure <a href="#org729a3a8">5</a> illustrent graphiquement les notions précédentes.
-</p>
-
-
-<div id="org729a3a8" class="figure">
-<p><img src="./fig/rho_hl_quant.png" alt="rho_hl_quant.png" />
-</p>
-<p><span class="figure-number">Figure&nbsp;5&nbsp;: </span>Représentation graphique des quantiles \(\rho^{\text{h}}_{p + k,\alpha}\) et \(\rho^{\text{l}}_{p + k,\alpha}\).</p>
-</div>
-
-
-<p>
-Le score des rendements extrêmes (<i>Extreme Returns Score</i>) au niveau \(\alpha\),
-noté \(\text{ERS}_{p+k, \alpha}\), est défini comme suit :
-\[
-\text{ERS}_{p+k, \alpha} = (1 - \alpha) \rho^{\text{h}}_{p + k,\alpha} + \alpha \rho^{\text{l}}_{p + k,\alpha} 
-\]
-</p>
-
-<p>
-Du point de vue financier, ce score s'interprète comme le rendement
-espéré résultant d'une prise de profit sur le rendement du maximum au
-niveau \(\alpha\) et des pertes sur le rendement du minimum au niveau
-\(\alpha\), cf. Figure <a href="#orga372150">6</a>.
-</p>
-
-
-<div id="orga372150" class="figure">
-<p><img src="./fig/ers_tp_sl.png" alt="ers_tp_sl.png" />
-</p>
-<p><span class="figure-number">Figure&nbsp;6&nbsp;: </span>Illustration du calcul des bornes de ventes sur gain (<i>take profit</i>) ou perte (<i>stop loss</i>) suite à l'achat à la période \(p\) d'un actif au prix \(Q_{p}\).</p>
-</div>
-
-
-<p>
-<b>TODO</b> - Se documenter sur la notion d'"expectiles" et comparer avec le
-score précédent :
-<a href="https://getd.libs.uga.edu/pdfs/anderson_andrew_l_201212_ms.pdf">https://getd.libs.uga.edu/pdfs/anderson_andrew_l_201212_ms.pdf</a> - Se
-documenter sur la notion de Conditional Value at Risk :
-<a href="https://www.investopedia.com/terms/c/conditional_value_at_risk.asp">https://www.investopedia.com/terms/c/conditional_value_at_risk.asp</a>
-</p>
-</div>
-</div>
-</div>
-</div>
-
-
-<div id="outline-container-orgd3bbe54" class="outline-2">
-<h2 id="orgd3bbe54"><span class="section-number-2">6.</span> Environnement technique</h2>
+<div id="outline-container-org0a65d3a" class="outline-2">
+<h2 id="org0a65d3a"><span class="section-number-2">6.</span> Environnement technique</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 Les librairies <code>Python</code> utilisées dans les traitements présentés dans ce document sont :
 </p>
 <style type="text/css">
 </style>
-<table id="T_006d1">
+<table id="T_56d6b">
   <thead>
     <tr>
-      <th id="T_006d1_level0_col0" class="col_heading level0 col0" >Library</th>
-      <th id="T_006d1_level0_col1" class="col_heading level0 col1" >Version</th>
+      <th id="T_56d6b_level0_col0" class="col_heading level0 col0" >Library</th>
+      <th id="T_56d6b_level0_col1" class="col_heading level0 col1" >Version</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td id="T_006d1_row0_col0" class="data row0 col0" >MOSAIC</td>
-      <td id="T_006d1_row0_col1" class="data row0 col1" >0.0.8</td>
+      <td id="T_56d6b_row0_col0" class="data row0 col0" >MOSAIC</td>
+      <td id="T_56d6b_row0_col1" class="data row0 col1" >0.0.12</td>
     </tr>
   </tbody>
 </table>
@@ -876,8 +1040,8 @@ Les librairies <code>Python</code> utilisées dans les traitements présentés d
 </div>
 
 
-<div id="outline-container-org4a1ba85" class="outline-2">
-<h2 id="org4a1ba85"><span class="section-number-2">7.</span> Références</h2>
+<div id="outline-container-org49e24bc" class="outline-2">
+<h2 id="org49e24bc"><span class="section-number-2">7.</span> Références</h2>
 <div class="outline-text-2" id="text-7">
 <style>.csl-left-margin{float: left; padding-right: 0em;}
  .csl-right-inline{margin: 0 0 0 1em;}</style><div class="csl-bib-body">
@@ -887,6 +1051,15 @@ Les librairies <code>Python</code> utilisées dans les traitements présentés d
 </div>
 </div>
 </div>
+<div id="footnotes">
+<h2 class="footnotes">Notes de bas de page: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">Par opposition d'un investissement en vente à 
+découvert (en anglais <i>short position</i>).</p></div></div>
+
+
 </div>
+</div></div>
 </body>
 </html>

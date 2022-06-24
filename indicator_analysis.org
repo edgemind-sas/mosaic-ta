@@ -245,14 +245,23 @@ import importlib
 # Custom remote librairies
 import mosaic
 import mosaic.utils as mu
-import mosaic.config as mc
 import mosaic.indicator as mi
-mc.MosaicConfig().from_yaml_filename(os.path.join("config", "server-config.yaml"))
+from mosaic.database import DbClient, InfluxDataSource
+client = DbClient(org="edgemind",
+                  url="http://callisto.edgemind.net:2086",
+                  token="-KRSutWAsQmri3hF8-g4HfD7EPLW1cAPU3k5ygRraETU5EHt846ibwN7LFjR53eK3X_djjvoaFfIUNk0UbT9GQ==")
+
 # Custom local librairies
+importlib.reload(mosaic)
 importlib.reload(mu)
-importlib.reload(mc)
 importlib.reload(mi)
 #+END_SRC
+
+* À FAIRE                                                          :noexport:
+** TODO Ajouter de la biblio
+** TODO Faire une figure pour illuster la notion de période
+** TODO Refaire la figure des quantiles avec $\beta$
+** TODO Faire une figure pour illustrer la stratégie de référence TP/SL
 
 * Biblio                                                           :noexport:
 
@@ -329,21 +338,19 @@ BTC par rapport à l'USDC de l'année 2021 avec une période
 d'échantillonnage $\Delta t =$ 5 minutes.
 
 #+BEGIN_SRC python :session indicator_analysis :results html :exports results :tangle indicator_analysis.py 
-config = {
-    "collection": "crypto",
-    "name": "ohlcv",
-    "tags": {
-        "period": "5m",
-        "exchange": "binance",
-        "base": "BTC",
-        "quote": "USDC",
-    },
-    "values": ["open", "high", "low", "close", "volume"],
-    "start_date": '2021-01-01 00:00:00',
-    "stop_date": '2021-01-02 00:00:00',
-}
+source = InfluxDataSource(collection="crypto",
+                          name="ohlcv",
+                          tags={"period": "5m",
+                                "exchange": "binance",
+                                "base": "BTC",
+                                "quote": "USDC"},
+                          values=["open", "high", "low", "close", "volume"],
+                          )
 
-ohlcv_format_ex_df = mi.get_data(**config)
+ohlcv_format_ex_df = \
+    client.get_data(source,
+                    start='2021-01-01 00:00:00',
+                    stop='2021-01-02 00:00:00')
 
 ohlcv_format_ex_df.head().style.format(precision=2, thousands=" ").to_html()
 #+END_SRC
@@ -384,7 +391,7 @@ $p$ -ème période d'observation des données, i.e. entre
 $t_{0} + p\Delta t$ et $t_{0} + (p+1)\Delta t$. En reprenant l'exemple
 précédent, on a :
 - 1er période d'observation $p = 0$ : période entre 2021-01-01 00:00:00 et 2021-01-01 00:05:00 ;
-- 5ème période d'observation $p = 4$ : période entre 2021-01-01 00:15:00 et 2021-01-01 00:20:00.
+- 5ème période d'observation $p = 4$ : période entre 2021-01-01 00:20:00 et 2021-01-01 00:25:00.
 
 Les données OHLCV sont notées dans la suite comme suit :
 - $\text{o}_{p}$ : cotation de l'actif à l'ouverture de la période $p$, i.e. à $t = t_{0} +  p\Delta
@@ -561,7 +568,7 @@ mi.ReturnsHighIndicator(horizon=[-3,0,1,2]).compute(data_ohlcv_ex_5)\
 #+begin_export html
 #+end_export
 
-Rendements du manimum calculés sur les mêmes horizons :
+Rendements du minimum calculés sur les mêmes horizons :
 
 #+BEGIN_SRC python :session indicator_analysis :results html :exports results :tangle indicator_analysis.py
 mi.ReturnsLowIndicator(horizon=[-3,0,1,2]).compute(data_ohlcv_ex_5)\
@@ -610,80 +617,203 @@ $$
 \rho^{\text{l}}_{p - 3} = \frac{\max\{\text{l}_{p-3}, \text{l}_{p-2}, \text{l}_{p-1}, \text{l}_{p}\}}{\text{c}_{p-4}} = \frac{\text{l}_{p-2}}{\text{c}_{p-4}} = \frac{28741.86}{29018.17} - 1 \simeq -0.00952 \simeq -0.95 \%
 $$
 
-* Évaluation de la performance des indicateurs
+
+* Indicateurs et évaluation
    :PROPERTIES:
    :CUSTOM_ID: évaluation-de-la-performance-des-indicateurs
    :END:
 
-** Méthodologie générale
+
+** Problématique
     :PROPERTIES:
-    :CUSTOM_ID: méthodologie-générale
+    :CUSTOM_ID: sec:strat_fi_intro
     :END:
 
-La méthodologie d'évaluation proposée repose sur le protocole suivant :
-1. Collecter des données historiques :
-   - Sélection de l'actif étudié, e.g. BTC/USDC.
-   - Choisir la période d'échantillonnage $\Delta t$ considérée. En fonction des stratégies, $\Delta
-     t$ peut être plus ou moins grand, e.g. 1 min, 5 min, 1 heure, 1 journée, 1 semaine, etc.
-1. Fixer un horizon de prédiction $k \ge 0$. Cet horizon indique qu'à chaque période $p$, l'objectif
-   est d'étudier la distribution des rendements futurs à l'instant $p + k\Delta t$.
-1. Calculer les rendements à horizon $p+k$ à chaque période $p$ à partir des données historiques.
-1. Calculer les indicateurs à étudier sur les données historiques considérées.
-1. Estimer la loi conditionnelle des rendements futurs par rapport aux indicateurs étudier :
-   - Choix de la loi conditionnelle : par défaut, le modèle bayésien optimal sera utilisé.
-   - Discrétiser si besoin les indicateurs à étudier en cohérence avec le choix précédent.
-   - Estimer la distribution conditionnelle des rendements à partir des données considérées.
-1. Évaluer le lien de causalité entre indicateurs et explication des rendements.
+Un des objectifs du projet MOSAIC est d'élaborer des politiques décisionnelles d'investissements
+auto-adaptatives sur les marchés financiers, en particulier ceux des crytoactifs. Un investissement
+de type achat/vente [fn:: Par opposition d'un investissement en vente à 
+découvert (en anglais /short position/).] (en anglais /long position/) se caractérise par le fait
+d'acheter une certaine quantité d'un actif afin de le vendre ultérieurement dans le but de faire une
+plus-value.
 
-** Critères d'évaluation
-    :PROPERTIES:
-    :CUSTOM_ID: critères-dévaluation
-    :END:
+En pratique, une politique d'investissement correspond donc à des règles d'achat et de vente d'un ou plusieurs
+actifs sur une durée donnée. Ces règles peuvent être établies de différentes manières,
+e.g. par expertise, suite à l'occurrence d'un ou plusieurs événements macroéconomiques, en fonction
+de l'évolution de la cotation, etc. 
 
-*** Score des rendements extrêmes
-     :PROPERTIES:
-     :CUSTOM_ID: score-des-rendements-extrêmes
-     :END:
+La stratégie que nous développons consiste à construire des règles d'achat et de vente
+s'appuyant sur l'analyse prévisionnelle des rendements futurs espérés (à un horizon fixe) suite à
+l'observation de divers indicateurs. Il est à noter que la notion d'indicateur peut se généraliser à la notion
+d'information disponible au moment d'appliquer des règles d'achat/vente. Par ailleurs, afin de simplifier la
+problématique, nous considérons que les indicateurs prennent leurs valeurs dans des domaines discrets et
+finis. Par exemple, nous pourrions construire nos stratégies d'achat/vente à partir de l'observation
+des deux indicateurs suivants :
+- couleur du chandelier précédent à valeurs dans $\{\text{vert},\text{rouge}\}$ ;
+- signe du rendement sur les 3 périodes précédentes à valeurs dans $\{+,-\}$.
+Dans ce cas, nous pouvons construire un indicateur agrégé ayant six configurations $\{(\text{vert}, +),
+(\text{vert}, -), (\text{rouge}, +), (\text{rouge}, -)\}$ permettant de représenter toute l'information
+observable à partir des deux indicateurs précédents.
 
-Considérons les variables aléatoires $R^{\text{c}}_{p + k}$, $R^{\text{h}}_{p + k}$,
-$R^{\text{l}}_{p + k}$ représentant les rendements de clôture, du maximum et du minimum à horizon 
-$k$. 
+La question de la pertinence des indicateurs utilisés dans une stratégie d'investissement se pose
+alors naturellement. Dans le secteur de la finance, il est courant d'évaluer une stratégie d'investissement en
+appliquant cette dernière sur des historiques de cotations (/back testing/) afin de simuler des
+décisions d'achat/vente et calculer le rendement correspondant. Toutefois, ces techniques de /back
+testing/ s'avèrent relativement complexes à mettre en place et ne permettent pas de dissocier
+l'apport des indicateurs utilisés par rapport à celui de la stratégie décisionnelle sur la
+performance simulée.
 
-On note alors :
-- $\rho^{\text{l}}_{p + k,\alpha}$ le quantile de niveau $\alpha$ du rendement du minimum à
-  l'horizon $k$, i.e. $\alpha = P(R^{\text{l}}_{p + k} \le \rho^{\text{l}}_{p + k,\alpha})$ ;
-- $\rho^{\text{h}}_{p + k,\alpha}$ le quantile de niveau $\alpha$ du rendement du maximum à
-  l'horizon $k$, i.e. $\alpha = P(R^{\text{h}}_{p + k} \le \rho^{\text{h}}_{p + k,\alpha})$ ;
+Par conséquent, sans remettre en question le principe essentiel de /back testing/, le but est ici de
+proposer une méthodologie ciblée sur l'évaluation quantitative des indicateurs. Pour ce faire, nous
+considérons une stratégie d'investissement de référence qui sera utilisée pour évaluer tous les
+indicateurs. Cette stratégie repose sur trois paramètres :
+- une borne de prise de profit (/take profit/ en anglais) qui désigne le prix auquel nous
+  vendrons notre actif si celui-ci prend de la valeur ;
+- une borne de contrôle des pertes (/stop loss/ en anglais) qui désigne le prix auquel nous
+  vendrons notre actif si celui-ci perd de la valeur ;
+- un horizon temporel au bout duquel nous vendrons l'actif au prix du marché.
 
-La Figure ref:fig_rho_hl_quant illustrent graphiquement les notions précédentes.
+  
+# FIGURE TODO
+
+
+** Formalisation
+
+Considérons tout d'abord les variables aléatoires suivantes :
+- $R^{\text{c}}_{p+k}$ représentant le rendement de clôture entre les périodes $p$ et $p+k$ ;
+- $R^{\text{h}}_{p+k}$ représentant le rendement du maximum entre les périodes $p$ et $p+k$ ;
+- $R^{\text{l}}_{p+k}$ représentant le rendement du minimum entre à la période $p$ et $p+k$.
+  
+Nous désignons par $\mathcal{S}$ la stratégie d'investissement de référence introduite dans la
+Section ref:sec:strat_fi_intro. Nous pouvons alors évaluer le rendement de cette 
+stratégie suite à l'achat de l'actif étudié à la période $p$. Ce rendement, noté
+$R^{\mathcal{S}}_{p+k}$, est une variable aléatoire définie comme suit : 
+\begin{equation}
+\label{eq:RSpk}
+R^{\mathcal{S}}_{p+k} =
+\begin{cases}
+\rho^{+} & \text{si}~ R^{\text{h}}_{p+k} > \rho^{+}~\text{et}~ R^{\text{l}}_{p+k} > \rho^{-}, \\
+\rho^{-} & \text{si}~ R^{\text{l}}_{p+k} < \rho^{-}, \\
+R^{\text{c}}_{p+k} & \text{sinon},
+\end{cases}
+\end{equation}
+où :
+- $\rho^{+}, \rho^{-}$ sont les rendements de prise de profit et de contrôle des
+  pertes considérés dans la stratégie ;
+- $k$ correspond au nombre de périodes au bout duquel l'actif sera vendu au rendement du
+  marché, i.e. $R^{\text{c}}_{p+k}$, si les seuils de rendement $\rho^{+}$ et
+  $\rho^{-}$ ne sont pas atteint entre les périodes $p$ et $p+k$.
+
+
+Nous cherchons à présent à construire un score représentatif de la performance d'un ou
+ plusieurs indicateurs dans la cadre de la stratégie d'investissement de référence
+ précédente. Notons $I_{p}$ la variable aléatoire représentant la configuration des indicateurs
+ considérés (l'information disponible) à la période $p$. La variable $I_{p}$ est à valeurs dans
+ l'ensemble fini des configurations possibles $\mathcal{I} = \{i_{1}, \ldots, i_{M}\}$. En reprenant
+ l'exemple de la Section ref:sec:strat_fi_intro, $M=6$ et $\mathcal{I} = \{(\text{vert}, +),
+ (\text{vert}, -), (\text{rouge}, +), (\text{rouge}, -)\}$. 
+
+Le score de performance proposé consiste à évaluer l'espérance des rendements de la stratégie
+$\mathcal{S}$ entre la période $p$ et $p+k$ conditionnellement à chaque configuration d'indicateurs
+observée à la période $p-1$. Autrement dit, pour toute configuration d'indicateurs $i_{m} \in
+\mathcal{I}$, nous avons :
+
+#+NAME: eq:exp_r_s_pk
+\begin{equation}
+\mathbb{E}[R^{\mathcal{S}}_{p+k} | i_{m}] = \pi^{+}_{i_{m}} \rho^{+}  + \pi^{-}_{i_{m}} \rho^{-}  + (1 - \pi^{+}_{i_{m}} - \pi^{-}_{i_{m}})\overline{\rho}^{\text{c}}_{p+k | i_{m}},
+\end{equation}
+avec :
+- $\pi^{+}_{i_{m}} = P(R^{\text{h}}_{p+k} > \rho^{+} ; R^{\text{l}}_{p+k} > \rho^{-} | i_{m})$ ;
+- $\pi^{-}_{i_{m}} = P(R^{\text{l}}_{p+k} < \rho^{-} | i_{m})$ ;
+- $\overline{\rho}^{\text{c}}_{p+k | i_{m}} = \mathbb{E}[R^{\text{c}}_{p+k} | i_{m}]$.
+# - $\pi^{\text{c}}(i_{m}) = P(\rho^{-} \le R^{\text{l}}_{p+k}, R^{\text{h}}_{p+k} \le \rho^{+} | i_{m}) = 1 - \pi^{+}_{i_{m}} - \pi^{-}(i_{m})$.
+
+  
+** Score WER
+
+À partir de l'expression eqref:eq:exp_r_s_pk, nous construisons le score des rendements
+extrêmes pondérés (/weighted extreme returns/ en anglais) en fixant les seuils rendements $\rho^{+}$
+et $\rho^{-}$ comme suit :
+- $\rho^{+} = \rho^{\text{h}}_{p + k,\alpha|i_{m}}$ le quantile de niveau $\alpha$ du rendement du maximum à
+  l'horizon $k$, i.e. $\alpha = P(R^{\text{h}}_{p + k} \le \rho^{\text{h}}_{p + k,\alpha}|i_{m})$.
+- $\rho^{-} = \rho^{\text{l}}_{p + k,1 - \beta|i_{m}}$ le quantile de niveau $1 - \beta$ du rendement du minimum à
+  l'horizon $k$, i.e. $1 - \beta = P(R^{\text{l}}_{p + k} \le \rho^{\text{l}}_{p + k,1 - \beta}|i_{m})$ ;
+
+Ce score de performance, noté WER, se calcule donc pour chaque configuration d'indicateurs $i_{m} \in
+\mathcal{I}$ de la manière suivante :
+#+NAME: eq:score_wer
+\begin{equation}
+\text{WER}(\alpha,\beta, k, i_{m}) = \rho^{\text{h}}_{p + k,\alpha|i_{m}} \pi^{+}_{i_{m}} + \rho^{\text{l}}_{p + k,1 - \beta|i_{m}} \pi^{-}_{i_{m}} + (1 - \pi^{+}_{i_{m}} - \pi^{-}_{i_{m}})\overline{\rho}^{\text{c}}_{p+k | i_{m}} - \text{WER}_{\text{ref}}(\alpha,\beta, k),
+\end{equation}
+en posant $\text{WER}_{\text{ref}}(\alpha,\beta, k)$ le score des rendements extrêmes de référence
+/a priori/, i.e. sans tenir compte du conditionnement par rapport aux indicateurs observés.
+
+_Interprétation du score :_
+- Le score WER est lié au rendement espéré résultant d'une prise
+  de profit sur le rendement du maximum au niveau $\alpha$ et des pertes sur le rendement du minimum
+  au niveau $\beta$.
+- Les niveaux $\alpha$ et $\beta$ contrôlent la prise de risque et les gains espérés de la stratégie
+  d'investissement (cf. Figure ref:fig_rho_hl_quant pour une illustration des quantiles
+  $\rho^{\text{h}}_{p + k,\alpha|i_{m}}$ et $\rho^{\text{l}}_{p + k, 1-\beta|i_{m}}$.
+- Prendre $\alpha$ proche de 0 signifie un seuil de prise de profit bas (donc un
+  gain espéré faible) mais avec probabilité élevée, i.e. on gagne peu mais
+  souvent. À l'inverse, prendre $\alpha$ proche de 1 signifie un seuil de prise de profit haut (donc un
+  gain espéré important) mais avec probabilité faible, i.e. on gagne beaucoup mais
+  rarement.
+- Prendre $\beta$ proche de 0 signifie un seuil de contrôle des pertes petit 
+  mais avec une probabilité élevée, i.e. on risque de perdre peu mais
+  souvent. À l'inverse, prendre $\beta$ proche de 1 signifie un seuil de contrôle des pertes grand
+  mais avec une probabilité faible, i.e. on risque de perdre beaucoup mais 
+  rarement.
+- Le terme $\text{WER}(\alpha,\beta, k, i_{m})$ permet de pénaliser le score de la configuration
+  $i_{m}$ en le corrigeant avec le score obtenu sans indicateur. 
 
 #+NAME: fig_rho_hl_quant
 #+CAPTION: Représentation graphique des quantiles $\rho^{\text{h}}_{p + k,\alpha}$ et $\rho^{\text{l}}_{p + k,\alpha}$.
 [[./fig/rho_hl_quant.png]]
 
+** Score AWER
 
-Le score des rendements extrêmes (/Extreme Returns Score/) au niveau $\alpha$,
-noté $\text{ERS}_{p+k, \alpha}$, est défini comme suit :
-$$
-\text{ERS}_{p+k, \alpha} = (1 - \alpha) \rho^{\text{h}}_{p + k,\alpha} + \alpha \rho^{\text{l}}_{p + k,\alpha} 
-$$
+Une variante du score WER eqref:eq:score_wer consiste à lier les niveaux de risques $\alpha$ et $\beta$ de
+sorte que $\beta = 1 - \alpha$.
 
-Du point de vue financier, ce score s'interprète comme le rendement
-espéré résultant d'une prise de profit sur le rendement du maximum au
-niveau $\alpha$ et des pertes sur le rendement du minimum au niveau
-$\alpha$, cf. Figure ref:fig_ers_tp_sl.
+Ce score, noté AWER pour (/asymetric weighted extreme returns/ en anglais), est défini pour chaque configuration d'indicateurs $i_{m} \in
+\mathcal{I}$ par :
+#+NAME: eq:score_awer
+\begin{equation}
+\text{AWER}(\alpha, k, i_{m}) = \rho^{\text{h}}_{p + k,\alpha|i_{m}} \pi^{+}_{i_{m}} + \rho^{\text{l}}_{p + k,\alpha|i_{m}} \pi^{-}_{i_{m}} +  (1 - \pi^{+}_{i_{m}} - \pi^{-}_{i_{m}})\overline{\rho}^{\text{c}}_{p+k | i_{m}} - \text{SWER}_{\text{ref}}(\alpha, k),
+\end{equation}
+en posant $\text{AWER}_{\text{ref}}(\alpha, k)$ le score des rendements extrêmes symétrique de référence.
 
-#+NAME: fig_ers_tp_sl
-#+CAPTION: Illustration du calcul des bornes de ventes sur gain (/take profit/) ou perte (/stop loss/) suite à l'achat à la période $p$ d'un actif au prix $Q_{p}$.
-[[./fig/ers_tp_sl.png]]
+L'interprétation du score AWER est analogue à celle du score WER. La différence entre les deux
+scores consiste à imposer une distribution des risques entre la prise de profit et le contrôle des
+pertes. Autrement dit, si on décide d'évaluer un indicateur en supposant une prise de profit faible
+mais fréquente (i.e. $\alpha$ proche de 0) alors les pertes pourront être importantes mais rares
+(i.e. $\beta$ proche de 1). En fixant, la stratégie associée à $\alpha = 0.5$ permet de considérer
+un risque équilibré entre perte et profit. 
 
+** Méthodologie d'évaluation
+    :PROPERTIES:
+    :CUSTOM_ID: méthodologie-générale
+    :END:
 
-*TODO* - Se documenter sur la notion d'"expectiles" et comparer avec le
-score précédent :
-https://getd.libs.uga.edu/pdfs/anderson_andrew_l_201212_ms.pdf - Se
-documenter sur la notion de Conditional Value at Risk :
-https://www.investopedia.com/terms/c/conditional_value_at_risk.asp
+Dans cette section, nous proposons une méthodologie d'évaluation d'indicateurs reposant sur le score
+AWER. Les différents termes du score sont évalués de manière empirique à partir d'un historique de
+données sur l'actif étudié.
 
+Soit un indicateur $I$ à valeurs dans $\mathcal{I} = \{i_{1}, \ldots, i_{M}\}$, le protocole
+d'évaluation se déroule de la manière suivante :
+1. Collecter des données historiques :
+   - Sélection de l'actif étudié, e.g. BTC/USDC.
+   - Choisir la période d'échantillonnage $\Delta t$ considérée. En fonction des stratégies, $\Delta
+     t$ peut être plus ou moins grand, e.g. 1 min, 5 min, 1 heure, 1 journée, 1 semaine, etc.
+1. Fixer un horizon $k \ge 0$ définissant le temps maximum de conservation de l'actif avant sa vente
+   au prix du marché.
+1. Fixer le niveau de risque $\alpha$ de la stratégie d'investissement de référence utilisée de
+   manière sous-jacente par le score ACER.
+1. Pour chaque configuration $i_{m} \in \mathcal{I}$ de l'indicateur étudié :
+   1. Estimer les rendements à horizon $p+k$ conditionnellement à l'observation de la configuration
+      $i_{m}$ à la période $p-1$ à partir des données historiques.
+   1. Estimer empiriquement le score AWER
 
 * Environnement technique
 
@@ -697,7 +827,7 @@ lib_dict = [
 
 pd.DataFrame([{"Library": lib["desc"], "Version": getattr(lib["module"], "__version__")}
               for lib in lib_dict])\
-  .style.hide_index().to_html()
+  .style.hide(axis='index').to_html()
 #+END_SRC
 
 #+RESULTS:
