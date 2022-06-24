@@ -259,9 +259,14 @@ importlib.reload(mi)
 
 * À FAIRE                                                          :noexport:
 ** TODO Ajouter de la biblio
-** TODO Faire une figure pour illuster la notion de période
+** DONE Faire une figure pour illuster la notion de période
+CLOSED: [2022-06-24 ven. 18:36]
 ** TODO Refaire la figure des quantiles avec $\beta$
-** TODO Faire une figure pour illustrer la stratégie de référence TP/SL
+** INPROGRESS Faire une figure pour illustrer la stratégie de référence TP/SL
+*** Ajouter les périodes d'achat p1, p2, p3
+*** Faire apparaître les prix d'achat o_{p1}
+*** Faire apparaître les vrais seuils o_{p1}*(1+rho+)
+*** Faire apparaître le prix de vente cloture sur le dernier trade c_{p3 + 4}
 
 * Biblio                                                           :noexport:
 
@@ -387,12 +392,17 @@ d'échantillonnage. Dans l'exemple de données précédent, on rappelle que
 $\Delta t = 5$ minutes et que $t_{0} =$ 2021-01-01 00:00:00.
 
 Nous introduisons ensuite l'indice $p \ge 0$ permettant de référencer la
-$p$ -ème période d'observation des données, i.e. entre
+$p$ -ème période d'observation des données (cf. Figure ref:fig-ohlcv_period), i.e. entre
 $t_{0} + p\Delta t$ et $t_{0} + (p+1)\Delta t$. En reprenant l'exemple
 précédent, on a :
 - 1er période d'observation $p = 0$ : période entre 2021-01-01 00:00:00 et 2021-01-01 00:05:00 ;
 - 5ème période d'observation $p = 4$ : période entre 2021-01-01 00:20:00 et 2021-01-01 00:25:00.
 
+#+NAME: fig-ohlcv_period
+#+CAPTION: Notion de période sur les données OHLCV.
+[[./fig/ohlcv_period.png]]
+
+  
 Les données OHLCV sont notées dans la suite comme suit :
 - $\text{o}_{p}$ : cotation de l'actif à l'ouverture de la période $p$, i.e. à $t = t_{0} +  p\Delta
   t$ ;
@@ -672,7 +682,7 @@ indicateurs. Cette stratégie repose sur trois paramètres :
   vendrons notre actif si celui-ci perd de la valeur ;
 - un horizon temporel au bout duquel nous vendrons l'actif au prix du marché.
 
-  
+Cette stratégie est illustrée dans sur la Figure ref:fig_fi_strat_ref.
 # FIGURE TODO
 
 
@@ -702,6 +712,18 @@ où :
 - $k$ correspond au nombre de périodes au bout duquel l'actif sera vendu au rendement du
   marché, i.e. $R^{\text{c}}_{p+k}$, si les seuils de rendement $\rho^{+}$ et
   $\rho^{-}$ ne sont pas atteint entre les périodes $p$ et $p+k$.
+
+La Figure ref:fig_fi_strat_ref illustre les principe de la stratégie d'investissement décrite
+précédemment. Dans cette exemple trois investissements (achats) sont effectuées. La durée maximum de
+conservation de l'actif est de $k=4$ périodes. La premier achat (à gauche) est revendu au cours de
+la deuxième période car la valeur de l'actif a atteint le seuil de contrôle des pertes. Le second
+achat (au milieu) est revendu au cours de la quatrième période car le seuil de prise de profit est
+atteint. Enfin, le dernier achat (à droite) est revendu au prix de clôture de la quatrième période
+car aucune des bornes de vente n'est atteinte sur les quatre période de l'investissement.
+
+#+NAME: fig_fi_strat_ref
+#+CAPTION: Principes de la stratégie d'investissement de référence. 
+[[./fig/fi_strat_ref.png]]
 
 
 Nous cherchons à présent à construire un score représentatif de la performance d'un ou
@@ -780,7 +802,7 @@ Ce score, noté AWER pour (/asymetric weighted extreme returns/ en anglais), est
 \mathcal{I}$ par :
 #+NAME: eq:score_awer
 \begin{equation}
-\text{AWER}(\alpha, k, i_{m}) = \rho^{\text{h}}_{p + k,\alpha|i_{m}} \pi^{+}_{i_{m}} + \rho^{\text{l}}_{p + k,\alpha|i_{m}} \pi^{-}_{i_{m}} +  (1 - \pi^{+}_{i_{m}} - \pi^{-}_{i_{m}})\overline{\rho}^{\text{c}}_{p+k | i_{m}} - \text{SWER}_{\text{ref}}(\alpha, k),
+\text{AWER}(\alpha, k, i_{m}) = \rho^{\text{h}}_{p + k,\alpha|i_{m}} \pi^{+}_{i_{m}} + \rho^{\text{l}}_{p + k,\alpha|i_{m}} \pi^{-}_{i_{m}} +  (1 - \pi^{+}_{i_{m}} - \pi^{-}_{i_{m}})\overline{\rho}^{\text{c}}_{p+k | i_{m}} - \text{AWER}_{\text{ref}}(\alpha, k),
 \end{equation}
 en posant $\text{AWER}_{\text{ref}}(\alpha, k)$ le score des rendements extrêmes symétrique de référence.
 
