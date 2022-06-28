@@ -702,13 +702,18 @@ $R^{\mathcal{S}}_{p+k}$, est une variable aléatoire définie comme suit :
 R^{\mathcal{S}}_{p+k} =
 \begin{cases}
 \rho^{+} & \text{si}~ R^{\text{h}}_{p+k} > \rho^{+}~\text{et}~ R^{\text{l}}_{p+k} > \rho^{-}, \\
-\rho^{-} & \text{si}~ R^{\text{l}}_{p+k} < \rho^{-}, \\
+\rho^{-} & \text{si}~ R^{\text{h}}_{p+k} < \rho^{+}~\text{et}~ R^{\text{l}}_{p+k} < \rho^{-}, \\
+\frac{\rho^{+} + \rho^{-}}{2} & \text{si}~ R^{\text{h}}_{p+k} < \rho^{+}~\text{et}~ R^{\text{l}}_{p+k} > \rho^{-}, \\
 R^{\text{c}}_{p+k} & \text{sinon},
 \end{cases}
 \end{equation}
 où :
 - $\rho^{+}, \rho^{-}$ sont les rendements de prise de profit et de contrôle des
   pertes considérés dans la stratégie ;
+- Le cas $R^{\text{h}}_{p+k} < \rho^{+}$ et $R^{\text{l}}_{p+k} > \rho^{-}$ correspond à la
+  situation où les rendements du minimum et du maximum dépassent leur borne de vente respective au
+  cours de la même période $p+k$. Dans ce cas, le rendement de la stratégie est fixé par convention
+  à la moyenne des seuils de vente.
 - $k$ correspond au nombre de périodes au bout duquel l'actif sera vendu au rendement du
   marché, i.e. $R^{\text{c}}_{p+k}$, si les seuils de rendement $\rho^{+}$ et
   $\rho^{-}$ ne sont pas atteint entre les périodes $p$ et $p+k$.
@@ -741,11 +746,13 @@ observée à la période $p-1$. Autrement dit, pour toute configuration d'indica
 
 #+NAME: eq:exp_r_s_pk
 \begin{equation}
-\mathbb{E}[R^{\mathcal{S}}_{p+k} | i_{m}] = \pi^{+}_{i_{m}} \rho^{+}  + \pi^{-}_{i_{m}} \rho^{-}  + (1 - \pi^{+}_{i_{m}} - \pi^{-}_{i_{m}})\overline{\rho}^{\text{c}}_{p+k | i_{m}},
+\mathbb{E}[R^{\mathcal{S}}_{p+k} | i_{m}] = \pi^{+}_{i_{m}} \rho^{+}  + \pi^{-}_{i_{m}} \rho^{-}  + \pi^{\pm}_{i_{m}} \frac{\rho^{+} + \rho^{-}}{2} + \pi^{\text{c}}_{i_{m}} \overline{\rho}^{\text{c}}_{p+k | i_{m}},
 \end{equation}
 avec :
 - $\pi^{+}_{i_{m}} = P(R^{\text{h}}_{p+k} > \rho^{+} ; R^{\text{l}}_{p+k} > \rho^{-} | i_{m})$ ;
-- $\pi^{-}_{i_{m}} = P(R^{\text{l}}_{p+k} < \rho^{-} | i_{m})$ ;
+- $\pi^{-}_{i_{m}} = P(R^{\text{h}}_{p+k} < \rho^{+} ; R^{\text{l}}_{p+k} < \rho^{-} | i_{m})$ ;
+- $\pi^{\pm}_{i_{m}} = P(R^{\text{h}}_{p+k} < \rho^{+} ; R^{\text{l}}_{p+k} > \rho^{-} | i_{m})$ ;
+- $\pi^{\text{c}}_{i_{m}} = 1 - \pi^{+}_{i_{m}} - \pi^{-}_{i_{m}} - \pi^{\pm}_{i_{m}}$ ;
 - $\overline{\rho}^{\text{c}}_{p+k | i_{m}} = \mathbb{E}[R^{\text{c}}_{p+k} | i_{m}]$.
 # - $\pi^{\text{c}}(i_{m}) = P(\rho^{-} \le R^{\text{l}}_{p+k}, R^{\text{h}}_{p+k} \le \rho^{+} | i_{m}) = 1 - \pi^{+}_{i_{m}} - \pi^{-}(i_{m})$.
 
@@ -758,16 +765,24 @@ et $\rho^{-}$ comme suit :
 - $\rho^{+} = \rho^{\text{h}}_{p + k,\alpha|i_{m}}$ le quantile de niveau $\alpha$ du rendement du maximum à
   l'horizon $k$, i.e. $\alpha = P(R^{\text{h}}_{p + k} \le \rho^{\text{h}}_{p + k,\alpha}|i_{m})$.
 - $\rho^{-} = \rho^{\text{l}}_{p + k,1 - \beta|i_{m}}$ le quantile de niveau $1 - \beta$ du rendement du minimum à
-  l'horizon $k$, i.e. $1 - \beta = P(R^{\text{l}}_{p + k} \le \rho^{\text{l}}_{p + k,1 - \beta}|i_{m})$ ;
+  l'horizon $k$, i.e. $1 - \beta = P(R^{\text{l}}_{p + k} \le \rho^{\text{l}}_{p + k,1 - \beta}|i_{m})$.
 
-Ce score de performance, noté WER, se calcule donc pour chaque configuration d'indicateurs $i_{m} \in
-\mathcal{I}$ de la manière suivante :
+pour chaque configuration d'indicateurs $i_{m} \in \mathcal{I}$, le score des rendements extrêmes pondérés, noté WER, est défini par :
 #+NAME: eq:score_wer
 \begin{equation}
-\text{WER}(\alpha,\beta, k, i_{m}) = \rho^{\text{h}}_{p + k,\alpha|i_{m}} \pi^{+}_{i_{m}} + \rho^{\text{l}}_{p + k,1 - \beta|i_{m}} \pi^{-}_{i_{m}} + (1 - \pi^{+}_{i_{m}} - \pi^{-}_{i_{m}})\overline{\rho}^{\text{c}}_{p+k | i_{m}} - \text{WER}_{\text{ref}}(\alpha,\beta, k),
+\text{WER}(\alpha,\beta, k| i_{m}) = \rho^{\text{h}}_{p + k,\alpha|i_{m}} \pi^{+}_{i_{m}} + \rho^{\text{l}}_{p + k,1 - \beta|i_{m}} \pi^{-}_{i_{m}} + \pi^{\pm}_{i_{m}} \frac{\rho^{\text{h}}_{p + k,\alpha|i_{m}} + \rho^{\text{l}}_{p + k,1 - \beta|i_{m}}}{2} + \pi^{\text{c}} \overline{\rho}^{\text{c}}_{p+k | i_{m}}.
 \end{equation}
-en posant $\text{WER}_{\text{ref}}(\alpha,\beta, k)$ le score des rendements extrêmes de référence
-/a priori/, i.e. sans tenir compte du conditionnement par rapport aux indicateurs observés.
+
+L'expression précédente peut s'exprimer également sous la forme suivante :
+#+NAME: eq:score_wer_bis
+\begin{equation}
+\text{WER}(\alpha,\beta, k| i_{m}) = \left(1 - \alpha - \frac{\pi^{\pm}_{i_{m}}}{2}\right)\rho^{\text{h}}_{p + k,\alpha|i_{m}}  + \left(1 - \beta - \frac{\pi^{\pm}_{i_{m}}}{2}\right)\rho^{\text{l}}_{p + k,1 - \beta|i_{m}} + (\alpha + \beta + \pi^{\pm}_{i_{m}} - 1) \overline{\rho}^{\text{c}}_{p+k | i_{m}}.
+\end{equation}
+En remarquant que :
+- $1 - \alpha = P(R^{\text{h}}_{p + k} > \rho^{\text{h}}_{p + k,\alpha}|i_{m}) =
+  \pi^{+}_{i_{m}} + \pi^{\pm}_{i_{m}}$.
+- $1 - \beta = P(R^{\text{l}}_{p + k} < \rho^{\text{l}}_{p + k,1 - \beta}|i_{m}) = \pi^{-}_{i_{m}} +
+  \pi^{\pm}_{i_{m}}$.
 
 _Interprétation du score :_
 - Le score WER est lié au rendement espéré résultant d'une prise
@@ -786,32 +801,47 @@ _Interprétation du score :_
   souvent. À l'inverse, prendre $\beta$ proche de 1 signifie un seuil de contrôle des pertes grand
   mais avec une probabilité faible, i.e. on risque de perdre beaucoup mais 
   rarement.
-- Le terme $\text{WER}(\alpha,\beta, k, i_{m})$ permet de pénaliser le score de la configuration
-  $i_{m}$ en le corrigeant avec le score obtenu sans indicateur. 
 
 #+NAME: fig_rho_hl_quant
 #+CAPTION: Représentation graphique des quantiles $\rho^{\text{h}}_{p + k,\alpha}$ et $\rho^{\text{l}}_{p + k,\alpha}$.
 [[./fig/rho_hl_quant.png]]
 
+Nous proposons enfin une version pénalisée du score WER, noté PWER, permettant de corriger le score
+d'une configuration d'indicateurs avec le score obtenu sans indicateur.
+
+Pour chaque configuration d'indicateurs $i_{m} \in \mathcal{I}$, le score PWER est obtenu comme
+suit :
+#+NAME: eq:score_pwer
+\begin{equation}
+\text{PWER}(\alpha,\beta, k| i_{m}) = \text{WER}(\alpha,\beta, k| i_{m}) - \text{WER}(\alpha,\beta, k| \varnothing)
+\end{equation}
+où $\text{WER}(\alpha,\beta, k| \varnothing)$ est le score des rendements extrêmes de référence
+/a priori/, i.e. sans tenir compte du conditionnement par rapport aux indicateurs observés.
+
 ** Score AWER
 
 Une variante du score WER eqref:eq:score_wer consiste à lier les niveaux de risques $\alpha$ et $\beta$ de
-sorte que $\beta = 1 - \alpha$.
-
-Ce score, noté AWER pour (/asymetric weighted extreme returns/ en anglais), est défini pour chaque configuration d'indicateurs $i_{m} \in
+sorte que $\beta = 1 - \alpha$. En reprenant l'expression eqref:eq:score_wer_bis, on définit le
+score AWER (/asymetric weighted extreme returns/ en anglais) pour chaque configuration d'indicateurs $i_{m} \in
 \mathcal{I}$ par :
 #+NAME: eq:score_awer
 \begin{equation}
-\text{AWER}(\alpha, k, i_{m}) = \rho^{\text{h}}_{p + k,\alpha|i_{m}} \pi^{+}_{i_{m}} + \rho^{\text{l}}_{p + k,\alpha|i_{m}} \pi^{-}_{i_{m}} +  (1 - \pi^{+}_{i_{m}} - \pi^{-}_{i_{m}})\overline{\rho}^{\text{c}}_{p+k | i_{m}} - \text{AWER}_{\text{ref}}(\alpha, k),
+\text{AWER}(\alpha, k| i_{m}) = \left(1 - \alpha - \frac{\pi^{\pm}_{i_{m}}}{2}\right)\rho^{\text{h}}_{p + k,\alpha|i_{m}}  + \left(\alpha - \frac{\pi^{\pm}_{i_{m}}}{2}\right)\rho^{\text{l}}_{p + k,1 - \beta|i_{m}} + \pi^{\pm}_{i_{m}} \overline{\rho}^{\text{c}}_{p+k | i_{m}}
 \end{equation}
-en posant $\text{AWER}_{\text{ref}}(\alpha, k)$ le score des rendements extrêmes symétrique de référence.
 
-L'interprétation du score AWER est analogue à celle du score WER. La différence entre les deux
-scores consiste à imposer une distribution des risques entre la prise de profit et le contrôle des
+On en déduit le score asymétrique pénalisé, noté PAWER, pour chaque configuration d'indicateurs $i_{m} \in
+\mathcal{I}$ :
+#+NAME: eq:score_awer
+\begin{equation}
+\text{PAWER}(\alpha, k | i_{m}) =  \text{AWER}(\alpha, k | i_{m}) - \text{AWER}_{\text{ref}}(\alpha, k | \varnothing),
+\end{equation}
+
+L'interprétation des scores AWER et PAWER est analogue à celle des scores WER et PWER. La différence
+provient du fait d'imposer une distribution des risques entre la prise de profit et le contrôle des
 pertes. Autrement dit, si on décide d'évaluer un indicateur en supposant une prise de profit faible
 mais fréquente (i.e. $\alpha$ proche de 0) alors les pertes pourront être importantes mais rares
-(i.e. $\beta$ proche de 1). En fixant, la stratégie associée à $\alpha = 0.5$ permet de considérer
-un risque équilibré entre perte et profit. 
+(i.e. $\beta$ proche de 1). En fixant $\alpha = 0.5$, on considère un risque équilibré entre perte
+et profit. 
 
 ** Méthodologie d'évaluation
     :PROPERTIES:
