@@ -757,7 +757,7 @@ avec :
 # - $\pi^{\text{c}}(i_{m}) = P(\rho^{-} \le R^{\text{l}}_{p+k}, R^{\text{h}}_{p+k} \le \rho^{+} | i_{m}) = 1 - \pi^{+}_{i_{m}} - \pi^{-}(i_{m})$.
 
   
-** Score WER
+** Scores WER/PWER
 
 À partir de l'expression eqref:eq:exp_r_s_pk, nous construisons le score des rendements
 extrêmes pondérés (/weighted extreme returns/ en anglais) en fixant les seuils rendements $\rho^{+}$
@@ -818,7 +818,7 @@ suit :
 où $\text{WER}(\alpha,\beta, k| \varnothing)$ est le score des rendements extrêmes de référence
 /a priori/, i.e. sans tenir compte du conditionnement par rapport aux indicateurs observés.
 
-** Score AWER
+** Scores AWER/PAWER
 
 Une variante du score WER eqref:eq:score_wer consiste à lier les niveaux de risques $\alpha$ et $\beta$ de
 sorte que $\beta = 1 - \alpha$. En reprenant l'expression eqref:eq:score_wer_bis, on définit le
@@ -826,14 +826,14 @@ score AWER (/asymetric weighted extreme returns/ en anglais) pour chaque configu
 \mathcal{I}$ par :
 #+NAME: eq:score_awer
 \begin{equation}
-\text{AWER}(\alpha, k| i_{m}) = \left(1 - \alpha - \frac{\pi^{\pm}_{i_{m}}}{2}\right)\rho^{\text{h}}_{p + k,\alpha|i_{m}}  + \left(\alpha - \frac{\pi^{\pm}_{i_{m}}}{2}\right)\rho^{\text{l}}_{p + k,1 - \beta|i_{m}} + \pi^{\pm}_{i_{m}} \overline{\rho}^{\text{c}}_{p+k | i_{m}}
+\text{AWER}(\alpha, k| i_{m}) = \left(1 - \alpha - \frac{\pi^{\pm}_{i_{m}}}{2}\right)\rho^{\text{h}}_{p + k,\alpha|i_{m}}  + \left(\alpha - \frac{\pi^{\pm}_{i_{m}}}{2}\right)\rho^{\text{l}}_{p + k,\alpha|i_{m}} + \pi^{\pm}_{i_{m}} \overline{\rho}^{\text{c}}_{p+k | i_{m}}
 \end{equation}
 
 On en déduit le score asymétrique pénalisé, noté PAWER, pour chaque configuration d'indicateurs $i_{m} \in
 \mathcal{I}$ :
 #+NAME: eq:score_awer
 \begin{equation}
-\text{PAWER}(\alpha, k | i_{m}) =  \text{AWER}(\alpha, k | i_{m}) - \text{AWER}_{\text{ref}}(\alpha, k | \varnothing),
+\text{PAWER}(\alpha, k | i_{m}) =  \text{AWER}(\alpha, k | i_{m}) - \text{AWER}(\alpha, k | \varnothing),
 \end{equation}
 
 L'interprétation des scores AWER et PAWER est analogue à celle des scores WER et PWER. La différence
