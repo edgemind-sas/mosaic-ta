@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#+TITLE: Projet MOSAIC : Analyse technique - Notions fondamentales
+#+TITLE: Projet MOSAIC : Évaluation des indicateurs techniques
 #+AUTHOR: Roland Donat
 #+EMAIL: roland.donat@edgemind.fr
 # #+DATE: 
@@ -270,371 +270,8 @@ CLOSED: [2022-06-24 ven. 18:36]
 
 * Biblio                                                           :noexport:
 
-* Introduction
-   :PROPERTIES:
-   :CUSTOM_ID: introduction
-   :END:
-   
-Dans le domaine de l'analyse des marchés financiers, l'analyse technique
-correspond à un ensemble d'outils dont le but est de prédire les
-rendements futurs des actifs financiers. Les analyses reposent sur
-l'étude des historiques des données de marché disponibles,
-principalement la cotation et le volume des actifs considérés.
 
-La grande majorité des méthodologies présentées reposent sur la
-construction d'indicateurs particuliers jugés pertinents par leurs
-auteurs. Toutefois, l'évaluation de ces indicateurs n'est réalisée que
-sur la base de backtesting empiriques sur des périodes choisies
-arbitrairement et relativement courtes lorsqu'il s'agit d'analyses
-intra-journalières. Comme les auteurs de l'article [[citenum:&farias_nazario_literature_2017]], nous partageons le constat que l'évaluation des performances de
-l'analyse technique nécessite une consolidation mathématique. Pour ce
-faire, nous proposons de développer une stratégie d'évaluation des
-indicateurs techniques innovante fondée sur l'analyse de la distribution
-conditionnelle des rendements par rapport aux indicateurs observés.
-
-Ce document a pour objectif de présenter notre démarche de développement
-et d'évaluation d'indicateurs techniques pour l'analyse technique des
-cryptoactifs.
-
-* Données historiques OHLCV
-   :PROPERTIES:
-   :CUSTOM_ID: données-historiques-ohlcv
-   :END:
-
-L'évolution de la cotation d'un actif au cours du temps est usuellement
-présentée sous la forme de données, dites au format OHLCV (de l'anglais
-/open/, /high/, /low/, /close/, /volume/). Il s'agit d'un format
-pratique permettant de représenter des séries temporelles d'une manière
-particulière. En effet, le format OHLC (la partie volume n'est pas
-concernée par la subtilité du format) représente l'évolution d'une
-mesure au cours d'intervalles de temps réguliers successifs caractérisés
-par une période d'échantillonnage notée $\Delta t$ (e.g. une minute,
-cinq minutes, une heure, une journée, etc).
-
-Typiquement, les données OHLCV contiennent les variables suivantes : 
-- =timestamp= : timestamp caractérisant le début de la période de mesure (par exemple exprimé en
-  millisecondes), la fin étant déterminée par la période d'échantillonnage $\Delta t$ utilisée. 
-- =open= : valeur de l'actif au début de la période. 
-- =high= : valeur maximum de l'actif atteinte sur la période. 
-- =low= : valeur mimimum de l'actif atteinte sur la période. 
-- =close= : valeur de l'actif à la fin de la période. 
-- =volume= : montant cumulé des ventes et des achats de l'actif sur la période.
-
-Il est courant de visualiser les données OHLC à l'aide du graphique, dit
-en chandeliers. En fonction, des valeurs d'ouverture (/open/) et de
-fermeture (/close/), on parle également de chandeliers haussiers et
-baissiers, cf. Figure ref:fig-candles.
-
-#+NAME: fig-candles
-#+CAPTION: Représentation du symbole de chandelier.
-[[./fig/candle.jpg]]
-
-Dans un diagramme en chandelier, on retrouve les données OHLC mais
-également les notions de : 
-- corps (/body/) représentant la distance entre la cotation d'ouverture et de fermeture de l'actif
-  sur une période ; 
-- mèches ou ombres supérieures (/upper shadow/) représentant la distance entre la partie haute du
-  corps et la cotation la plus haute sur une période ; 
-- mèches ou ombres inférieures (/lower shadow/) représentant la distance entre la partie basse du
-  corps et la cotation la plus basse sur une période ;
-
-Le tableau suivant donne un aperçu des premières données de cotation du
-BTC par rapport à l'USDC de l'année 2021 avec une période
-d'échantillonnage $\Delta t =$ 5 minutes.
-
-#+BEGIN_SRC python :session indicator_analysis :results html :exports results :tangle indicator_analysis.py 
-source = InfluxDataSource(collection="crypto",
-                          name="ohlcv",
-                          tags={"period": "5m",
-                                "exchange": "binance",
-                                "base": "BTC",
-                                "quote": "USDC"},
-                          values=["open", "high", "low", "close", "volume"],
-                          )
-
-ohlcv_format_ex_df = \
-    client.get_data(source,
-                    start='2021-01-01 00:00:00',
-                    stop='2021-01-02 00:00:00')
-
-ohlcv_format_ex_df.head().style.format(precision=2, thousands=" ").to_html()
-#+END_SRC
-
-#+RESULTS:
-
-Par exemple, la première ligne du tableau signifie que le 01/01/2021 :
-
-- à 00:00:00, le prix d'un BTC était de 28964,54 USDC ;
-- à 00:05:00, le prix d'un BTC était entre 29018,17 USDC (fermeture
-  période) et 28993,74 USDC (ouverture période suivante) ;
-- entre 00:00:00 et 00:05:00 le prix d'un BTC est passé par un minimum
-  28958,66 USDC et un maximum de 29064,55 USDC.
-
-Le marché BTC/USDC étant ouvert 24h/24 et 7j/7, nous devrions observer
-$\text{close}(t-1)$ égale à $\text{open}(t)$ pour tout $t$. Toutefois,
-la collecte des données n'étant pas instantanée, il est fréquent
-d'observer de légères différences entre le cours d'ouverture de la
-période courante et le cours de fermeture de la période précédente.
-
-* Notations mathématiques
-   :PROPERTIES:
-   :CUSTOM_ID: notations-mathématiques
-   :END:
-
-** Notions temporelles
-    :PROPERTIES:
-    :CUSTOM_ID: notions-temporelles
-    :END:
-
-Nous avons introduit précédemment la période d'échantillonnage des
-données $\Delta t$. On note également $t_{0}$ la première date
-d'échantillonnage. Dans l'exemple de données précédent, on rappelle que
-$\Delta t = 5$ minutes et que $t_{0} =$ 2021-01-01 00:00:00.
-
-Nous introduisons ensuite l'indice $p \ge 0$ permettant de référencer la
-$p$ -ème période d'observation des données (cf. Figure ref:fig-ohlcv_period), i.e. entre
-$t_{0} + p\Delta t$ et $t_{0} + (p+1)\Delta t$. En reprenant l'exemple
-précédent, on a :
-- 1er période d'observation $p = 0$ : période entre 2021-01-01 00:00:00 et 2021-01-01 00:05:00 ;
-- 5ème période d'observation $p = 4$ : période entre 2021-01-01 00:20:00 et 2021-01-01 00:25:00.
-
-#+NAME: fig-ohlcv_period
-#+CAPTION: Notion de période sur les données OHLCV.
-[[./fig/ohlcv_period.png]]
-
-  
-Les données OHLCV sont notées dans la suite comme suit :
-- $\text{o}_{p}$ : cotation de l'actif à l'ouverture de la période $p$, i.e. à $t = t_{0} +  p\Delta
-  t$ ;
-- $\text{c}_{p}$ : cotation de l'actif à la fermeture de la période $p$, i.e. à $t = t_{0} +
-  (p+1)\Delta t$ ;
-- $\text{h}_{p}$ : cotation maximum de l'actif sur la période $p$ ;
-- $\text{l}_{p}$ : cotation mimimum de l'actif sur la période $p$ ;
-- $\text{v}_{p}$ : volume échangé de l'actif la période $p$.
-
-** Chandelier
-    :PROPERTIES:
-    :CUSTOM_ID: chandelier
-    :END:
-
-En plus des notations précédentes, nous pouvons introduire différentes
-grandeurs associées aux parties du diagramme en chandelier.
-
-En considérant, le chandelier représentant une donnée OHLC à la période
-$p$, nous avons :\\
-- Le corps $\text{b}_{p} = \text{c}_{p} - \text{o}_{p}$.
-- L'ombre inférieure $\text{s}_{p}^{\ell} = \min\{\text{c}_{p}, \text{o}_{p}\} - \text{l}_{p}$.
-- L'ombre supérieure $\text{s}_{p}^{u} = \text{h}_{p} - \max\{\text{c}_{p}, \text{o}_{p}\}$.
-
-** Rendements
-    :PROPERTIES:
-    :CUSTOM_ID: rendements
-    :END:
-
-On note enfin $r_{p}$ la variation relative de la cotation d'un actif
-entre deux périodes consécutives, on parle également de rendement (ou
-/returns/ en anglais) sur la période $p$. Nous avons donc pour tout
-$p \ge 1$ :
-$$
-r_{p} = \frac{\text{c}_{p}}{\text{c}_{p - 1}} - 1.
-$$
-La quantité $r_{p}$ est donc positive si le BTC gagne en valeur par
-rapport à l'USDC sur la période $p$ et négative sinon. Le rendement
-représente l'indicateur principal au coeur de toutes les analyses
-financières réalisées sur un actif donnée.
-
-* Extension de la notion de rendements
-   :PROPERTIES:
-   :CUSTOM_ID: extension-de-la-notion-de-rendements
-   :END:
-
-** Définitions
-    :PROPERTIES:
-    :CUSTOM_ID: définitions
-    :END:
-
-Le calcul des rendements est une étape fondamentale dans l'analyse d'un
-actif au cours du temps. La définition d'un rendement proposée dans la
-section précédente se limite au rendement sur le cours de clôture et à
-deux périodes successives.
-
-En effet, nous allons étendre la définition des rendements :
-- d'une part, aux cotations maximum et minimum ;
-- et d'autre part, entre deux périodes $p$ et $p + k$ données.
-
-Dans les paragraphes suivants, nous illustrerons les différentes rendements sur l'extrait
-de cotation BTC/USDC suivant.
-#+NAME: fig_ohlcv_ex
-#+BEGIN_SRC python :session indicator_analysis :results html :exports results :tangle indicator_analysis.py 
-data_ohlcv_ex_5 = ohlcv_format_ex_df.head()
-fig = mu.plotly_ohlcv(data_ohlcv_ex_5,
-                      layout=dict(title="Exemple de données OHLC sur l'actif BTC/USDC",
-                                  yaxis_title="USDC",
-                                  xaxis_title="Temps"))
-
-pio.to_html(fig, include_plotlyjs="cdn",
-            full_html=False,
-            config={'displayModeBar': False})
-#+END_SRC
-
-** Rendement de clôture
-
-Débutons donc par définir le rendement de clôture entre deux périodes $p$ et $p+k$ (cf. Figure
-ref:fig_rho_c_p_k) comme suit :
-\begin{equation}
-\rho^{\text{c}}_{p + k} = 
-\begin{cases}
-\frac{\text{c}_{p + k}}{\text{c}_{p-1}} - 1 & \quad k \ge 0 \\
-\frac{\text{c}_{p }}{\text{c}_{p + k - 1}} - 1 & \quad k < 0.
-\end{cases}
-\end{equation}
-
-À noter que $k$ est un nombre entier permettant de définir le nombre
-de périodes futures ou passées à prendre en compte pour le calcul du
-rendement.
-
-#+NAME: fig_rho_c_p_k
-#+CAPTION: Illustration graphique du calcul d'un rendement de clôture.
-[[./fig/rho_c_p_k.png]]
-
-*Exemples*
-
-Rendements de clôture calculés sur les données de l'exemple précédent et
-sur différents horizons :
-
-#+BEGIN_SRC python :session indicator_analysis :results html :exports results :tangle indicator_analysis.py 
-mi.ReturnsCloseIndicator(horizon=[-3,-2,-1,0,1,2,3]).compute(data_ohlcv_ex_5)\
-  .style.format('{0:.3%}',  na_rep='').to_html()
-#+END_SRC
-
-#+RESULTS:
-
-En prenant la période $p$ = 2021-01-01T00:05:00 et un horizon $k = 0$,
-le rendement de clôture $\rho^{\text{c}}_{p} = r_{p}$ correspond au
-rapport entre la clôture de la période 2021-01-01T00:05:00 et la clôture
-de la période 2021-01-01T00:00:00, soit :
-$$
-\rho^{\text{c}}_{p} = \frac{\text{c}_{p}}{\text{c}_{p-1}} = \frac{28914.30}{29018.17} - 1 \simeq -0.003579 \simeq -0.358 \%
-$$
-
-En prenant la période $p$ = 2021-01-01T00:10:00 et un horizon $k = 2$,
-le rendement de clôture $\rho^{\text{c}}_{k+2}$ correspond au rapport
-entre la clôture de la période 2021-01-01T00:20:00 et la clôture de la
-période 2021-01-01T00:05:00, soit :
-$$
-\rho^{\text{c}}_{p + 2} = \frac{\text{c}_{p+2}}{\text{c}_{p-1}} = \frac{28885.73}{28914.30} - 1 \simeq -0.000988 \simeq -0.099 \%
-$$
-
-En prenant la période $p$ = 2021-01-01T00:20:00 et un horizon $k = -3$,
-le rendement de clôture $\rho^{\text{c}}_{k-3}$ correspond au rapport
-entre la clôture de la période 2021-01-01T00:20:00 et la clôture de la
-période 2021-01-01T00:00:00, soit :
-$$
-\rho^{\text{c}}_{p - 3} = \frac{\text{c}_{p}}{\text{c}_{p-4}} = \frac{28885.73}{29018.17} - 1 \simeq -0.00456 \simeq -0.456 \%
-$$
-
-
-** Rendement du maximum et du minimum
-
-Le rendement du maximum entre deux périodes $p$ et $p+k$ (cf. Figure ref:fig_rho_h_p_k) est défini par :
-\begin{equation}
-\rho^{\text{h}}_{p + k} = 
-\begin{cases}
-\frac{\max_{p \le i \le p + k}\text{h}_{i}}{\text{c}_{p-1}} - 1 & \quad k \ge 0 \\
-\frac{\max_{p - k \le i \le p}\text{h}_{i}}{\text{c}_{p + k - 1}} - 1 & \quad k < 0.
-\end{cases}
-\end{equation}
-
-#+NAME: fig_rho_h_p_k
-#+CAPTION: Illustration graphique du calcul d'un rendement du maximum.
-[[./fig/rho_h_p_k.png]]
-
-
-Et par analogie, on définit le rendement du minimum entre deux périodes $p$ et $p+k$ (cf. Figure
-ref:fig_rho_l_p_k) :
-\begin{equation}
-\rho^{\text{l}}_{p + k} = 
-\begin{cases}
-\frac{\min_{p \le i \le p + k}\text{h}_{i}}{\text{c}_{p-1}} - 1 & \quad k \ge 0 \\
-\frac{\min_{p - k \le i \le p}\text{h}_{i}}{\text{c}_{p + k - 1}} - 1 & \quad k < 0.
-\end{cases}
-\end{equation}
-
-#+NAME: fig_rho_l_p_k
-#+CAPTION: Illustration graphique du calcul d'un rendement du minimum.
-[[./fig/rho_l_p_k.png]]
-
-*Exemples*
-
-Rendements du maximum calculés sur les données de l'exemple précédent et
-sur différents horizons :
-
-#+BEGIN_SRC python :session indicator_analysis :results html :exports results :tangle indicator_analysis.py 
-mi.ReturnsHighIndicator(horizon=[-3,0,1,2]).compute(data_ohlcv_ex_5)\
-                                           .style.format('{0:.3%}',  na_rep='').to_html()
-#+END_SRC
-
-#+RESULTS:
-#+begin_export html
-#+end_export
-
-Rendements du minimum calculés sur les mêmes horizons :
-
-#+BEGIN_SRC python :session indicator_analysis :results html :exports results :tangle indicator_analysis.py
-mi.ReturnsLowIndicator(horizon=[-3,0,1,2]).compute(data_ohlcv_ex_5)\
-                                           .style.format('{0:.3%}',  na_rep='').to_html()
-#+END_SRC
-
-
-En prenant la période $p$ = 2021-01-01T00:05:00 et un horizon $k = 0$,
-le rendement du maximum $\rho^{\text{h}}_{p} = r_{p}$ correspond au
-rapport entre la cotation maximum de la période 2021-01-01T00:05:00 et
-la clôture de la période 2021-01-01T00:00:00, soit :
-$$
-\rho^{\text{h}}_{p} = \frac{\text{h}_{p}}{\text{c}_{p-1}} = \frac{28996.04}{29018.17} - 1 \simeq -0.000762 \simeq -0.076 \%
-$$
-
-Le rendement du minimum correspondant est :
-$$
-\rho^{\text{l}}_{p} = \frac{\text{l}_{p}}{\text{c}_{p-1}} = \frac{28890.99}{29018.17} - 1 \simeq -0.00438 \simeq -0.44 \%
-$$
-
-En prenant la période $p$ = 2021-01-01T00:10:00 et un horizon $k = 2$,
-le rendement du maximum $\rho^{\text{h}}_{k+2}$ correspond au rapport
-entre la cotation maximum entre les périodes 2021-01-01T00:10:00 et
-2021-01-01T00:20:00, et la clôture de la période 2021-01-01T00:05:00,
-soit :
-$$
-\rho^{\text{h}}_{p + 2} = \frac{\max\{\text{h}_{p}, \text{h}_{p+1}, \text{h}_{p+2}\}}{\text{c}_{p-1}} = \frac{\text{h}_{p}}{\text{c}_{p-1}} = \frac{28908.49}{28914.30} - 1 \simeq -0.000201 \simeq -0.02 \%
-$$
-
-Le rendement du minimum correspondant est :
-$$
-\rho^{\text{l}}_{p + 2} = \frac{\max\{\text{l}_{p}, \text{l}_{p+1}, \text{l}_{p+2}\}}{\text{c}_{p-1}} = \frac{\text{l}_{p}}{\text{c}_{p-1}} = \frac{28741.86}{28914.30} - 1 \simeq -0.00596 \simeq -0.59 \%
-$$
-
-En prenant la période $p$ = 2021-01-01T00:20:00 et un horizon $k = -3$,
-le rendement du maximum $\rho^{\text{h}}_{k-3}$ correspond au rapport
-entre la cotation maximum entre les périodes 2021-01-01T00:05:00 et
-2021-01-01T00:20:00, et la clôture de la période 2021-01-01T00:00:00,
-soit :
-$$
-\rho^{\text{h}}_{p - 3} = \frac{\max\{\text{h}_{p-3}, \text{h}_{p-2}, \text{h}_{p-1}, \text{h}_{p}\}}{\text{c}_{p-4}} = \frac{\text{h}_{p-3}}{\text{c}_{p-4}} = \frac{28996.04}{29018.17} - 1 \simeq -0.000762 \simeq -0.076 \%
-$$
-
-Le rendement du minimum correspondant est :
-$$
-\rho^{\text{l}}_{p - 3} = \frac{\max\{\text{l}_{p-3}, \text{l}_{p-2}, \text{l}_{p-1}, \text{l}_{p}\}}{\text{c}_{p-4}} = \frac{\text{l}_{p-2}}{\text{c}_{p-4}} = \frac{28741.86}{29018.17} - 1 \simeq -0.00952 \simeq -0.95 \%
-$$
-
-
-* Indicateurs et évaluation
-   :PROPERTIES:
-   :CUSTOM_ID: évaluation-de-la-performance-des-indicateurs
-   :END:
-
-
-** Problématique
+* Problématique
     :PROPERTIES:
     :CUSTOM_ID: sec:strat_fi_intro
     :END:
@@ -686,7 +323,7 @@ Cette stratégie est illustrée dans sur la Figure ref:fig_fi_strat_ref.
 # FIGURE TODO
 
 
-** Formalisation
+* Formalisation
 
 Considérons tout d'abord les variables aléatoires suivantes :
 - $R^{\text{c}}_{p+k}$ représentant le rendement de clôture entre les périodes $p$ et $p+k$ ;
@@ -757,7 +394,7 @@ avec :
 # - $\pi^{\text{c}}(i_{m}) = P(\rho^{-} \le R^{\text{l}}_{p+k}, R^{\text{h}}_{p+k} \le \rho^{+} | i_{m}) = 1 - \pi^{+}_{i_{m}} - \pi^{-}(i_{m})$.
 
   
-** Scores WER/PWER
+* Scores WER/PWER
 
 À partir de l'expression eqref:eq:exp_r_s_pk, nous construisons le score des rendements
 extrêmes pondérés (/weighted extreme returns/ en anglais) en fixant les seuils rendements $\rho^{+}$
@@ -818,7 +455,7 @@ suit :
 où $\text{WER}(\alpha,\beta, k| \varnothing)$ est le score des rendements extrêmes de référence
 /a priori/, i.e. sans tenir compte du conditionnement par rapport aux indicateurs observés.
 
-** Scores AWER/PAWER
+* Scores AWER/PAWER
 
 Une variante du score WER eqref:eq:score_wer consiste à lier les niveaux de risques $\alpha$ et $\beta$ de
 sorte que $\beta = 1 - \alpha$. En reprenant l'expression eqref:eq:score_wer_bis, on définit le
@@ -843,7 +480,7 @@ mais fréquente (i.e. $\alpha$ proche de 0) alors les pertes pourront être impo
 (i.e. $\beta$ proche de 1). En fixant $\alpha = 0.5$, on considère un risque équilibré entre perte
 et profit. 
 
-** Méthodologie d'évaluation
+* Méthodologie d'évaluation
     :PROPERTIES:
     :CUSTOM_ID: méthodologie-générale
     :END:
@@ -866,23 +503,6 @@ d'évaluation se déroule de la manière suivante :
    1. Estimer les rendements à horizon $p+k$ conditionnellement à l'observation de la configuration
       $i_{m}$ à la période $p-1$ à partir des données historiques.
    1. Estimer empiriquement le score AWER
-
-* Environnement technique
-
-Les librairies =Python= utilisées dans les traitements présentés dans ce document sont :
-#+BEGIN_SRC python :session indicator_analysis :results html :exports results :tangle indicator_analysis.py 
-print(f"MOSAIC library version: {mosaic.__version__}")
-
-lib_dict = [
-    {"desc": "MOSAIC", "module": mosaic}
-    ]
-
-pd.DataFrame([{"Library": lib["desc"], "Version": getattr(lib["module"], "__version__")}
-              for lib in lib_dict])\
-  .style.hide(axis='index').to_html()
-#+END_SRC
-
-#+RESULTS:
 
 
 * Références
