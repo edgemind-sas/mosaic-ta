@@ -5,7 +5,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Projet MOSAIC : Analyse technique</title>
+<title>Projet Modélisation et Optimisation StochAstIque des Cryptoactifs (MOSAIC)</title>
 <meta name="author" content="Roland Donat" />
 <meta name="generator" content="Org Mode" />
 <link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/htmlize.css"/>
@@ -18,28 +18,225 @@
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Projet MOSAIC : Analyse technique</h1>
+<h1 class="title">Projet Modélisation et Optimisation StochAstIque des Cryptoactifs (MOSAIC)</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>Table des matières</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org3034b19">1. Méthodologie générale</a></li>
-<li><a href="#orga0cd4e1">2. Indicateurs étudiés</a></li>
+<li><a href="#org92b92a5">1. Contexte</a></li>
+<li><a href="#org57c331d">2. Objectifs</a></li>
+<li><a href="#org3cd0dc6">3. Axes de recherche</a>
+<ul>
+<li><a href="#org4a1ddac">3.1. Formalisation et modélisation probabiliste</a></li>
+<li><a href="#orga5996b9">3.2. Analyse technique</a>
+<ul>
+<li><a href="#orgfddff0e">3.2.1. Généralité</a></li>
+<li><a href="#orgb91ff8b">3.2.2. Indicateurs étudiés</a></li>
+<li><a href="#org98ec657">3.2.3. Modèles décisionnels</a></li>
+<li><a href="#orge99eb0a">3.2.4. Backtesting</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org60b0140">4. Références</a></li>
 </ul>
 </div>
 </div>
 
+<div id="outline-container-org92b92a5" class="outline-2">
+<h2 id="org92b92a5"><span class="section-number-2">1.</span> Contexte</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Une crypto-monnaie est une monnaie virtuelle qui opère indépendamment des banques et des
+gouvernements. La particularité des marchés de crypto-monnaies provient de sa décentralisation. Cela
+signifie que ces monnaies ne sont pas émises par une autorité centrale (un État par exemple) mais
+via des algorithmes exécutés sur un réseau informatique assurant leur cohérence et la sécurité des
+transactions. Ces marchés évoluent en fonction de l’offre et de la demande, mais, s’agissant de
+marchés décentralisés, ils sont souvent mieux protégés des changements économiques et politiques qui
+impactent généralement les devises traditionnelles <a href="#citeproc_bib_item_1">[1]</a>.  
+</p>
 
-<div id="outline-container-org3034b19" class="outline-2">
-<h2 id="org3034b19"><span class="section-number-2">1.</span> <a href="indicator_analysis.html">Méthodologie générale</a></h2>
+<p>
+Bien que le potentiel économique de ces nouvelles monnaies reste à évaluer, ces dernières offrent
+déjà à certains pays en développement une alternative de financement plus fiable qu’une monnaie
+traditionnelle gérée par des infrastructures bancaires ou des institutions étatiques
+défaillantes. Toutefois, de part leur jeunesse, le comportement des marchés de crypto-monnaies
+s’avère parfois très volatile. La gestion des risques de ces nouveaux actifs financiers apparaît
+donc comme un enjeu socio-économique fort pour les prochaines années.  
+</p>
+
+<p>
+Depuis 2014, la société EdgeMind développe des méthodes et des outils pour l’évaluation et la
+prévision des risques industriels. Pour ce faire, EdgeMind met en œuvre différentes techniques de
+machine learning et de simulation afin de modéliser le comportement dynamiques de systèmes complexes
+et anticiper l’occurrence de situations indésirables en fonction de l’évolution des contextes
+opérationnels. 
+</p>
+
+<p>
+La société EdgeMind cherche aujourd’hui à diversifier son activité en abordant le domaine des
+risques financiers, en se focalisant dans un premier temps sur les problématiques liées à l’analyse
+des cryptomonnaies et à la gestion d’actifs algorithmiques. En effet, qu’il soit question
+d’industrie ou de finance, les enjeux autour de la gestion d’actifs sont similaires, à savoir
+prévoir l’évolution future du système d’actifs considéré et déterminer un ensemble d’actions
+permettant d’agir sur ce système de manière à optimiser ses performances dans le temps. Par exemple,
+la maintenance prévisionnelle (ou prédictive) est une manière de valoriser les données
+opérationnelles afin d’optimiser la disponibilité d’un système d’actifs industriels. Dans la
+finance, les algorithmes de trading font de même pour valoriser un portefeuille d’actifs <a href="#citeproc_bib_item_2">[2]</a>. Nous
+souhaitons donc dans ce projet expérimenter une partie des méthodes d’analyses prédictives
+développées pour la gestion des risques industriels sur le domaine des risques financiers.  
+</p>
+
+<p>
+Par ailleurs, contrairement au secteur industriel, les données sur les principaux actifs financiers
+sont disponibles à des niveaux d’échantillonnage élevés (de l’ordre de la seconde). Cette
+spécificité est particulièrement intéressante pour l’élaboration d’algorithmes d’aide à la décision
+auto-apprenants proches du temps réel, mais soulève dans le même temps de nombreux verrous
+scientifiques et techniques 
+</p>
 </div>
-<div id="outline-container-orga0cd4e1" class="outline-2">
-<h2 id="orga0cd4e1"><span class="section-number-2">2.</span> Indicateurs étudiés</h2>
+</div>
+
+<div id="outline-container-org57c331d" class="outline-2">
+<h2 id="org57c331d"><span class="section-number-2">2.</span> Objectifs</h2>
 <div class="outline-text-2" id="text-2">
+<p>
+Ce projet a pour objectif général l’élaboration d’une IA autonome capable de :
+</p>
+<ol class="org-ol">
+<li>évaluer les risques liés à la gestion de crypto-actifs (e.g. crypto-monnaies), i.e. prévoir les
+performances futures des actifs sur un horizon temporel donné ;</li>
+<li>prendre des décisions visant à optimiser les performances d’un portefeuille de crypto-actifs ;</li>
+<li>s'auto adapter en “temps réel” en fonction de l’évolution de contexte économique et sociétal courant.</li>
+</ol>
+</div>
+</div>
+
+
+<div id="outline-container-org3cd0dc6" class="outline-2">
+<h2 id="org3cd0dc6"><span class="section-number-2">3.</span> Axes de recherche</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-org4a1ddac" class="outline-3">
+<h3 id="org4a1ddac"><span class="section-number-3">3.1.</span> Formalisation et modélisation probabiliste</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+Qu’il s’agisse de prévoir l’évolution d’actifs traditionnels <a href="#citeproc_bib_item_3">[3]</a> <a href="#citeproc_bib_item_4">[4]</a>, ou de crypto-monnaies
+<a href="#citeproc_bib_item_5">[5]</a> <a href="#citeproc_bib_item_6">[6]</a> <a href="#citeproc_bib_item_7">[7]</a>, les scientifiques travaillant sur l’élaboration de modèles probabilistes s’intéressent,
+pour la plupart, aux approches dites paramétriques. Ceci s’explique principalement par la simplicité
+de ces modèles et leur relative interprétabilité. En revanche, les approches paramétriques peinent à
+correctement représenter les comportements extrêmes d’actifs volatiles. Des articles récents ont
+montré l’intérêt des méthodes non-paramétriques afin de prévoir l’évolution du Bitcoin <a href="#citeproc_bib_item_8">[8]</a>
+<a href="#citeproc_bib_item_9">[9]</a>. Ces modèles, plus complexes, semblent difficilement compatibles avec la prise en compte de
+variables exogènes permettant d’expliquer le comportement des actifs considérés.   
+Notre objectif est de lever la limitation précédente en proposant une approche non-paramétrique
+discrète (la distribution des rendements des actifs est discrétisée). À notre connaissance, cette
+approche n’a pas été expérimentée dans le cadre des cryto-actifs et possèdent l’avantage d’être
+compatible avec des techniques de modélisation probabilistes pertinentes (e.g. techniques
+bayésiennes) pour répondre à la problématique. 
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga5996b9" class="outline-3">
+<h3 id="orga5996b9"><span class="section-number-3">3.2.</span> Analyse technique</h3>
+<div class="outline-text-3" id="text-3-2">
+</div>
+<div id="outline-container-orgfddff0e" class="outline-4">
+<h4 id="orgfddff0e"><span class="section-number-4">3.2.1.</span> Généralité</h4>
+<div class="outline-text-4" id="text-3-2-1">
+<p>
+Dans le domaine de l’analyse des marchés financiers, l'<a href="notions_bases.html">analyse technique</a> correspond à un ensemble
+d'outils dont le but est de prédire les rendements futurs des actifs financiers en étudiant
+l’historique des données de marché disponibles, principalement le cours et le volume des actifs
+considérés <a href="#citeproc_bib_item_10">[10]</a>.  Dans l’article de revue de littérature sur l’analyse technique <a href="#citeproc_bib_item_11">[11]</a>, les auteurs
+listent les principales méthodologies d’analyses mises en œuvre depuis une cinquantaine d’années.  
+La grande majorité des méthodologies présentées reposent sur la construction d’indicateurs
+particuliers jugés pertinents par leurs auteurs (e.g. <a href="#citeproc_bib_item_12">[12]</a>, <a href="#citeproc_bib_item_13">[13]</a>). Toutefois, l’évaluation de ces
+indicateurs n’est réalisée que sur la base de backtesting empiriques sur des périodes choisies
+arbitrairement et relativement courtes lorsqu’il s’agit d’analyse intra-journalière.  
+Comme les auteurs de l’article <a href="#citeproc_bib_item_11">[11]</a>, nous partageons le constat que l’évaluation des performances de
+l’analyse technique nécessite une consolidation mathématique. Pour ce faire, nous proposons de
+développer une <a href="indicator_analysis.html">stratégie d’évaluation des indicateurs techniques innovante</a> fondée sur l’analyse de
+la distribution conditionnelle des rendements par rapport aux indicateurs observés.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgb91ff8b" class="outline-4">
+<h4 id="orgb91ff8b"><span class="section-number-4">3.2.2.</span> Indicateurs étudiés</h4>
+<div class="outline-text-4" id="text-3-2-2">
 <ul class="org-ul">
 <li><a href="indic/indic_gh.html">Marteau généralisé</a></li>
-<li><a href="indic/indic_mvq.html">Quantile de volume mobile</a></li>
+<li><a href="indic/indic_mvl.html">Niveau de volume mobile</a></li>
 </ul>
+</div>
+</div>
+
+
+<div id="outline-container-org98ec657" class="outline-4">
+<h4 id="org98ec657"><span class="section-number-4">3.2.3.</span> Modèles décisionnels</h4>
+</div>
+
+<div id="outline-container-orge99eb0a" class="outline-4">
+<h4 id="orge99eb0a"><span class="section-number-4">3.2.4.</span> Backtesting</h4>
+<div class="outline-text-4" id="text-3-2-4">
+<ul class="org-ul">
+<li>Construire un environnement de backtesting comparable à une plateforme d'échanges</li>
+<li>Évaluer les performances du prototype sur l'environnement de backtesting.</li>
+<li>Réaliser des expérimentations "à blanc" en temps réel sur différentes périodes : 1 heure, 12 heures, 24 heures, 2 jours, une semaine.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org60b0140" class="outline-2">
+<h2 id="org60b0140"><span class="section-number-2">4.</span> Références</h2>
+<div class="outline-text-2" id="text-4">
+<style>.csl-left-margin{float: left; padding-right: 0em;}
+ .csl-right-inline{margin: 0 0 0 2em;}</style><div class="csl-bib-body">
+  <div class="csl-entry"><a id="citeproc_bib_item_1"></a>
+    <div class="csl-left-margin">[1]</div><div class="csl-right-inline">A. Stachtchenko, “Manuel de survie dans la jungle des poncifs anti-Bitcoin (version longue),” <i>Medium</i>. Jan. 2022. Accessed: Feb. 08, 2022. [Online]. Available: <a href="https://medium.com/@AlexStach/manuel-de-survie-dans-la-jungle-des-poncifs-anti-bitcoin-version-longue-523e381745ff">https://medium.com/@AlexStach/manuel-de-survie-dans-la-jungle-des-poncifs-anti-bitcoin-version-longue-523e381745ff</a></div>
+  </div>
+  <div class="csl-entry"><a id="citeproc_bib_item_2"></a>
+    <div class="csl-left-margin">[2]</div><div class="csl-right-inline">D.-Y. Park and K.-H. Lee, “Practical Algorithmic Trading Using State Representation Learning and Imitative Reinforcement Learning,” <i>Ieee access</i>, vol. PP, p. 1, Nov. 2021, doi: <a href="https://doi.org/10.1109/ACCESS.2021.3127209">10.1109/ACCESS.2021.3127209</a>.</div>
+  </div>
+  <div class="csl-entry"><a id="citeproc_bib_item_3"></a>
+    <div class="csl-left-margin">[3]</div><div class="csl-right-inline">J. Shen, <i>A Stochastic LQR Model for Child Order Placement in Algorithmic Trading</i>. 2020.</div>
+  </div>
+  <div class="csl-entry"><a id="citeproc_bib_item_4"></a>
+    <div class="csl-left-margin">[4]</div><div class="csl-right-inline">D. Snow, “Machine Learning in Asset Management - Part 1 : Portfolio Construction - Trading Strategies,” <i>The journal of financial data science</i>, vol. 2, no. 1, pp. 10–23, Jan. 2020, doi: <a href="https://doi.org/10.3905/jfds.2019.1.021">10.3905/jfds.2019.1.021</a>.</div>
+  </div>
+  <div class="csl-entry"><a id="citeproc_bib_item_5"></a>
+    <div class="csl-left-margin">[5]</div><div class="csl-right-inline">E. Bouri, C. K. M. Lau, B. Lucey, and D. Roubaud, “Trading volume and the predictability of return and volatility in the cryptocurrency market,” <i>Finance research letters</i>, vol. 29, pp. 340–346, Jun. 2019, doi: <a href="https://doi.org/10.1016/j.frl.2018.08.015">10.1016/j.frl.2018.08.015</a>.</div>
+  </div>
+  <div class="csl-entry"><a id="citeproc_bib_item_6"></a>
+    <div class="csl-left-margin">[6]</div><div class="csl-right-inline">N. Crone, E. Brophy, and T. Ward, <i>Exploration of Algorithmic Trading Strategies for the Bitcoin Market</i>. 2021.</div>
+  </div>
+  <div class="csl-entry"><a id="citeproc_bib_item_7"></a>
+    <div class="csl-left-margin">[7]</div><div class="csl-right-inline">P. Hansen, C. Kim, and W. Kimbrough, <i>Periodicity in Cryptocurrency Volatility and Liquidity</i>. 2021.</div>
+  </div>
+  <div class="csl-entry"><a id="citeproc_bib_item_8"></a>
+    <div class="csl-left-margin">[8]</div><div class="csl-right-inline">M. Balcilar, E. Bouri, R. Gupta, and D. Roubaud, “Can volume predict Bitcoin returns and volatility? A quantiles-based approach,” <i>Economic modelling</i>, vol. 64, pp. 74–81, Aug. 2017, doi: <a href="https://doi.org/10.1016/j.econmod.2017.03.019">10.1016/j.econmod.2017.03.019</a>.</div>
+  </div>
+  <div class="csl-entry"><a id="citeproc_bib_item_9"></a>
+    <div class="csl-left-margin">[9]</div><div class="csl-right-inline">I. Jiménez, A. Mora-Valencia, and J. Perote, “Semi-nonparametric risk assessment with cryptocurrencies,” <i>Research in international business and finance</i>, vol. 59, p. 101567, Jan. 2022, doi: <a href="https://doi.org/10.1016/j.ribaf.2021.101567">10.1016/j.ribaf.2021.101567</a>.</div>
+  </div>
+  <div class="csl-entry"><a id="citeproc_bib_item_10"></a>
+    <div class="csl-left-margin">[10]</div><div class="csl-right-inline">R. Yamamoto, “Intraday technical analysis of individual stocks on the Tokyo Stock Exchange,” <i>Journal of banking &#38; finance</i>, vol. 36, no. 11, pp. 3033–3047, Nov. 2012, doi: <a href="https://doi.org/10.1016/j.jbankfin.2012.07.006">10.1016/j.jbankfin.2012.07.006</a>.</div>
+  </div>
+  <div class="csl-entry"><a id="citeproc_bib_item_11"></a>
+    <div class="csl-left-margin">[11]</div><div class="csl-right-inline">R. T. Farias Nazário, J. L. e Silva, V. A. Sobreiro, and H. Kimura, “A literature review of technical analysis on stock markets,” <i>The quarterly review of economics and finance</i>, vol. 66, pp. 115–126, Nov. 2017, doi: <a href="https://doi.org/10.1016/j.qref.2017.01.014">10.1016/j.qref.2017.01.014</a>.</div>
+  </div>
+  <div class="csl-entry"><a id="citeproc_bib_item_12"></a>
+    <div class="csl-left-margin">[12]</div><div class="csl-right-inline">A. Hassanniakalager, G. Sermpinis, and C. Stasinakis, “Trading the foreign exchange market with technical analysis and Bayesian Statistics,” <i>Journal of empirical finance</i>, vol. 63, pp. 230–251, Sep. 2021, doi: <a href="https://doi.org/10.1016/j.jempfin.2021.07.006">10.1016/j.jempfin.2021.07.006</a>.</div>
+  </div>
+  <div class="csl-entry"><a id="citeproc_bib_item_13"></a>
+    <div class="csl-left-margin">[13]</div><div class="csl-right-inline">D. Bao and Z. Yang, “Intelligent stock trading system by turning point confirming and probabilistic reasoning,” <i>Expert systems with applications</i>, vol. 34, no. 1, pp. 620–627, Jan. 2008, doi: <a href="https://doi.org/10.1016/j.eswa.2006.09.043">10.1016/j.eswa.2006.09.043</a>.</div>
+  </div>
+</div>
 </div>
 </div>
 </div>
