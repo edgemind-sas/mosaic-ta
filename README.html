@@ -23,28 +23,28 @@
 <h2>Table des matières</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org92b92a5">1. Contexte</a></li>
-<li><a href="#org57c331d">2. Objectifs</a></li>
-<li><a href="#org3cd0dc6">3. Axes de recherche</a>
+<li><a href="#org4038ea4">1. Contexte</a></li>
+<li><a href="#org9840da1">2. Objectifs</a></li>
+<li><a href="#orgd924b84">3. Axes de recherche</a>
 <ul>
-<li><a href="#org4a1ddac">3.1. Formalisation et modélisation probabiliste</a></li>
-<li><a href="#orga5996b9">3.2. Analyse technique</a>
+<li><a href="#orga24fcf4">3.1. Formalisation et modélisation probabiliste</a></li>
+<li><a href="#org854f987">3.2. Analyse technique</a>
 <ul>
-<li><a href="#orgfddff0e">3.2.1. Généralité</a></li>
-<li><a href="#orgb91ff8b">3.2.2. Indicateurs étudiés</a></li>
-<li><a href="#org98ec657">3.2.3. Modèles décisionnels</a></li>
-<li><a href="#orge99eb0a">3.2.4. Backtesting</a></li>
+<li><a href="#orgd6dc1ac">3.2.1. Généralité</a></li>
+<li><a href="#org5c533e0">3.2.2. Indicateurs étudiés</a></li>
 </ul>
 </li>
+<li><a href="#orgde62e5a">3.3. Modèles décisionnels</a></li>
+<li><a href="#orgc3cfba1">3.4. Backtesting</a></li>
 </ul>
 </li>
-<li><a href="#org60b0140">4. Références</a></li>
+<li><a href="#org89bde3c">4. Références</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org92b92a5" class="outline-2">
-<h2 id="org92b92a5"><span class="section-number-2">1.</span> Contexte</h2>
+<div id="outline-container-org4038ea4" class="outline-2">
+<h2 id="org4038ea4"><span class="section-number-2">1.</span> Contexte</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Une crypto-monnaie est une monnaie virtuelle qui opère indépendamment des banques et des
@@ -97,8 +97,8 @@ scientifiques et techniques
 </div>
 </div>
 
-<div id="outline-container-org57c331d" class="outline-2">
-<h2 id="org57c331d"><span class="section-number-2">2.</span> Objectifs</h2>
+<div id="outline-container-org9840da1" class="outline-2">
+<h2 id="org9840da1"><span class="section-number-2">2.</span> Objectifs</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Ce projet a pour objectif général l’élaboration d’une IA autonome capable de :
@@ -113,12 +113,12 @@ performances futures des actifs sur un horizon temporel donné ;</li>
 </div>
 
 
-<div id="outline-container-org3cd0dc6" class="outline-2">
-<h2 id="org3cd0dc6"><span class="section-number-2">3.</span> Axes de recherche</h2>
+<div id="outline-container-orgd924b84" class="outline-2">
+<h2 id="orgd924b84"><span class="section-number-2">3.</span> Axes de recherche</h2>
 <div class="outline-text-2" id="text-3">
 </div>
-<div id="outline-container-org4a1ddac" class="outline-3">
-<h3 id="org4a1ddac"><span class="section-number-3">3.1.</span> Formalisation et modélisation probabiliste</h3>
+<div id="outline-container-orga24fcf4" class="outline-3">
+<h3 id="orga24fcf4"><span class="section-number-3">3.1.</span> Formalisation et modélisation probabiliste</h3>
 <div class="outline-text-3" id="text-3-1">
 <p>
 Qu’il s’agisse de prévoir l’évolution d’actifs traditionnels <a href="#citeproc_bib_item_3">[3]</a> <a href="#citeproc_bib_item_4">[4]</a>, ou de crypto-monnaies
@@ -138,15 +138,15 @@ bayésiennes) pour répondre à la problématique.
 </div>
 </div>
 
-<div id="outline-container-orga5996b9" class="outline-3">
-<h3 id="orga5996b9"><span class="section-number-3">3.2.</span> Analyse technique</h3>
+<div id="outline-container-org854f987" class="outline-3">
+<h3 id="org854f987"><span class="section-number-3">3.2.</span> Analyse technique</h3>
 <div class="outline-text-3" id="text-3-2">
 </div>
-<div id="outline-container-orgfddff0e" class="outline-4">
-<h4 id="orgfddff0e"><span class="section-number-4">3.2.1.</span> Généralité</h4>
+<div id="outline-container-orgd6dc1ac" class="outline-4">
+<h4 id="orgd6dc1ac"><span class="section-number-4">3.2.1.</span> Généralité</h4>
 <div class="outline-text-4" id="text-3-2-1">
 <p>
-Dans le domaine de l’analyse des marchés financiers, l'<a href="notions_bases.html">analyse technique</a> correspond à un ensemble
+Dans le domaine de l’analyse des marchés financiers, l'analyse technique correspond à un ensemble
 d'outils dont le but est de prédire les rendements futurs des actifs financiers en étudiant
 l’historique des données de marché disponibles, principalement le cours et le volume des actifs
 considérés <a href="#citeproc_bib_item_10">[10]</a>.  Dans l’article de revue de littérature sur l’analyse technique <a href="#citeproc_bib_item_11">[11]</a>, les auteurs
@@ -164,24 +164,27 @@ la distribution conditionnelle des rendements par rapport aux indicateurs observ
 </div>
 
 
-<div id="outline-container-orgb91ff8b" class="outline-4">
-<h4 id="orgb91ff8b"><span class="section-number-4">3.2.2.</span> Indicateurs étudiés</h4>
+<div id="outline-container-org5c533e0" class="outline-4">
+<h4 id="org5c533e0"><span class="section-number-4">3.2.2.</span> Indicateurs étudiés</h4>
 <div class="outline-text-4" id="text-3-2-2">
 <ul class="org-ul">
 <li><a href="indic/indic_gh.html">Marteau généralisé</a></li>
 <li><a href="indic/indic_mvl.html">Niveau de volume mobile</a></li>
+<li><a href="indic/indic_rsi.html">RSI</a></li>
+<li><a href="indic/indic_sri.html"><i>Support Range Index</i></a></li>
 </ul>
 </div>
 </div>
-
-
-<div id="outline-container-org98ec657" class="outline-4">
-<h4 id="org98ec657"><span class="section-number-4">3.2.3.</span> Modèles décisionnels</h4>
 </div>
 
-<div id="outline-container-orge99eb0a" class="outline-4">
-<h4 id="orge99eb0a"><span class="section-number-4">3.2.4.</span> Backtesting</h4>
-<div class="outline-text-4" id="text-3-2-4">
+
+<div id="outline-container-orgde62e5a" class="outline-3">
+<h3 id="orgde62e5a"><span class="section-number-3">3.3.</span> Modèles décisionnels</h3>
+</div>
+
+<div id="outline-container-orgc3cfba1" class="outline-3">
+<h3 id="orgc3cfba1"><span class="section-number-3">3.4.</span> Backtesting</h3>
+<div class="outline-text-3" id="text-3-4">
 <ul class="org-ul">
 <li>Construire un environnement de backtesting comparable à une plateforme d'échanges</li>
 <li>Évaluer les performances du prototype sur l'environnement de backtesting.</li>
@@ -190,10 +193,9 @@ la distribution conditionnelle des rendements par rapport aux indicateurs observ
 </div>
 </div>
 </div>
-</div>
 
-<div id="outline-container-org60b0140" class="outline-2">
-<h2 id="org60b0140"><span class="section-number-2">4.</span> Références</h2>
+<div id="outline-container-org89bde3c" class="outline-2">
+<h2 id="org89bde3c"><span class="section-number-2">4.</span> Références</h2>
 <div class="outline-text-2" id="text-4">
 <style>.csl-left-margin{float: left; padding-right: 0em;}
  .csl-right-inline{margin: 0 0 0 2em;}</style><div class="csl-bib-body">
