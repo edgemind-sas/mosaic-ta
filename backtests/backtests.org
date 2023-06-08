@@ -1,0 +1,458 @@
+# -*- coding: utf-8 -*-
+#+TITLE: Projet MOSAIC : Backtesting
+#+AUTHOR: Roland Donat
+#+EMAIL: roland.donat@edgemind.fr
+# #+DATE: 
+
+# ==============================================
+# Document Configuration
+# ======================
+# Orgmode
+:CONFIG:
+#+LANGUAGE: fr
+#+OPTIONS: H:3 num:t toc:t \n:nil @:t ::t |:t ^:{} f:t TeX:t author:t d:nil timestamp:nil
+#+OPTIONS: html-postamble:nil
+#+STARTUP: content 
+#+STARTUP: hidestars
+#+DRAWERS: CONFIG OPTIONS CACHE MACROS
+#+TODO: TODO(t) INPROGRESS(p) | DONE(d)
+#+BIND: org-latex-table-scientific-notation "{%s}E{%s}"
+# #+csl-style: ../ieee.csl
+:END:
+
+# LaTeX
+# -----
+# Class parameters
+:CONFIG:
+#+LaTeX_CLASS: edgemind-note
+#+LaTeX_CLASS_OPTIONS: [a4paper,twoside,11pt]
+#+LATEX_HEADER: \thelang{FR}
+#+LATEX_HEADER: \thesubtitle{}
+#+LATEX_HEADER: \version{1.0}
+:END:
+# Packages
+:CONFIG:
+#+LATEX_HEADER: \usepackage[french]{babel}
+#+LATEX_HEADER: \usepackage{graphicx}
+#+LATEX_HEADER: \usepackage{amssymb}
+#+LATEX_HEADER: \usepackage{amsmath}
+#+LATEX_HEADER: \usepackage{amsfonts}
+#+LATEX_HEADER: \usepackage{xcolor}
+#+LATEX_HEADER: \usepackage{verbatim}
+#+LATEX_HEADER: \usepackage{tabularx}
+#+LATEX_HEADER: \usepackage{float}
+#+LATEX_HEADER: \usepackage{lmodern}
+#+LATEX_HEADER: \usepackage{natbib}
+#+LATEX_HEADER: \usepackage{subfig}
+#+LATEX_HEADER: \usepackage{booktabs}
+#+LATEX_HEADER: \usepackage{minted}
+:END:
+# Layout
+:CONFIG:
+# Figures path
+#+LATEX_HEADER: % Graphics path
+#+LATEX_HEADER: \graphicspath{ 
+#+LATEX_HEADER:   {./fig/}
+#+LATEX_HEADER: }
+
+# Colors
+#+LATEX_HEADER: \definecolor{almostwhite}        {rgb}{0.85,0.85,0.85}
+
+# Minted
+# To control spaces between minted block
+#+LATEX_HEADER: \AtBeginEnvironment{snugshade*}{\vspace{-1.25\FrameSep}}
+#+LATEX_HEADER: \AfterEndEnvironment{snugshade*}{\vspace{-2\FrameSep}}
+# #+LATEX_HEADER: \usemintedstyle{monokai}
+# #+LATEX_HEADER: \renewcommand{\theFancyVerbLine}{\sffamily \footnotesize {\color{EMLogoBlue}\oldstylenums{\arabic{FancyVerbLine}}}}
+
+# Captions
+#+LATEX_HEADER: \captionsetup[table]{position=bottom,margin=90pt,font=small,labelfont=bf,labelsep=endash,format=plain}
+#+LATEX_HEADER: \captionsetup[figure]{position=bottom,margin=90pt,font=small,labelfont=bf,labelsep=endash,format=plain}
+#+LATEX_HEADER: \captionsetup[subfloat]{margin=0pt,font=footnotesize}
+
+# Geometry
+#+LATEX_HEADER: \usepackage{geometry}
+#+LATEX_HEADER: \geometry{
+#+LATEX_HEADER: %  nohead,
+#+LATEX_HEADER:   top=2.25cm, 
+#+LATEX_HEADER:   bottom=2.25cm, 
+#+LATEX_HEADER:  left=2.5cm, 
+#+LATEX_HEADER:  right=2.5cm}
+
+#+LATEX_HEADER: \usepackage{setspace}
+#+LATEX_HEADER: \onehalfspacing
+#+LATEX_HEADER: % Supprime l'indentation
+#+LATEX_HEADER: \setlength{\parindent}{0pt}
+#+LATEX_HEADER: % Espacement entre les paragraphes
+#+LATEX_HEADER: \setlength{\parskip}{2ex}
+
+# List layout
+#+LATEX_HEADER: \frenchbsetup{ListOldLayout=true} %FBReduceListSpacing=true,CompactItemize=false}
+
+# References
+#+LATEX: \renewcommand*{\refname}{}*
+:END:
+# LaTeX Compilator
+:CONFIG:
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+(setq org-latex-listings 'minted
+      org-latex-minted-options nil ;; '(("frame" "lines")))
+      org-latex-pdf-process
+      '("xelatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+        "bibtex %b"
+        "xelatex -shell-escape -interaction nonstopmode -output-directory %o %f"
+        "xelatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
+#+END_SRC
+:END:
+
+# HTML
+# ----
+:CONFIG:
+# Org HTML Macros
+#+MACRO: NEWLINE @@latex:\\@@ @@html:<br>@@
+#+MACRO: HTMLFONTSIZE @@html:<font size="$2">$1</font>@@
+#+MACRO: SUBTITLE @@html:<div class="slidesubtitle">$1</div>@@
+
+# HTML options
+# ------------
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://edgemind-sas.github.io/visual-identity/official_docs/css/edgemind.css" />
+:END:
+
+# Publishing
+# ----------
+:CONFIG:
+#+BEGIN_SRC emacs-lisp :results silent :exports none
+;; Define some export options here since in org-publish-project-alist some of them are not taken into account
+;; e.g. with-toc nil
+(defun my-html-export-options (plist backend)
+  (cond 
+    ((equal backend 'html)
+     (plist-put plist :with-toc t)
+     (plist-put plist :section-numbers nil)
+     (plist-put plist :with-author t)
+     (plist-put plist :with-email t)
+     (plist-put plist :with-date t)
+     ))
+  plist)
+
+(setq org-publish-project-alist
+      '(
+	
+        ("main"
+         :base-directory "./"
+         :include ("rb_mod_stoch.org")
+         :publishing-directory "./"
+         :recursive nil
+         :publishing-function org-html-publish-to-html
+         :preparation-function (lambda () (setq org-export-filter-options-functions '(my-html-export-options)))
+         :auto-preamble t
+         :html-head  "<link rel='stylesheet' type='text/css' href='edgemind.css' />"
+         :htmlized-source 
+	 :section-numbers nil
+         )
+        ("td-html"
+         :base-directory "./td/"
+         :base-extension "org"
+         :publishing-directory "./td"
+         :recursive t
+         :publishing-function org-html-publish-to-html
+         :preparation-function (lambda () (setq org-export-filter-options-functions '(my-html-export-options)))
+         :auto-preamble t
+         :html-head  "<link rel='stylesheet' type='text/css' href='edgemind.css' />"
+         :htmlized-source 
+         )
+
+	 ;; pdf
+        ("td-pdf"
+         :base-directory "./td/"
+         :base-extension "org"
+         :publishing-directory "./td"
+         :recursive t
+         :publishing-function org-latex-publish-to-pdf
+         )
+
+	 ("td-attach"
+	 :base-directory "./td/"
+	 :base-extension "xdsl\\|txt\\|csv\\|py\\|png"
+         :publishing-directory "./td"
+	 :recursive t
+	 :publishing-function org-publish-attachment
+	 )
+
+	 ("cours-attach"
+	 :base-directory "./cours/"
+	 :base-extension "pdf\\|xdsl\\|txt\\|csv\\|py"
+         :publishing-directory "./cours"
+	 :recursive t
+	 :publishing-function org-publish-attachment
+	 )
+
+        ("projet-html"
+         :base-directory "./projet/"
+         :base-extension "org"
+         :publishing-directory "./projet"
+         :recursive t
+         :publishing-function org-html-publish-to-html
+         :preparation-function (lambda () (setq org-export-filter-options-functions '(my-html-export-options)))
+         :auto-preamble t
+         :html-head  "<link rel='stylesheet' type='text/css' href='edgemind.css' />"
+         :htmlized-source 
+         )
+
+	 ("projet-attach"
+	 :base-directory "./projet/"
+	 :base-extension "xdsl\\|txt\\|csv"
+         :publishing-directory "./projet"
+	 :recursive t
+	 :publishing-function org-publish-attachment
+	 )
+
+	 ("css"
+         :base-directory "./css/"
+         :base-extension "css"
+         :publishing-directory "./www/css"
+         :publishing-function org-publish-attachment)
+	 
+	 ;("rb_mod_stoch" :components ("main" "td-pdf" "td-html" "td-attach" "cours-attach" "projet-html" "projet-attach" "css"))
+	 ;("rb_mod_stoch" :components ("main" "td-pdf" "td-html" "projet-html"))
+	 ("rb_mod_stoch" :components ("main"))
+
+      ))
+#+END_SRC
+:END:
+
+# ==============================================
+# Document starts here
+# ====================
+
+#+LATEX: \clearpage
+
+# Configuration de l'environnement                           
+# --------------------------------
+# Configuration de l'environnement                           
+# --------------------------------
+#+NAME: python-imports
+#+BEGIN_SRC python :exports none
+import os
+import sys
+import tqdm
+import time
+import numpy as np
+import datetime
+import pandas as pd
+import plotly.io as pio
+
+import pkg_resources
+installed_pkg = {pkg.key for pkg in pkg_resources.working_set}
+if 'ipdb' in installed_pkg:
+    import ipdb  # noqa: F401
+import importlib
+
+# Custom remote librairies
+import mosaic
+import mosaic.utils as mut
+import mosaic.backtest as mbt
+import mosaic.bot as mbo
+import mosaic.database as mdd
+import mosaic.decision_model as mdm
+#+END_SRC
+
+#+NAME: python-home-conf
+#+BEGIN_SRC python :exports none
+# Reload librairies in dev phase
+importlib.reload(mosaic)
+importlib.reload(mut)
+importlib.reload(mbt)
+importlib.reload(mbo)
+importlib.reload(mdd)
+importlib.reload(mdm)
+
+# TO BE ADAPTED IF NEEDED : Custom data PATH
+ONLINE_MODE = False
+
+if ONLINE_MODE:
+    client = mdd.DbClient(org="edgemind",
+                          url="http://callisto.edgemind.net:2086",
+                          token="-KRSutWAsQmri3hF8-g4HfD7EPLW1cAPU3k5ygRraETU5EHt846ibwN7LFjR53eK3X_djjvoaFfIUNk0UbT9GQ==")
+
+DATA_PATH = os.path.join("..", "data")
+FIG_PATH = os.path.join("..", "fig")
+
+config = {
+    "collection": "crypto",
+    "name": "ohlcv",
+    "tags": {
+        "period": "5m",
+        "exchange": "binance",
+        "base": "BTC",
+        "quote": "USDT",
+    },
+    "values": ["open", "high", "low", "close", "volume"],
+    "start_date": '2021-01-01 00:00:00',
+    "stop_date": '2023-01-01 00:00:00',
+}
+
+source = mdd.InfluxDataSource(**config)
+
+source_filename = os.path.join(
+    DATA_PATH,
+    f"{source.get_str_info()}_"\
+    f"{config['start_date']}_{config['stop_date']}.csv.bz2")
+
+if os.path.exists(source_filename) or (not ONLINE_MODE):
+    ohlcv_df = pd.read_csv(source_filename,
+                              index_col="time",
+                              parse_dates=["time"])
+else:
+
+    ohlcv_df = \
+        client.get_data(source,
+                        start=config["start_date"],
+                        stop=config["stop_date"])
+
+    ohlcv_df.to_csv(source_filename,
+                    index=True)
+
+print("Data loaded")
+#+END_SRC
+
+* À FAIRE                                                          :noexport:
+* Biblio                                                           :noexport:
+
+* Introduction
+   :PROPERTIES:
+   :CUSTOM_ID: introduction
+   :END:
+   
+Ce document décrit les fonctionnalités de backtesting de la librairie MOSAIC.
+   
+* Initialisation de l'environnement
+   :PROPERTIES:
+   :CUSTOM_ID: données-historiques-ohlcv
+   :END:
+
+#+BEGIN_SRC python :results silent :exports code :noweb yes
+<<python-imports>>
+#+END_SRC
+
+
+* Création d'un bot achat-vente RSI
+
+#+BEGIN_SRC python :session bot_rsi_simple :results silent :exports results :tangle bot_rsi_simple.py :noweb yes
+<<python-imports>>
+<<python-home-conf>>
+#+END_SRC
+
+** Création d'un modèle de décision
+
+La création d'un bot d'achat-vente demande au préalable de disposer d'un modèle de décision
+d'achat-vente.
+
+Un modèle de décision d'achat-vente a simplement pour objectif de générer des signaux d'achat et des
+signaux de vente en fonction d'une certaine logique.
+
+Dans cet exemple, nous allons utiliser le modèle de décision =DML_RSI2= qui génère les signaux
+d'achat et de vente en fonction des valeurs observées de l'indicateur RSI.
+#+BEGIN_SRC python :session bot_rsi_simple :results silent :exports results :tangle bot_rsi_simple.py
+dm = mdm.DML_RSI2(
+        offset=1,
+        params={
+            "window": 10,
+            "buy_level": 15,
+            "sell_level": 95,
+        })
+#+END_SRC
+Ce modèle de décision va utiliser l'indicateur RSI sur une fenêtre de taille 10 et va générer un
+signal d'achat si la valeur du RSI descend sous 15 et un signal de vente si la valeur du RSI monte
+au dessus de 95.
+
+Nous pouvons observer le comportement de la règle de décision grâce à la méthode =.compute= qui
+renvoie une =Series= de 1 (achats) ou 0 (ventes).
+#+BEGIN_SRC python :session bot_rsi_simple :results silent :exports code :tangle bot_rsi_simple.py
+# We suppose ohlcv_df is a DataFrame of OHLCV data.
+signals = dm.compute(ohlcv_df)
+# We can concat signals values with indicators value to check if computation is as expected
+indic_signals_df = pd.concat([dm.indic_s, signals], axis=1)
+indic_signals_df
+#+END_SRC
+#+BEGIN_SRC python :session bot_rsi_simple :results html :exports results
+indic_signals_df.head(20).style.format(precision=2, thousands=" ").to_html()
+#+END_SRC
+
+Nous pouvons également représenter graphiquement les signaux produits.
+#+BEGIN_SRC python :session bot_rsi_simple :results silent :exports code :tangle bot_rsi_simple.py
+fig = dm.plotly(ohlcv_df.head(300), layout={"title": "Signaux du DM RSI"})
+fig
+#+END_SRC
+#+BEGIN_SRC python :session bot_rsi_simple :results html :exports results
+pio.to_html(fig, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
+
+
+** Création du bot et backtesting
+
+Pour créer un bot reposant sur le modèle de décision créé précédemment, il faut initialiser un objet
+=BotLong= de la façon suivante :
+#+BEGIN_SRC python :session bot_rsi_simple :results silent :exports code :tangle bot_rsi_simple.py
+bot = mbo.BotLong(decision_model=dm)
+#+END_SRC
+
+Il est alors possible de backtester la stratégie sur les données disponibles en effectuant :
+#+BEGIN_SRC python :session bot_rsi_simple :results silent :exports code :tangle bot_rsi_simple.py
+bot.run_test(ohlcv_df)
+#+END_SRC
+
+** Analyse des résultats
+
+Une fois le backtesting réalisé, il est possible d'analyser les résultats obtenus.
+
+En particulier, l'attribut =.perf_test= contient un résumé des performances de la stratégie.
+#+BEGIN_SRC python :session bot_rsi_simple :results silent :exports code :tangle bot_rsi_simple.py
+bot.perf_test
+#+END_SRC
+#+BEGIN_SRC python :session bot_rsi_simple :results html :exports results
+pd.Series(bot.perf_test.dict()).to_frame().style.format(precision=2, thousands=" ").to_html(header=False)
+#+END_SRC
+Les attributs de l'objet =perf_test= sont :
+- =perf_asset= : La performance de l'asset sur la période (i.e. stratégie buy&hold de référence).
+- =nb_trades= : Le nombre de trades réalisé.
+- =trade_duration_mean=: Durée moyenne d'un trade.
+- =time_between_trades_mean=: Durée moyenne entre deux trades.
+- =perf_open_open= : Performance de la stratégie en considérant les prix d'achat et de vente à
+  l'ouverture des périodes concernées (hypothèse optimiste).
+- =perf_high_low= : Performance de la stratégie en considérant les prix d'achat et de vente,
+  respectivement au prix maximum et prix minimum des périodes concernées (hypothèse pessimiste).
+- =perf_rel_open_open= : Performance relative de la stratégie en mode open/open par rapport au
+  performance de l'asset.
+- =perf_rel_high_low= : Performance relative de la stratégie en mode high/low par rapport au
+  performance de l'asset.
+
+Nous pouvons également afficher la liste des trades réalisés avec l'attribut =.trades_test= :
+#+BEGIN_SRC python :session bot_rsi_simple :results silent :exports code :tangle bot_rsi_simple.py
+bot.trades_test
+#+END_SRC
+#+BEGIN_SRC python :session bot_rsi_simple :results html :exports results
+bot.trades_test.head(10).style.format(precision=5, thousands=" ").to_html()
+#+END_SRC
+
+Enfin, il est possible de visualiser graphiquement les performances de la stratégie comme suit :
+#+BEGIN_SRC python :session bot_rsi_simple :results silent :exports code :tangle bot_rsi_simple.py
+fig = bot.plotly_test(layout={"title": "Performance de la stratégie RSI simple"})
+fig
+#+END_SRC
+On enregistre la figure au format =html= :
+#+BEGIN_SRC python :session bot_rsi_simple :results silent :exports code :tangle bot_rsi_simple.py
+fig_filename = "bot_rsi_simple.html"
+fig.write_html(fig_filename)
+#+END_SRC
+Puis on ouvre ce fichier dans un navigateur : [[file:bot_rsi_simple.html]]
+
+
+
+* Références
+
+# [[Bibliography:../MOSAIC.bib]]
+
