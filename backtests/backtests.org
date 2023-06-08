@@ -354,7 +354,7 @@ signaux de vente en fonction d'une certaine logique.
 
 Dans cet exemple, nous allons utiliser le modèle de décision =DML_RSI2= qui génère les signaux
 d'achat et de vente en fonction des valeurs observées de l'indicateur RSI.
-#+BEGIN_SRC python :session bot_rsi_simple :results silent :exports results :tangle bot_rsi_simple.py
+#+BEGIN_SRC python :session bot_rsi_simple :results silent :exports code :tangle bot_rsi_simple.py
 dm = mdm.DML_RSI2(
         offset=1,
         params={
