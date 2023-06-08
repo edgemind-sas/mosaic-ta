@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr" xml:lang="fr">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Projet Modélisation et Optimisation StochAstIque des Cryptoactifs (MOSAIC)</title>
+<meta name="author" content="Roland Donat" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/readtheorg.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/js/readtheorg.js"></script>
+<link rel="stylesheet" type="text/css" href="https://edgemind-sas.github.io/visual-identity/official_docs/css/edgemind.css" />
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Projet Modélisation et Optimisation StochAstIque des Cryptoactifs (MOSAIC)</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table des matières</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orgda1977f">1. Contexte</a></li>
+<li><a href="#org6a28691">2. Objectifs</a></li>
+<li><a href="#org76130fb">3. Axes de recherche</a>
+<ul>
+<li><a href="#org671d623">3.1. Formalisation et modélisation probabiliste</a></li>
+<li><a href="#org78172b5">3.2. Analyse technique</a>
+<ul>
+<li><a href="#orgceaa181">3.2.1. Généralité</a></li>
+<li><a href="#orgab692d9">3.2.2. Indicateurs étudiés</a></li>
+</ul>
+</li>
+<li><a href="#orge47a258">3.3. Modèles décisionnels</a></li>
+<li><a href="#org460f994">3.4. Backtesting</a></li>
+</ul>
+</li>
+<li><a href="#org7b0f346">4. Références</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgda1977f" class="outline-2">
+<h2 id="orgda1977f"><span class="section-number-2">1.</span> Contexte</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+Une crypto-monnaie est une monnaie virtuelle qui opère indépendamment des banques et des
+gouvernements. La particularité des marchés de crypto-monnaies provient de sa décentralisation. Cela
+signifie que ces monnaies ne sont pas émises par une autorité centrale (un État par exemple) mais
+via des algorithmes exécutés sur un réseau informatique assurant leur cohérence et la sécurité des
+transactions. Ces marchés évoluent en fonction de l’offre et de la demande, mais, s’agissant de
+marchés décentralisés, ils sont souvent mieux protégés des changements économiques et politiques qui
+impactent généralement les devises traditionnelles <a href="stachtchenko_manuel_2022">stachtchenko_manuel_2022</a>.  
+</p>
+
+<p>
+Bien que le potentiel économique de ces nouvelles monnaies reste à évaluer, ces dernières offrent
+déjà à certains pays en développement une alternative de financement plus fiable qu’une monnaie
+traditionnelle gérée par des infrastructures bancaires ou des institutions étatiques
+défaillantes. Toutefois, de part leur jeunesse, le comportement des marchés de crypto-monnaies
+s’avère parfois très volatile. La gestion des risques de ces nouveaux actifs financiers apparaît
+donc comme un enjeu socio-économique fort pour les prochaines années.  
+</p>
+
+<p>
+Depuis 2014, la société EdgeMind développe des méthodes et des outils pour l’évaluation et la
+prévision des risques industriels. Pour ce faire, EdgeMind met en œuvre différentes techniques de
+machine learning et de simulation afin de modéliser le comportement dynamiques de systèmes complexes
+et anticiper l’occurrence de situations indésirables en fonction de l’évolution des contextes
+opérationnels. 
+</p>
+
+<p>
+La société EdgeMind cherche aujourd’hui à diversifier son activité en abordant le domaine des
+risques financiers, en se focalisant dans un premier temps sur les problématiques liées à l’analyse
+des cryptomonnaies et à la gestion d’actifs algorithmiques. En effet, qu’il soit question
+d’industrie ou de finance, les enjeux autour de la gestion d’actifs sont similaires, à savoir
+prévoir l’évolution future du système d’actifs considéré et déterminer un ensemble d’actions
+permettant d’agir sur ce système de manière à optimiser ses performances dans le temps. Par exemple,
+la maintenance prévisionnelle (ou prédictive) est une manière de valoriser les données
+opérationnelles afin d’optimiser la disponibilité d’un système d’actifs industriels. Dans la
+finance, les algorithmes de trading font de même pour valoriser un portefeuille d’actifs <a href="park_practical_2021">park_practical_2021</a>. Nous
+souhaitons donc dans ce projet expérimenter une partie des méthodes d’analyses prédictives
+développées pour la gestion des risques industriels sur le domaine des risques financiers.  
+</p>
+
+<p>
+Par ailleurs, contrairement au secteur industriel, les données sur les principaux actifs financiers
+sont disponibles à des niveaux d’échantillonnage élevés (de l’ordre de la seconde). Cette
+spécificité est particulièrement intéressante pour l’élaboration d’algorithmes d’aide à la décision
+auto-apprenants proches du temps réel, mais soulève dans le même temps de nombreux verrous
+scientifiques et techniques 
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6a28691" class="outline-2">
+<h2 id="org6a28691"><span class="section-number-2">2.</span> Objectifs</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Ce projet a pour objectif général l’élaboration d’une IA autonome capable de :
+</p>
+<ol class="org-ol">
+<li>évaluer les risques liés à la gestion de crypto-actifs (e.g. crypto-monnaies), i.e. prévoir les
+performances futures des actifs sur un horizon temporel donné ;</li>
+<li>prendre des décisions visant à optimiser les performances d’un portefeuille de crypto-actifs ;</li>
+<li>s'auto adapter en “temps réel” en fonction de l’évolution de contexte économique et sociétal courant.</li>
+</ol>
+</div>
+</div>
+
+
+<div id="outline-container-org76130fb" class="outline-2">
+<h2 id="org76130fb"><span class="section-number-2">3.</span> Axes de recherche</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-org671d623" class="outline-3">
+<h3 id="org671d623"><span class="section-number-3">3.1.</span> Formalisation et modélisation probabiliste</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+Qu’il s’agisse de prévoir l’évolution d’actifs traditionnels <a href="&amp;shen_stochastic_2020">&amp;shen_stochastic_2020</a> <a href="&amp;snow_machine_2020">&amp;snow_machine_2020</a>, ou de crypto-monnaies
+<a href="&amp;bouri_trading_2019">&amp;bouri_trading_2019</a> <a href="&amp;crone_exploration_2021">&amp;crone_exploration_2021</a> <a href="&amp;hansen_periodicity_2021">&amp;hansen_periodicity_2021</a>, les scientifiques travaillant sur l’élaboration de modèles probabilistes s’intéressent,
+pour la plupart, aux approches dites paramétriques. Ceci s’explique principalement par la simplicité
+de ces modèles et leur relative interprétabilité. En revanche, les approches paramétriques peinent à
+correctement représenter les comportements extrêmes d’actifs volatiles. Des articles récents ont
+montré l’intérêt des méthodes non-paramétriques afin de prévoir l’évolution du Bitcoin <a href="&amp;balcilar_can_2017">&amp;balcilar_can_2017</a>
+<a href="&amp;jimenez_semi-nonparametric_2022">&amp;jimenez_semi-nonparametric_2022</a>. Ces modèles, plus complexes, semblent difficilement compatibles avec la prise en compte de
+variables exogènes permettant d’expliquer le comportement des actifs considérés.   
+Notre objectif est de lever la limitation précédente en proposant une approche non-paramétrique
+discrète (la distribution des rendements des actifs est discrétisée). À notre connaissance, cette
+approche n’a pas été expérimentée dans le cadre des cryto-actifs et possèdent l’avantage d’être
+compatible avec des techniques de modélisation probabilistes pertinentes (e.g. techniques
+bayésiennes) pour répondre à la problématique.
+</p>
+
+<p>
+Par ailleurs, nous introduisons certaines <a href="notions_bases.html">notions fondamentales</a>, notamment autour du calcul des
+rendements, qui serviront de base commune aux dévelppements ultérieurs.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org78172b5" class="outline-3">
+<h3 id="org78172b5"><span class="section-number-3">3.2.</span> Analyse technique</h3>
+<div class="outline-text-3" id="text-3-2">
+</div>
+<div id="outline-container-orgceaa181" class="outline-4">
+<h4 id="orgceaa181"><span class="section-number-4">3.2.1.</span> Généralité</h4>
+<div class="outline-text-4" id="text-3-2-1">
+<p>
+Dans le domaine de l’analyse des marchés financiers, l'analyse technique correspond à un ensemble
+d'outils dont le but est de prédire les rendements futurs des actifs financiers en étudiant
+l’historique des données de marché disponibles, principalement le cours et le volume des actifs
+considérés <a href="&amp;yamamoto_intraday_2012">&amp;yamamoto_intraday_2012</a>.  Dans l’article de revue de littérature sur l’analyse technique <a href="&amp;farias_nazario_literature_2017">&amp;farias_nazario_literature_2017</a>, les auteurs
+listent les principales méthodologies d’analyses mises en œuvre depuis une cinquantaine d’années.  
+La grande majorité des méthodologies présentées reposent sur la construction d’indicateurs
+particuliers jugés pertinents par leurs auteurs (e.g. <a href="&amp;hassanniakalager_trading_2021">&amp;hassanniakalager_trading_2021</a>, <a href="&amp;bao_intelligent_2008">&amp;bao_intelligent_2008</a>). Toutefois, l’évaluation de ces
+indicateurs n’est réalisée que sur la base de backtesting empiriques sur des périodes choisies
+arbitrairement et relativement courtes lorsqu’il s’agit d’analyse intra-journalière.  
+Comme les auteurs de l’article <a href="&amp;farias_nazario_literature_2017">&amp;farias_nazario_literature_2017</a>, nous partageons le constat que l’évaluation des performances de
+l’analyse technique nécessite une consolidation mathématique. Pour ce faire, nous proposons de
+développer une <a href="indicator_analysis.html">stratégie d’évaluation des indicateurs techniques innovante</a> fondée sur l’analyse de
+la distribution conditionnelle des rendements par rapport aux indicateurs observés.
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgab692d9" class="outline-4">
+<h4 id="orgab692d9"><span class="section-number-4">3.2.2.</span> Indicateurs étudiés</h4>
+<div class="outline-text-4" id="text-3-2-2">
+<ul class="org-ul">
+<li><a href="indic/indic_gh.html">Marteau généralisé</a></li>
+<li><a href="indic/indic_mvl.html">Niveau de volume mobile</a></li>
+<li><a href="indic/indic_rsi.html">RSI</a></li>
+<li><a href="indic/indic_sri.html"><i>Support Range Index</i></a></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orge47a258" class="outline-3">
+<h3 id="orge47a258"><span class="section-number-3">3.3.</span> Modèles décisionnels</h3>
+</div>
+
+<div id="outline-container-org460f994" class="outline-3">
+<h3 id="org460f994"><span class="section-number-3">3.4.</span> Backtesting</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+<a href=".backtests/backtests.html">Documentation sur la partie backtesting</a>.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7b0f346" class="outline-2">
+<h2 id="org7b0f346"><span class="section-number-2">4.</span> Références</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+<a href="MOSAIC.bib">MOSAIC.bib</a>
+</p>
+</div>
+</div>
+</div>
+</body>
+</html>
