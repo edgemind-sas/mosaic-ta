@@ -1,0 +1,761 @@
+# -*- coding: utf-8 -*-
+#+TITLE: Prévision des variations du bitcoin en fonction d'indicateurs techniques à partir de régression linéaire
+#+AUTHOR: Roland Donat
+#+DATE: Projet MOSAIC
+
+# ==============================================
+# Document Configuration
+# ======================
+# Orgmode
+:CONFIG:
+#+LANGUAGE: fr
+#+OPTIONS: H:3 num:nil toc:t \n:nil @:t ::t |:t ^:{} f:t TeX:t author:t d:nil timestamp:nil
+#+OPTIONS: html-postamble:nil
+#+STARTUP: content 
+#+STARTUP: hidestars
+#+DRAWERS: CONFIG OPTIONS CACHE MACROS
+#+TODO: TODO(t) INPROGRESS(p) | DONE(d)
+#+BIND: org-latex-table-scientific-notation "{%s}E{%s}"
+#+export_file_name: index.html
+:END:
+
+# HTML
+# ----
+:CONFIG:
+# Org HTML Macros
+#+MACRO: NEWLINE @@latex:\\@@ @@html:<br>@@
+#+MACRO: HTMLFONTSIZE @@html:<font size="$2">$1</font>@@
+#+MACRO: SUBTITLE @@html:<div class="slidesubtitle">$1</div>@@
+
+# HTML options
+# ------------
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://edgemind-sas.github.io/visual-identity/official_docs/css/edgemind.css" />
+:END:
+
+# ==============================================
+# Document starts here
+# ====================
+
+#+ATTR_HTML: :width 50% :alt woman doing algorithmic trading with many computer, colorful detailed, white background
+#+CAPTION: Image générée par Midjourney
+[[./crypto_trading.png]]
+
+
+* Contexte et objectifs du projet
+
+Le bitcoin, une monnaie numérique décentralisée, fonctionne indépendamment de toute banque ou
+gouvernement. Il n'est pas émis par une autorité centrale, mais plutôt par des algorithmes exécutés
+sur un réseau informatique qui garantissent sa cohérence et la sécurité des transactions. Son
+potentiel économique est encore sous-évalué, mais le bitcoin a déjà fourni une alternative de
+financement pertinente à certains pays en développement par rapport aux monnaies traditionnelles
+contrôlées par des infrastructures bancaires ou des institutions étatiques. Cependant, la volatilité
+du bitcoin est parfois extrême, et comprendre ses fluctuations est un enjeu socio-économique majeur
+pour l'avenir.
+
+* Travaux à réaliser
+  :PROPERTIES:
+  :CUSTOM_ID: sec-sujets
+  :END:
+
+Le but de ce projet est d'étudier l'influence d'indicateurs techniques financiers sur la
+valorisation du bitcoin (BTC). Cela sera fait en utilisant des outils d'analyse technique, qui sont
+généralement utilisés pour prédire les rendements futurs des actifs financiers en étudiant les
+données de marché historiques.
+
+** Tâches à accomplir
+
+- *Analyse descriptive univariée des variations de la cotation du BTC* : Comprendre la distribution des
+  rendements, évaluer la volatilité sur différentes périodes (hebdomadaire, mensuelle, annuelle,
+  intra-journalière), etc. 
+- *Analyse descriptive multivariée des variations du BTC* : Explorer l'influence des indicateurs
+  techniques financiers sélectionnés sur les variations de la cotation du BTC. 
+- *Développement d'un ou plusieurs modèles explicatifs pour les variations du BTC* : Créer des modèles
+  qui peuvent expliquer les variations du BTC en fonction des indicateurs techniques, par exemple à
+  partir de régressions linéaires.
+- *Évaluation des performances prédictives des modèles mis en œuvre* : Évaluer la capacité des modèles
+  développés à prédire les variations du BTC. 
+
+** Outils et compétences nécessaires
+
+Le travail est à réaliser avec le langage Python. Une montée en compétences est donc attendue en
+programmation Python, particulièrement sur la bibliothèque Pandas. En outre, il sera important de se
+familiariser avec le domaine de l'analyse financière pour 
+comprendre comment les indicateurs techniques sont utilisés pour analyser et prédire les variations
+du marché. 
+
+# Le travail attendu dans ce projet est le suivant :
+# - Réaliser une analyse descriptive univariée des variations de la cotation du BTC (e.g. distribution des
+#   rendements, volatilité hebdomadaire, mensuelle, annuelle, intra-journalière, etc.). 
+# - Analyse descriptive multivariée des variations du BTC en fonction des indicateurs techniques considérés.
+# - Développement d’un ou plusieurs modèles explicatifs pour les variations du BTC.
+# - Évaluation des performances prédictives des modèles mis en œuvre.
+
+# Du point de vue technique, les développements sont à réaliser avec le langage Python. 
+
+# Pour ce faire, une montée en compétences sur les sujets suivants est à réaliser : 
+#   - le domaine de l'analyse financière ;
+#   - la programmation Python ;
+#   - l'utilisation de la librairie Pandas.
+
+* Présentation des données
+
+#+BEGIN_SRC python :session pres_data :results silent :exports results
+import plotly.io as pio
+#+END_SRC
+
+L'évolution de la cotation d'un actif au cours du temps est usuellement
+présentée sous la forme de données, dites au format OHLCV (de l'anglais
+/open/, /high/, /low/, /close/, /volume/). Il s'agit d'un format
+pratique permettant de représenter des séries temporelles d'une manière
+particulière. En effet, le format OHLC (la partie volume n'est pas
+concernée par la subtilité du format) représente l'évolution d'une
+mesure au cours d'intervalles de temps réguliers successifs caractérisés
+par une période d'échantillonnage notée $\Delta t$ (e.g. une minute,
+cinq minutes, une heure, une journée, etc).
+
+Typiquement, les données OHLCV contiennent les variables suivantes : 
+- =timestamp= : timestamp caractérisant le début de la période de mesure (par exemple exprimé en
+  millisecondes), la fin étant déterminée par la période d'échantillonnage $\Delta t$ utilisée. 
+- =open= : valeur de l'actif au début de la période. 
+- =high= : valeur maximum de l'actif atteinte sur la période. 
+- =low= : valeur mimimum de l'actif atteinte sur la période. 
+- =close= : valeur de l'actif à la fin de la période. 
+- =volume= : montant cumulé des ventes et des achats de l'actif sur la période.
+
+Il est courant de visualiser les données OHLC à l'aide du graphique, dit
+en chandeliers. En fonction, des valeurs d'ouverture (/open/) et de
+fermeture (/close/), on parle également de chandeliers haussiers et
+baissiers, cf. Figure ref:fig-candles.
+
+#+NAME: fig-candles
+#+CAPTION: Représentation du symbole de chandelier.
+[[./candle.jpg]]
+
+Dans un diagramme en chandelier, on retrouve les données OHLC mais
+également les notions de : 
+- corps (/body/) représentant la distance entre la cotation d'ouverture et de fermeture de l'actif
+  sur une période ; 
+- mèches ou ombres supérieures (/upper shadow/) représentant la distance entre la partie haute du
+  corps et la cotation la plus haute sur une période ; 
+- mèches ou ombres inférieures (/lower shadow/) représentant la distance entre la partie basse du
+  corps et la cotation la plus basse sur une période ;
+
+
+*Dans ce projet nous allons travailler sur les données de cotation du Bitcoin (BTC) par rapport au
+Dollar (USDT) échantillonnées à une période de 5 minutes sur les années 2021 et 2022.*
+
+Le fichier de données est accessible en suivant ce [[file:btc_5m_2021_2022.csv.bz2][lien de téléchargement]]. Le tableau suivant donne
+un aperçu des 25 premières minutes de cotations du BTC/USDT de l'année 2021.
+#+BEGIN_SRC python :session pres_data :results silent :exports code :tangle pres_data.py
+import pandas as pd
+
+ohlcv_df = pd.read_csv("btc_5m_2021_2022.csv.bz2",
+                       compression="bz2",
+                       index_col="time")
+ohlcv_df
+#+END_SRC
+
+#+BEGIN_SRC python :session pres_data :results html :exports results :tangle pres_data.py                       
+ohlcv_df.head().style.format(precision=2, thousands=" ").to_html()
+#+END_SRC
+
+#+RESULTS:
+
+Par exemple, la première ligne du tableau signifie que le 01/01/2021 :
+
+- à 00:00:00, le prix d'un BTC était de src_python[:session pres_data]{ohlcv_df.loc["2021-01-01 00:00:00+00:00", "open"]} USDT ;
+- à 00:05:00, le prix d'un BTC était de src_python[:session pres_data]{ohlcv_df.loc["2021-01-01 00:00:00+00:00", "close"]} USDT (cotation de fermeture
+  de la période de 00:00:00 et cotation d'ouverture de la période 00:05:00) ;
+- entre 00:00:00 et 00:05:00 le prix d'un BTC est passé par un minimum de
+  src_python[:session pres_data]{ohlcv_df.loc["2021-01-01 00:00:00+00:00", "low"]} USDT et un
+  maximum de src_python[:session pres_data]{ohlcv_df.loc["2021-01-01 00:00:00+00:00", "high"]} USDT.
+
+*Note :* Le marché BTC/USDT étant ouvert 24h/24 et 7j/7, nous devrions observer
+$\text{close}(t-1)$ égale à $\text{open}(t)$ pour tout $t$. Toutefois,
+la collecte des données n'étant pas instantanée, il est fréquent
+d'observer de légères différences entre le cours d'ouverture de la
+période courante et le cours de fermeture de la période précédente.
+
+* Notations mathématiques
+   :PROPERTIES:
+   :CUSTOM_ID: notations-mathématiques
+   :END:
+
+** Notions temporelles
+    :PROPERTIES:
+    :CUSTOM_ID: notions-temporelles
+    :END:
+
+Nous avons introduit précédemment la période d'échantillonnage des
+données $\Delta t$. On note également $t_{0}$ la première date
+d'échantillonnage. Dans l'exemple de données précédent, on rappelle que
+$\Delta t = 5$ minutes et que $t_{0} =$ 2021-01-01 00:00:00.
+
+Nous introduisons ensuite l'indice $p \ge 0$ permettant de référencer la
+$p$ -ème période d'observation des données (cf. Figure ref:fig-ohlcv_period), i.e. entre
+$t_{0} + p\Delta t$ et $t_{0} + (p+1)\Delta t$. En reprenant l'exemple
+précédent, on a :
+- 1er période d'observation $p = 0$ : période entre 2021-01-01 00:00:00 et 2021-01-01 00:05:00 ;
+- 5ème période d'observation $p = 4$ : période entre 2021-01-01 00:20:00 et 2021-01-01 00:25:00.
+
+#+NAME: fig-ohlcv_period
+#+CAPTION: Notion de période sur les données OHLCV.
+[[./ohlcv_period.png]]
+
+  
+Les données OHLCV sont notées dans la suite comme suit :
+- $\text{o}_{p}$ : cotation de l'actif à l'ouverture de la période $p$, i.e. à $t = t_{0} +  p\Delta
+  t$ ;
+- $\text{c}_{p}$ : cotation de l'actif à la fermeture de la période $p$, i.e. à $t = t_{0} +
+  (p+1)\Delta t$ ;
+- $\text{h}_{p}$ : cotation maximum de l'actif sur la période $p$ ;
+- $\text{l}_{p}$ : cotation mimimum de l'actif sur la période $p$ ;
+- $\text{v}_{p}$ : volume échangé de l'actif la période $p$.
+
+** Rendements
+    :PROPERTIES:
+    :CUSTOM_ID: rendements
+    :END:
+
+On note enfin $r_{p}$ la variation relative de la cotation d'un actif
+entre deux périodes consécutives, on parle également de rendement (ou
+/returns/ en anglais) sur la période $p$. Nous avons donc pour tout
+$p \ge 1$ :
+#+NAME: eq-def-returns
+\begin{equation}
+r_{p} = \frac{\text{c}_{p}}{\text{c}_{p - 1}} - 1.
+\end{equation}
+La quantité $r_{p}$ est donc positive si le BTC gagne en valeur par
+rapport à l'USDT sur la période $p$ et négative sinon. Le rendement
+représente l'indicateur principal au coeur de toutes les analyses
+financières réalisées sur un actif donné.
+
+La définition eqref:eq-def-returns porte sur un rendement entre deux
+périodes successives. Cette définition peut être étendue entre deux périodes $p$ et $p + k$
+données (cf. Figure ref:fig_rho_c_p_k) comme suit :
+\begin{equation}
+\rho_{p + k} = \frac{\text{c}_{p + k}}{\text{c}_{p-1}} - 1,
+\end{equation}
+avec $k \ge 0$ un nombre entier permettant de définir le nombre
+de périodes futures à prendre en compte pour le calcul du rendement.
+
+#+NAME: fig_rho_c_p_k
+#+CAPTION: Illustration graphique du calcul d'un rendement de clôture.
+[[./rho_c_p_k.png]]
+
+*Exemples*
+
+Nous illustrons les définitions précédentes sur l'extrait de cotation BTC/USDT suivant.
+#+BEGIN_SRC python :session pres_data :results silent :exports code :tangle pres_data.py
+import plotly.graph_objects as go
+
+ohlcv_ex_df = ohlcv_df.head(10)
+fig = go.Figure()
+fig.add_trace(go.Candlestick(x=ohlcv_ex_df.index,
+                             open=ohlcv_ex_df["open"],
+                             high=ohlcv_ex_df["high"],
+                             low=ohlcv_ex_df["low"],
+                             close=ohlcv_ex_df["close"], name="OHLC"))
+fig.update_layout(title="Exemple de données OHLC sur l'actif BTC/USDT",
+                  yaxis_title="USDT",
+                  xaxis_title="Temps",
+                  xaxis_rangeslider_visible=False)
+
+fig
+#+END_SRC
+
+#+NAME: fig_ohlcv_ex
+#+BEGIN_SRC python :session pres_data :results html :exports results 
+pio.to_html(fig, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
+
+
+Le calcul général du rendement de clôture à $p + k$ avec =Pandas= repose sur la méthode =.shift= :
+#+BEGIN_SRC python :exports code :eval no
+rho_pk = ohlcv_df["close"].shift(-k)/ohlcv_df["close"].shift(1) - 1
+#+END_SRC
+Un calcul alternatif équivalent utilise la méthode =.pct_change= :
+#+BEGIN_SRC python :exports code :eval no
+rho_pk = ohlcv_df["close"].pct_change(k+1).shift(-k)
+#+END_SRC
+Même si à notre niveau les deux méthodes précédentes sont identiques, on privilégiera dans la suite
+l'utilisation de la méthode =.pct_change= car cette dernière possède une meilleure précision
+numérique. 
+
+Calculons les rendements à $p$ et $p + 2$ :
+#+BEGIN_SRC python :session pres_data :results silent :exports code :tangle pres_data.py
+#rho_p = (ohlcv_ex_df["close"].shift(0)/ohlcv_ex_df["close"].shift(1) - 1).rename("returns")
+#rho_p2 = (ohlcv_ex_df["close"].shift(-2)/ohlcv_ex_df["close"].shift(1) - 1).rename("returns_2")
+
+rho_p = ohlcv_ex_df["close"].pct_change(1).shift(0).rename("returns")
+# => équivalent à écrire rho_p = ohlcv_ex_df["close"].pct_change().rename("returns")
+
+rho_p2 = ohlcv_ex_df["close"].pct_change(3).shift(-2).rename("returns_2")
+
+rho_p_p2 = pd.concat([rho_p, rho_p2], axis=1)
+rho_p_p2
+#+END_SRC
+
+#+BEGIN_SRC python :session pres_data :results html :exports results
+rho_p_p2.style.format('{0:.3%}',  na_rep='').to_html()
+#+END_SRC
+
+En prenant la période $p$ = 2021-01-01T00:05:00 et un horizon $k = 0$,
+le rendement de clôture $\rho_{p} = r_{p}$ correspond au
+rapport entre la clôture de la période 2021-01-01T00:05:00 et la clôture
+de la période 2021-01-01T00:00:00, soit :
+$$
+\rho_{p} = \frac{\text{c}_{p}}{\text{c}_{p-1}} = \frac{28858.94}{28975.65} - 1 \simeq -0.004028 \simeq -0.403 \%
+$$
+
+En prenant la période $p$ = 2021-01-01T00:10:00 et un horizon $k = 2$,
+le rendement de clôture $\rho_{p+2}$ correspond au rapport
+entre la clôture de la période 2021-01-01T00:20:00 et la clôture de la
+période 2021-01-01T00:05:00, soit :
+$$
+\rho_{p + 2} = \frac{\text{c}_{p+2}}{\text{c}_{p-1}} = \frac{28846.46}{28858.94} - 1 \simeq -0.000432 \simeq -0.043 \%
+$$
+
+*Propriété*
+
+Le rendement de clôture entre la période $p$ et la période $p + k$, noté $\rho_{p + k}$,
+s'exprime en fonction des rendements $r_{p}, \ldots, r_{p+k}$ (cf. Équation eqref:eq-def-returns)
+comme suit :
+\begin{equation}
+\rho_{p + k} = \prod_{i = 1}^{k} (r_{p + i} + 1) - 1
+\end{equation}
+
+Ce résultat classique s'obtient en remarquant que :
+\begin{align}
+\rho_{p + k} + 1 & = \frac{\text{c}_{p + k}}{\text{c}_{p-1}} \\
+& = \frac{\text{c}_{p}}{\text{c}_{p - 1}} \frac{\text{c}_{p + 1}}{\text{c}_{p}} \ldots \frac{\text{c}_{p + k}}{\text{c}_{p + k - 1}} \\
+& = (r_{p} + 1) (r_{p+1} + 1) \ldots (r_{p+k} + 1)
+\end{align}
+
+
+* Quelques ressources à consulter
+
+L'objectif du projet consiste à expliquer les rendements futurs de la cotation BTC/USDT. En effet,
+prévoir avec un bon niveau de précision les prochaines variations de la cotation du BTC/USDT,
+permettrait d'élaborer des stratégies d'investissement rentables. Dans le domaine de la finance des
+marchés, ce travail est réalisé par les analystes quantitatifs (également appelés /quant/).
+
+Voici quelques ressources à consulter afin de montée en compétences dans le domaine de l'analyse
+financière et du bitcoin :
+- [[https://www.youtube.com/watch?v=du34gPopY5Y][Le Bitcoin et la Blockchain]]
+- [[https://www.youtube.com/watch?v=XE7FKLfZzBA][La formule qui a radicalement transformé la finance mondiale [Black-Scholes]]
+- [[https://www.youtube.com/watch?v=MrsjMiL9W9o][Krachs Boursiers & Tremblements De Terre]]
+- [[https://www.youtube.com/watch?v=If5knyqF_0E][Les bases de L'analyse Technique]]
+- [[https://www.youtube.com/watch?v=SinQRCKY328][Trading RSI sur le Bitcoin]]
+  
+À la lumière ces nouvelles connaissances, il peut être intéressant de relire la Section
+ref:notations-mathématiques.
+
+*Question à méditer* :
+En supposons que l'on dispose d'un modèle permettant, à chaque période $p$, de prévoir le rendement
+  du BTC/USDT à $k$ unités de temps dans le futur, i.e. $\rho_{p+k}$. Comment pourriez-vous utiliser cette
+  information pour investir dans ce marché ? 
+
+* Démarche générale d'analyse
+
+#+BEGIN_SRC python :session start :results silent :exports results
+import plotly.io as pio
+#+END_SRC
+
+Les paragraphes suivants présente une démarche d'analyse statistique générale d'un actif financier appliquée dans
+le cas de l'analyse de la cotation BTC/USDT.
+
+** Construction de la variable cible
+
+Dans notre problématique, la variable cible (c.-à-d. la variable à prédire) représente les rendements futurs du BTC/USDT. Dans un
+premier temps, il est donc nécessaire de décider de l'horizon futur des rendements à 
+prévoir. Prenons un exemple en considérant un horizon d'une heure. Sachant que les données utilisées
+sont échantillonnées avec une période de 5 min, il faut calculer à chaque période $p$ le rendement à
+$p + k$ où $k = 60~\text{min} / 5~\text{min} = 12$.
+
+Commençons par charger les données.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+import pandas as pd
+
+ohlcv_df = pd.read_csv("btc_5m_2021_2022.csv.bz2",
+                       compression="bz2",
+                       index_col="time")
+#+END_SRC
+
+Calculons ensuite les rendements futurs sur un horizon de 1 heure (soit $k=12$ unités de temps).
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+k_horizon = 12
+returns = ohlcv_df["close"].pct_change(k_horizon+1).shift(-k_horizon).rename(f"r{k_horizon}")
+#+END_SRC
+
+** Analyse descriptive univariée
+Nous pouvons alors faire une analyse univariée rapide de notre variable cible.
+
+*Statistiques de base :*
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+returns.describe()
+#+END_SRC
+
+#+BEGIN_SRC python :session start :results html :exports results
+returns.describe().to_frame().style.format('{0:.5}',  na_rep='').to_html()
+#+END_SRC
+
+#+RESULTS:
+#+begin_export html
+#+end_export
+
+*Premières valeurs (1 semaine = 2016*5 min)*
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+import plotly.express as px
+
+fig_returns = px.line(returns.head(2016), title=f"Rendements du BTC/USDT à p+{k_horizon}",
+                      markers=True,
+                      labels=dict(
+                          value=returns.name))
+fig_returns.update_layout(showlegend=False)
+fig_returns
+#+END_SRC
+#+BEGIN_SRC python :session start :results html :exports results
+pio.to_html(fig_returns, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
+
+
+*Distribution*
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+import plotly.express as px
+
+fig_returns_hist = px.histogram(returns, title="Distribution des rendements du BTC/USDT à p+12",
+                                labels=dict(value=returns.name))
+fig_returns_hist.update_layout(showlegend=False)
+fig_returns_hist
+#+END_SRC
+
+#+BEGIN_SRC python :session start :results html :exports results
+pio.to_html(fig_returns_hist, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
+
+*Question à méditer* :
+En tant qu'analyste quantitif, que vous apprennent ces premières analyses sur les
+rendements du BTC/USDT sur un horizon futur de 1h ?
+
+
+** Création des variables explicatives
+
+Dans ce projet, nous proposons d'expliquer les variations du BTC/USDT à partir d'indicateurs
+techniques financiers. Il existe un très grand nombre d'indicateurs techniques utilisés
+classiquement dans le domaine de la finance. Parmi les plus connus, on trouve :
+- le [[https://fr.wikipedia.org/wiki/Relative_strength_index][RSI]] (/Relative Strength Index/) ;
+- le [[https://fr.wikipedia.org/wiki/MACD][MACD]] (/Moving Average Convergence Divergence/) ;
+- les [[https://fr.wikipedia.org/wiki/Bandes_de_Bollinger][Bandes de Bollinger]] ;
+- le [[https://fr.wikipedia.org/wiki/Stochastique_(analyse_technique)][Stochastique]].
+
+Tous ces indicateurs se calculent à partir des données OHLCV du BTC/USDT disponibles. De plus, la
+librairie =pandas_ta= (=pip install pandas_ta=) met à disposition les fonctions de calcul des principaux indicateurs
+techniques.
+
+
+*** Calcul de l'indicateur RSI
+
+Le RSI est un indicateur technique permettant d'évaluer la vitesse et le changement des mouvements
+de prix d'un actif. Le RSI oscille entre 0 et 100 et est principalement utilisé pour identifier les
+conditions de surachat et de survente. Si l'indicateur RSI est grand (e.g. supérieur à 70), cela
+suggère que l'actif est suracheté, ce qui signifie que le prix pourrait baisser à l'avenir. En
+revanche, si l'indicateur est faible (e.g. inférieur à 30), cela peut indiquer que l'actif est
+survendu et que le prix pourrait augmenter. 
+
+L'indicateur RSI possède un paramètre appelé période ou fenêtre du RSI. Ce paramètre détermine le
+nombre de périodes (dans notre cas une période = 5 min) à prendre en compte pour le calcul de
+l'indicateur. La période du RSI influence la sensibilité de l'indicateur. Une période plus courte
+rendra le RSI plus sensible aux variations de prix, produisant plus de signaux de surachat et de
+survente. En revanche, une période plus longue rendra le RSI moins sensible, produisant moins de ces 
+signaux, et dans ce cas, ces derniers peuvent être considérés comme plus fiables. 
+
+*Notes :*
+1. comme tous les indicateurs techniques, le RSI n'est pas parfait et ne permet pas à lui seul de
+   prédire le cours futur d'un actif. En revanche, il peut être intéressant de mesurer son pouvoir
+   explicatif, puis de l'utiliser en conjonction avec d'autres indicateurs techniques.
+2. Il n'y a pas de "meilleure" période de RSI universelle ; le choix dépend de la stratégie
+   d'investissement, de la volatilité de l'actif, et d'autres facteurs. Il est toujours recommandé
+   de tester différentes périodes pour voir laquelle fonctionne le mieux pour la stratégie
+   d'investissement considérée.
+
+Calculons par exemple le RSI avec une fenêtre de 25 minutes (i.e. 5 périodes de 5 min). 
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+import pandas_ta as ta
+
+# Calcul du RSI avec une fenêtre d'un 25min (5 périodes de 5 minutes)
+rsi = ta.rsi(ohlcv_df['close'], length=5)
+rsi
+#+END_SRC
+*Notes :*
+Pour calculer le RSI, vous devez avoir au moins autant de points de données que la taille
+de la fenêtre spécifiée. Ceci explique pourquoi les 5 premières valeurs de la =Series= =rsi= sont
+à =NaN=.
+
+Visualisation du RSI(5) sur 1 semaine = 2016*5 min.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+fig_rsi = px.line(rsi.head(2016), title=f"{rsi.name}",
+                  markers=True,
+                  labels=dict(
+                      value=rsi.name))
+fig_rsi.update_layout(showlegend=False)
+fig_rsi.update_yaxes(range=[0, 100])
+fig_rsi
+#+END_SRC
+#+BEGIN_SRC python :session start :results html :exports results
+pio.to_html(fig_rsi, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
+
+
+À ce stade, nous pouvons créer un =DataFrame= qui contiendra tous les indicateurs que nous souhaitons utiliser
+pour prédire les rendements du BTC/USDT :
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+indics_df = pd.DataFrame(index=ohlcv_df.index)
+#+END_SRC
+
+Ajoutons des indicateurs RSI en changeant la fenêtre de calcul :
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+indics_df.ta.rsi(close=ohlcv_df["close"], length=5, append=True)
+indics_df.ta.rsi(close=ohlcv_df["close"], length=10, append=True)
+indics_df.ta.rsi(close=ohlcv_df["close"], length=30, append=True)
+indics_df
+#+END_SRC
+
+
+*** Calcul de l'indicateur MFI
+
+Le [[https://en.wikipedia.org/wiki/Money_flow_index][Money Flow Index (MFI)]] est un indicateur
+variant entre 0 et 100 mesurant la pression d'achat et de vente en tenant compte 
+à la fois des prix et des volumes. Un MFI élevé (proche de 100) est généralement considéré comme
+synonyme d'un actif suracheté, tandis qu'un MFI faible (proche de 0) est généralement considéré
+synonyme d'un actif survendu.
+
+Calculons l'MFI sur une fenêtre de 10 unités de temps.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+import pandas_ta as ta
+
+mfi = ta.mfi(close=ohlcv_df['close'],
+             high=ohlcv_df['high'],
+             low=ohlcv_df['low'],
+             volume=ohlcv_df['volume'],
+             length=10)
+#+END_SRC
+*Notes :*
+Le calcul de l'MFI nécessite les prix de clôture, du minimum, du maximum et les volumes échangés à
+chaque période. 
+
+Visualisation du MFI sur 1 semaine = 2016*5 min.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+fig_mfi = px.line(mfi.head(2016), title=f"{mfi.name}",
+                  markers=True,
+                  labels=dict(
+                      value=mfi.name))
+fig_mfi.update_layout(showlegend=False)
+fig_mfi.update_yaxes(range=[0, 100])
+fig_mfi
+#+END_SRC
+#+BEGIN_SRC python :session start :results html :exports results
+pio.to_html(fig_mfi, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
+
+
+Calcul de différents indicateurs MFI en changeant la fenêtre de calcul :
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+length_list = [5, 10, 30]
+for length in length_list:
+    indics_df.ta.mfi(close=ohlcv_df['close'],
+                     high=ohlcv_df['high'],
+                     low=ohlcv_df['low'],
+                     volume=ohlcv_df['volume'],
+                     length=length,
+                     append=True)
+#+END_SRC
+
+
+
+*** Analyse exploratoire multivariée
+
+Dans ce projet, le but de l'analyse exploratoire multivariée consiste à identifier d'éventuelles
+liens entre les variables explicatives retenues et la
+variable cible (rendements à 1h).
+
+Pour ce faire, nous pouvons réaliser une analyse visuelle avec un diagramme en paires.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+fig_pairs = px.scatter_matrix(
+    pd.concat([indics_df, returns], axis=1).head(10000),
+    color=f"r{k_horizon}",
+    title="Diagramme en paire")
+fig_pairs
+#+END_SRC
+#+BEGIN_SRC python :session start :results html :exports results
+pio.to_html(fig_pairs, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
+
+
+*Questions :*
+- Quelles sont les informations à retenir de cette première analyse visuelle ?
+- Par quelle(s) méthode(s) poursuivre l'analyse multivariée ? 
+
+
+** Réalisation d'un premier modèle de régression linéaire
+
+*Questions :*
+- Les variables explicatives sont de quelle(s) nature(s) ?
+- Quelle est la nature de la variable cible ?
+- Quels méthodes de modélisation statistiques connaissez-vous qui seraient adaptées à cette
+  situation ?
+
+
+Nous choisissons d'expliquer les rendements à $p + 12$ (soit les rendements a 1 heure dans le futur)
+à partir d'indicateurs RSI et MFI en utilisant une régression linéaire. On pose donc l'hypothèse
+suivante :
+$$
+\text{r12} = \alpha_{0} + \alpha_{2} \text{RSI5} + \alpha_{3}
+\text{RSI10} + \alpha_{4}\text{RSI30}+ \alpha_{5} \text{MFI5} + \alpha_{6}
+\text{MFI10} + \alpha_{7}\text{MFI30}
+$$
+où $\alpha_{0}, \alpha_{1}, \ldots, \alpha_{7}$ sont les paramètres de régression à estimer à partir
+des données.
+
+Pour ce faire, nous utilisons la librairie =statsmodels= (=pip install statsmodels=).
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+import statsmodels.api as sm
+#+END_SRC
+
+La régression linéaire est mise en oeuvre grâce à la classe =OLS= comme suit :
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+var_target = f"r{k_horizon}"
+var_features = list(indics_df.columns)
+
+data_all = pd.concat([indics_df, returns], axis=1).dropna()
+
+# Ajout d'une colonne de 1 afin d'ajouter le paramètre $\alpha_{0}$
+features_df = sm.add_constant(data_all[var_features])
+target = data_all[var_target]
+
+mod1 = sm.OLS(target, features_df)
+mod1_res = mod1.fit()
+mod1_res.summary()
+#+END_SRC
+#+BEGIN_SRC python :session start :results html :exports results
+mod1_summary_df = pd.DataFrame({"Coefficient": mod1_res.params,
+                                "Écart-type": mod1_res.bse,
+                                "p-values": mod1_res.pvalues})
+
+conf_int = mod1_res.conf_int()
+mod1_summary_df['IC  2.5%'] = conf_int[0]
+mod1_summary_df['IC 97.5%'] = conf_int[1]
+
+mod1_summary_df.style.format('{0:.5}',  na_rep='').to_html()
+#+END_SRC
+
+
+** Évaluation du modèle
+
+*Questions :*
+- Quelle approche standard d'évaluation d'un modèle prédictif connaissez-vous ?
+- Cette approche est-elle adaptée dans le contexte de ce projet ?
+- Du point de vue d'un analyste quantitatif, quels seraient les critères permettant de dire qu'un
+  modèle est bon ou mauvais ?
+
+Pour évaluer le modèle, nous mettons en oeuvre la démarche d'apprentissage/test usuelle. Les données
+étant chronologiques, nous veillons à ce que les données d'apprentissage correspondent bien à des
+données antérieures aux données de test.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+pct_train = 0.7
+nb_train = int(pct_train*len(data_all))
+
+data_all_train = data_all.iloc[:nb_train]
+data_all_test = data_all.iloc[nb_train:]
+
+features_train_df = sm.add_constant(data_all_train[var_features])
+target_train = data_all_train[var_target]
+features_test_df = sm.add_constant(data_all_test[var_features])
+target_test = data_all_test[var_target]
+#+END_SRC
+
+Un modèle de régression linéaire est ensuite ajusté sur les données d'apprentissage.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+mod1_train = sm.OLS(target_train, features_train_df)
+mod1_train_res = mod1_train.fit()
+mod1_train_res.summary()
+#+END_SRC
+#+BEGIN_SRC python :session start :results html :exports results
+mod1_train_summary_df = pd.DataFrame({"Coefficient": mod1_train_res.params,
+                                "Écart-type": mod1_train_res.bse,
+                                "p-values": mod1_train_res.pvalues})
+
+conf_int = mod1_train_res.conf_int()
+mod1_train_summary_df['IC  2.5%'] = conf_int[0]
+mod1_train_summary_df['IC 97.5%'] = conf_int[1]
+
+mod1_train_summary_df.style.format('{0:.5}',  na_rep='').to_html()
+#+END_SRC
+
+Puis, ce modèle est utilisé pour estimer des rendements à $p + 12$.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+mod1_target_pred = mod1_train_res.predict(features_test_df)
+#+END_SRC
+
+Il est alors possible d'évaluer les performances du modèle en utilisant un indicateur classique
+comme la erreur absolue moyenne.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+mod1_pred_mae = (mod1_target_pred - target_test).abs().mean()
+#+END_SRC
+
+Toutefois, dans une application d'analyse financière, l'enjeu est d'élaborer un modèle
+d'investissement rentable. Par exemple, on peut chercher à évaluer la rentabilité de la stratégie
+suivante : À une période $p$ donnée, si le modèle de régression linéaire prédit un rendement à $p+12$
+  positif, alors un achat est effectué et on ne fait rien sinon. Si un achat est réalisé à la
+période $p$, une vente a lieu à $p + 12$ et le rendement à $p+12$ est obtenu (positif ou négatif).
+
+En considérant un investissement de 1/12 d'unité à chaque achat, cette stratégie se traduit en pratique par :
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+invest = 1/k_horizon
+buy_thresh = 0.00
+
+idx_mod1_pred_buy = mod1_target_pred > buy_thresh
+
+mod1_trades_buy = pd.Series(0, index=target_test.index, name="achat")
+mod1_trades_sell = (target_test.copy().rename("vente") + 1)*invest
+
+mod1_trades_buy[idx_mod1_pred_buy] = -invest
+mod1_trades_sell[~idx_mod1_pred_buy] = 0
+mod1_trades_sell = mod1_trades_sell.shift(k_horizon).fillna(0)
+
+mod1_trades_balance = (mod1_trades_buy + mod1_trades_sell).rename("portefeuille")
+mod1_trades_balance.iloc[0] += 1
+
+
+mod1_trades_df = pd.concat([mod1_trades_buy,
+                            mod1_trades_sell,
+                            mod1_trades_balance], axis=1)
+#+END_SRC
+
+Visualisation de la performance de la stratégie sur la période de test.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+fig_mod1_perf = px.line(mod1_trades_balance.cumsum(), title=f"Performance de la stratégie",
+                  markers=True,
+                  labels=dict(
+                      value="Performance"))
+fig_mod1_perf.update_layout(showlegend=False)
+fig_mod1_perf
+#+END_SRC
+#+BEGIN_SRC python :session start :results html :exports results
+pio.to_html(fig_mod1_perf, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
