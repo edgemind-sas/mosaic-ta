@@ -82,7 +82,10 @@ Le travail est à réaliser avec le langage Python. Une montée en compétences 
 programmation Python, particulièrement sur la bibliothèque Pandas. En outre, il sera important de se
 familiariser avec le domaine de l'analyse financière pour 
 comprendre comment les indicateurs techniques sont utilisés pour analyser et prédire les variations
-du marché. 
+du marché.
+
+Concernant Python la série de vidéos [[https://www.youtube.com/watch?v=82KLS2C_gNQ&list=PLO_fdPEVlfKqMDNmCFzQISI2H_nJcEDJq][Formation Python Machine Learning]] est une ressource
+intéressante parmi d'autres pour se mettre à niveau avec ce langage.
 
 # Le travail attendu dans ce projet est le suivant :
 # - Réaliser une analyse descriptive univariée des variations de la cotation du BTC (e.g. distribution des
@@ -605,29 +608,24 @@ pio.to_html(fig_pairs, include_plotlyjs="cdn",
 #+END_SRC
 
 
-*Questions :*
+*Questions à méditer :*
 - Quelles sont les informations à retenir de cette première analyse visuelle ?
 - Par quelle(s) méthode(s) poursuivre l'analyse multivariée ? 
 
 
-** Réalisation d'un premier modèle de régression linéaire
+** Modèle 1 : Premier modèle de régression linéaire univarié
 
-*Questions :*
-- Les variables explicatives sont de quelle(s) nature(s) ?
-- Quelle est la nature de la variable cible ?
-- Quels méthodes de modélisation statistiques connaissez-vous qui seraient adaptées à cette
-  situation ?
+Les variables explicatives et la variable cible étant quantitatives, la régression linéaire semble a
+priori une méthode adéquate pour répondre à notre problématique.
 
-
-Nous choisissons d'expliquer les rendements à $p + 12$ (soit les rendements a 1 heure dans le futur)
-à partir d'indicateurs RSI et MFI en utilisant une régression linéaire. On pose donc l'hypothèse
-suivante :
+Nous choisissons dans un premier temps d'expliquer les rendements à $p + 12$ (soit les rendements a
+1 heure dans le futur) 
+à partir de l'indicateur RSI avec une période de taille 5 en utilisant une régression linéaire. On
+pose donc l'hypothèse suivante :
 $$
-\text{r12} = \alpha_{0} + \alpha_{2} \text{RSI5} + \alpha_{3}
-\text{RSI10} + \alpha_{4}\text{RSI30}+ \alpha_{5} \text{MFI5} + \alpha_{6}
-\text{MFI10} + \alpha_{7}\text{MFI30}
+\text{r12} = \alpha_{0} + \alpha_{1} \text{RSI5}.
 $$
-où $\alpha_{0}, \alpha_{1}, \ldots, \alpha_{7}$ sont les paramètres de régression à estimer à partir
+où $\alpha_{0} et \alpha_{1} sont les paramètres de régression à estimer à partir
 des données.
 
 Pour ce faire, nous utilisons la librairie =statsmodels= (=pip install statsmodels=).
@@ -635,18 +633,26 @@ Pour ce faire, nous utilisons la librairie =statsmodels= (=pip install statsmode
 import statsmodels.api as sm
 #+END_SRC
 
-La régression linéaire est mise en oeuvre grâce à la classe =OLS= comme suit :
+On déclare notre variable cible et on construit le jeu de données contenant à la fois les variables
+explicatives et la variable cible.
 #+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
 var_target = f"r{k_horizon}"
-var_features = list(indics_df.columns)
+# On applique un décalage d'une unité de temps aux variables explicatives
+# car au début d'une période, on ne peut pas prédire un rendement futur en utilisant
+# des indicateurs utilisant la valeur de clôture de cette même période. 
+data_all = pd.concat([indics_df.shift(1), returns], axis=1).dropna()
+target = data_all[var_target]
+#+END_SRC
 
-data_all = pd.concat([indics_df, returns], axis=1).dropna()
+
+La régression linéaire est mise en oeuvre grâce à la classe =OLS= comme suit :
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+var_features_mod1 = ["RSI_5"]
 
 # Ajout d'une colonne de 1 afin d'ajouter le paramètre $\alpha_{0}$
-features_df = sm.add_constant(data_all[var_features])
-target = data_all[var_target]
+features_mod1_df = sm.add_constant(data_all[var_features_mod1])
 
-mod1 = sm.OLS(target, features_df)
+mod1 = sm.OLS(target, features_mod1_df)
 mod1_res = mod1.fit()
 mod1_res.summary()
 #+END_SRC
@@ -662,8 +668,55 @@ mod1_summary_df['IC 97.5%'] = conf_int[1]
 mod1_summary_df.style.format('{0:.5}',  na_rep='').to_html()
 #+END_SRC
 
+#+RESULTS:
 
-** Évaluation du modèle
+*Questions à méditer :*
+- Avez-vous bien compris pourquoi il est nécessaire de faire =indics_df.shift(1)= pour décaler les
+  variables explicatives d'une unité de temps avant de
+  construire le modèle de prévision des rendements ?
+- À quoi sert la commande =sm.add_constant= ?
+- Comment interpréter les coefficients obtenus ?
+
+
+** Modèle 2 : Régression linéaire multivariée
+
+Nous choisissons à présent d'expliquer les rendements à $p + 12$
+à partir d'indicateurs RSI et MFI en utilisant toujours une régression linéaire mais cette fois-ci
+multivariée :
+$$
+\text{r12} = \alpha_{0} + \alpha_{1} \text{RSI5} + \alpha_{2}
+\text{RSI10} + \alpha_{3}\text{RSI30}+ \alpha_{4} \text{MFI5} + \alpha_{5}
+\text{MFI10} + \alpha_{6}\text{MFI30}
+$$
+où $\alpha_{0}, \alpha_{1}, \ldots, \alpha_{6}$ sont les paramètres de régression à estimer à partir
+des données.
+
+Comme précédemment, on met en oeuvre la régression linéaire comme suit :
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+var_features_mod2 = list(indics_df.columns)
+
+# Ajout d'une colonne de 1 afin d'ajouter le paramètre $\alpha_{0}$
+features_mod2_df = sm.add_constant(data_all[var_features_mod2])
+
+mod2 = sm.OLS(target, features_mod2_df)
+mod2_res = mod2.fit()
+mod2_res.summary()
+#+END_SRC
+#+BEGIN_SRC python :session start :results html :exports results
+mod2_summary_df = pd.DataFrame({"Coefficient": mod2_res.params,
+                                "Écart-type": mod2_res.bse,
+                                "p-values": mod2_res.pvalues})
+
+conf_int = mod2_res.conf_int()
+mod2_summary_df['IC  2.5%'] = conf_int[0]
+mod2_summary_df['IC 97.5%'] = conf_int[1]
+
+mod2_summary_df.style.format('{0:.5}',  na_rep='').to_html()
+#+END_SRC
+
+#+RESULTS:
+
+** Évaluation des modèles
 
 *Questions :*
 - Quelle approche standard d'évaluation d'un modèle prédictif connaissez-vous ?
@@ -671,7 +724,7 @@ mod1_summary_df.style.format('{0:.5}',  na_rep='').to_html()
 - Du point de vue d'un analyste quantitatif, quels seraient les critères permettant de dire qu'un
   modèle est bon ou mauvais ?
 
-Pour évaluer le modèle, nous mettons en oeuvre la démarche d'apprentissage/test usuelle. Les données
+Pour évaluer les modèles, nous mettons en oeuvre la démarche d'apprentissage/test usuelle. Les données
 étant chronologiques, nous veillons à ce que les données d'apprentissage correspondent bien à des
 données antérieures aux données de test.
 #+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
@@ -680,16 +733,21 @@ nb_train = int(pct_train*len(data_all))
 
 data_all_train = data_all.iloc[:nb_train]
 data_all_test = data_all.iloc[nb_train:]
-
-features_train_df = sm.add_constant(data_all_train[var_features])
 target_train = data_all_train[var_target]
-features_test_df = sm.add_constant(data_all_test[var_features])
 target_test = data_all_test[var_target]
+#+END_SRC
+
+*** Évaluation du modèle 1
+
+Extraction des variables explicatives pour le modèle 1.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+features_mod1_train_df = sm.add_constant(data_all_train[var_features_mod1])
+features_mod1_test_df = sm.add_constant(data_all_test[var_features_mod1])
 #+END_SRC
 
 Un modèle de régression linéaire est ensuite ajusté sur les données d'apprentissage.
 #+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
-mod1_train = sm.OLS(target_train, features_train_df)
+mod1_train = sm.OLS(target_train, features_mod1_train_df)
 mod1_train_res = mod1_train.fit()
 mod1_train_res.summary()
 #+END_SRC
@@ -705,13 +763,15 @@ mod1_train_summary_df['IC 97.5%'] = conf_int[1]
 mod1_train_summary_df.style.format('{0:.5}',  na_rep='').to_html()
 #+END_SRC
 
+#+RESULTS:
+
 Puis, ce modèle est utilisé pour estimer des rendements à $p + 12$.
 #+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
-mod1_target_pred = mod1_train_res.predict(features_test_df)
+mod1_target_pred = mod1_train_res.predict(features_mod1_test_df)
 #+END_SRC
 
 Il est alors possible d'évaluer les performances du modèle en utilisant un indicateur classique
-comme la erreur absolue moyenne.
+comme l'erreur absolue moyenne.
 #+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
 mod1_pred_mae = (mod1_target_pred - target_test).abs().mean()
 #+END_SRC
@@ -747,7 +807,8 @@ mod1_trades_df = pd.concat([mod1_trades_buy,
 
 Visualisation de la performance de la stratégie sur la période de test.
 #+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
-fig_mod1_perf = px.line(mod1_trades_balance.cumsum(), title=f"Performance de la stratégie",
+mod1_perf = mod1_trades_balance.cumsum().rename("perf")
+fig_mod1_perf = px.line(mod1_perf, title=f"Modèle 1 : Performance de la stratégie",
                   markers=True,
                   labels=dict(
                       value="Performance"))
@@ -759,3 +820,190 @@ pio.to_html(fig_mod1_perf, include_plotlyjs="cdn",
             full_html=False,
             config={'displayModeBar': False})
 #+END_SRC
+
+Afin d'éliminer les variations liées aux différentes actions d'achats/ventes, nous pouvons lisser la
+performance en utilisant par exemple un minimum glissant sur une journée, c.-à-d. de taille 12*24 = 288 unité de
+temps.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+mod1_smooth_perf = mod1_perf.rolling(12*24).mean()
+fig_mod1_smooth_perf = px.line(mod1_smooth_perf, title=f"Modèle 1 : Performance lissée (min) de la stratégie",
+                               markers=True,
+                               labels=dict(
+                                   value="Performance"))
+fig_mod1_smooth_perf.update_layout(showlegend=False)
+fig_mod1_smooth_perf
+#+END_SRC
+#+BEGIN_SRC python :session start :results html :exports results
+pio.to_html(fig_mod1_smooth_perf, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
+
+
+*** Évaluation du modèle 2
+
+La démarche d'évaluation du modèle 2 est analogue.
+
+Extraction des variables explicatives pour le modèle 1.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+features_mod2_train_df = sm.add_constant(data_all_train[var_features_mod2])
+features_mod2_test_df = sm.add_constant(data_all_test[var_features_mod2])
+#+END_SRC
+
+Création du modèle de régression linéaire.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+mod2_train = sm.OLS(target_train, features_mod2_train_df)
+mod2_train_res = mod2_train.fit()
+mod2_train_res.summary()
+#+END_SRC
+#+BEGIN_SRC python :session start :results html :exports results
+mod2_train_summary_df = pd.DataFrame({"Coefficient": mod2_train_res.params,
+                                "Écart-type": mod2_train_res.bse,
+                                "p-values": mod2_train_res.pvalues})
+
+conf_int = mod2_train_res.conf_int()
+mod2_train_summary_df['IC  2.5%'] = conf_int[0]
+mod2_train_summary_df['IC 97.5%'] = conf_int[1]
+
+mod2_train_summary_df.style.format('{0:.5}',  na_rep='').to_html()
+#+END_SRC
+
+#+RESULTS:
+
+Prédiction des rendements à $p + 12$.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+mod2_target_pred = mod2_train_res.predict(features_mod2_test_df)
+#+END_SRC
+
+Calcul de l'erreur absolue moyenne.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+mod2_pred_mae = (mod2_target_pred - target_test).abs().mean()
+#+END_SRC
+
+Toutefois, dans une application d'analyse financière, l'enjeu est d'élaborer un modèle
+d'investissement rentable. Par exemple, on peut chercher à évaluer la rentabilité de la stratégie
+suivante : À une période $p$ donnée, si le modèle de régression linéaire prédit un rendement à $p+12$
+  positif, alors un achat est effectué et on ne fait rien sinon. Si un achat est réalisé à la
+période $p$, une vente a lieu à $p + 12$ et le rendement à $p+12$ est obtenu (positif ou négatif).
+
+Évaluation de la stratégie d'investissement décrite dans la section précédente.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+invest = 1/k_horizon
+buy_thresh = 0.00
+
+idx_mod2_pred_buy = mod2_target_pred > buy_thresh
+
+mod2_trades_buy = pd.Series(0, index=target_test.index, name="achat")
+mod2_trades_sell = (target_test.copy().rename("vente") + 1)*invest
+
+mod2_trades_buy[idx_mod2_pred_buy] = -invest
+mod2_trades_sell[~idx_mod2_pred_buy] = 0
+mod2_trades_sell = mod2_trades_sell.shift(k_horizon).fillna(0)
+
+mod2_trades_balance = (mod2_trades_buy + mod2_trades_sell).rename("portefeuille")
+mod2_trades_balance.iloc[0] += 1
+
+
+mod2_trades_df = pd.concat([mod2_trades_buy,
+                            mod2_trades_sell,
+                            mod2_trades_balance], axis=1)
+#+END_SRC
+
+#+BEGIN_SRC python :session start :results silent :exports none :tangle start.py
+invest = 1/k_horizon
+buy_thresh = 0.00
+
+idx_mod2_pred_buy = mod2_target_pred > buy_thresh
+idx_mod2_pred_sell = idx_mod2_pred_buy.shift(k_horizon)
+
+mod2_trades_usdt = pd.Series(0, index=target_test.index, name="USDT")
+
+mod2_trades_order_usdt = pd.Series(0, index=target_test.index, name="Order USDT")
+mod2_trades_order_btc = pd.Series(0, index=target_test.index, name="Order BTC")
+
+mod2_trades_order_usdt[idx_mod2_pred_buy] = -1
+mod2_trades_order_btc[idx_mod2_pred_buy] = ohlcv_test_df.loc[mod2_target_pred.index[idx_mod2_pred_buy]]**(-1)
+
+mod2_trades_sell[~idx_mod2_pred_buy] = 0
+mod2_trades_sell = mod2_trades_sell.shift(k_horizon).fillna(0)
+
+mod2_trades_balance = (mod2_trades_buy + mod2_trades_sell).rename("portefeuille")
+mod2_trades_balance.iloc[0] += 1
+
+
+mod2_trades_df = pd.concat([mod2_trades_buy,
+                            mod2_trades_sell,
+                            mod2_trades_balance], axis=1)
+#+END_SRC
+
+
+Visualisation de la performance de la stratégie sur la période de test.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+mod2_perf = mod2_trades_balance.cumsum().rename("perf")
+fig_mod2_perf = px.line(mod2_perf, title=f"Modèle 2 : Performance de la stratégie",
+                  markers=True,
+                  labels=dict(
+                      value="Performance"))
+fig_mod2_perf.update_layout(showlegend=False)
+fig_mod2_perf
+#+END_SRC
+#+BEGIN_SRC python :session start :results html :exports results
+pio.to_html(fig_mod2_perf, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
+
+Visualisation de la performance lissée.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+mod2_smooth_perf = mod2_perf.rolling(12*24).mean()
+fig_mod2_smooth_perf = px.line(mod2_smooth_perf, title=f"Modèle 2 : Performance lissée (min) de la stratégie",
+                               markers=True,
+                               labels=dict(
+                                   value="Performance"))
+fig_mod2_smooth_perf.update_layout(showlegend=False)
+fig_mod2_smooth_perf
+#+END_SRC
+#+BEGIN_SRC python :session start :results html :exports results
+pio.to_html(fig_mod2_smooth_perf, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
+
+
+** Comparaison des performances modèles
+
+Nous pouvons enfin visualiser sur un même graphique les performances de nos deux modèles ainsi que
+la performance naturelle du BTC/USDT sur la même période.
+
+La performance naturelle du BTC/USDT correspond simplement à la performance d'un unique achat pour 
+un USDT au début de la période de l'étude et de la vente de notre actif (en BTC) à la fin de la
+période d'étude :
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+ohlcv_test_df = ohlcv_df.iloc[nb_train:]
+ohlcv_test_perf = (ohlcv_test_df["close"]/ohlcv_test_df["close"].iloc[0]).rename("perf")
+#+END_SRC
+
+Visualisation des performances.
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+models_perf_df = pd.concat([
+    ohlcv_test_perf.reset_index().assign(model="btc/usdt"),
+    mod1_smooth_perf.reset_index().assign(model="modèle 1"),
+    mod2_smooth_perf.reset_index().assign(model="modèle 2"),
+    ], axis=0)
+
+fig_models_perf = px.line(models_perf_df,
+                          x="time",
+                          y="perf",
+                          color="model",
+                          markers=True,
+                          title="Comparaison des performances des stratégies",
+                          labels=dict(
+                              perf="Performance"))
+fig_models_perf
+#+END_SRC
+#+BEGIN_SRC python :session start :results html :exports results
+pio.to_html(fig_models_perf, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
+
