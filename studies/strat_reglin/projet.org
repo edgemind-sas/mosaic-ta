@@ -609,7 +609,7 @@ variables explicatives en y ajoutant une droite de régression linéaires (optio
 fonction =px.scatter=).
 #+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
 data_target_features_long_df = \
-    pd.melt(data_pairs_df.reset_index(),
+    pd.melt(data_pairs_df.reset_index().head(10000),
             id_vars=["time", returns.name],
             value_vars=list(indics_df.columns),
             var_name="indic",
@@ -625,10 +625,10 @@ fig_target_pairs = \
         trendline="ols",
         title=f"Variable cible {returns.name} en fonction d'indicateurs techniques",
     )
-fig_target_pairs.show()
+fig_target_pairs
 #+END_SRC
 #+BEGIN_SRC python :session start :results html :exports results
-pio.to_html(fig_target_features, include_plotlyjs="cdn",
+pio.to_html(fig_target_pairs, include_plotlyjs="cdn",
             full_html=False,
             config={'displayModeBar': False})
 #+END_SRC
