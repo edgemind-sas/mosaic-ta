@@ -919,6 +919,8 @@ fig_mod1_perf = px.line(mod1_trades_df["USDT:perf"], title=f"Modèle 1 : Perform
                   labels=dict(
                       value="Performance"))
 fig_mod1_perf.update_layout(showlegend=False)
+fig_mod1_perf.update_yaxes(range=[0, mod2_trades_df["USDT:perf"].max()*1.05])
+fig_mod1_perf.update_traces(line=dict(width=5))
 fig_mod1_perf
 #+END_SRC
 #+BEGIN_SRC python :session start :results html :exports results
@@ -1002,6 +1004,8 @@ fig_mod2_perf = \
             labels=dict(
                 value="Performance"))
 fig_mod2_perf.update_layout(showlegend=False)
+fig_mod2_perf.update_yaxes(range=[0, mod2_trades_df["USDT:perf"].max()*1.05])
+fig_mod2_perf.update_traces(line=dict(width=5))
 fig_mod2_perf
 #+END_SRC
 #+BEGIN_SRC python :session start :results html :exports results
@@ -1039,6 +1043,9 @@ fig_models_perf = px.line(models_perf_df,
                           title="Comparaison des performances des stratégies",
                           labels=dict(
                               perf="Performance"))
+fig_models_perf.update_yaxes(
+    range=[0, models_perf_df["USDT:perf"].max()*1.05])
+fig_models_perf.update_traces(line=dict(width=5))
 fig_models_perf
 #+END_SRC
 #+BEGIN_SRC python :session start :results html :exports results
