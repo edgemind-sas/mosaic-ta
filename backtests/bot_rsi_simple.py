@@ -91,7 +91,7 @@ indic_signals_df = pd.concat([dm.indic_s, signals], axis=1)
 indic_signals_df
 
 fig = dm.plotly(ohlcv_df.head(300), layout={"title": "Signaux du DM RSI"})
-fig
+fig.show()
 
 bot = mbo.BotLong(decision_model=dm)
 

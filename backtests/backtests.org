@@ -383,7 +383,7 @@ indic_signals_df.head(20).style.format(precision=2, thousands=" ").to_html()
 Nous pouvons également représenter graphiquement les signaux produits.
 #+BEGIN_SRC python :session bot_rsi_simple :results silent :exports code :tangle bot_rsi_simple.py
 fig = dm.plotly(ohlcv_df.head(300), layout={"title": "Signaux du DM RSI"})
-fig
+fig.show()
 #+END_SRC
 #+BEGIN_SRC python :session bot_rsi_simple :results html :exports results
 pio.to_html(fig, include_plotlyjs="cdn",

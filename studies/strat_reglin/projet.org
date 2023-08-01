@@ -914,7 +914,6 @@ mod1_trades_df = \
 
 Visualisation de la performance de la stratégie sur la période de test.
 #+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
-mod1_perf = mod1_trades_balance.cumsum().rename("perf")
 fig_mod1_perf = px.line(mod1_trades_df["USDT:perf"], title=f"Modèle 1 : Performance de la stratégie",
                   markers=False,
                   labels=dict(
