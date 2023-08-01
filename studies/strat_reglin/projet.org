@@ -593,14 +593,42 @@ variable cible (rendements à 1h).
 
 Pour ce faire, nous pouvons réaliser une analyse visuelle avec un diagramme en paires.
 #+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
-fig_pairs = px.scatter_matrix(
-    pd.concat([indics_df, returns], axis=1).head(10000),
-    color=f"r{k_horizon}",
+data_pairs_df = pd.concat([indics_df, returns], axis=1)
+fig_pairs = px.scatter_matrix(data_pairs_df.head(10000),
     title="Diagramme en paire")
 fig_pairs
 #+END_SRC
 #+BEGIN_SRC python :session start :results html :exports results
 pio.to_html(fig_pairs, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
+
+Nous pouvons également visualiser uniquement les nuages de points de la variable cible avec les différentes
+variables explicatives en y ajoutant une droite de régression linéaires (option =trendline= de la
+fonction =px.scatter=).
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+data_target_features_long_df = \
+    pd.melt(data_pairs_df.reset_index(),
+            id_vars=["time", returns.name],
+            value_vars=list(indics_df.columns),
+            var_name="indic",
+            value_name="indic_value",
+            )
+fig_target_pairs = \
+    px.scatter(
+        data_target_features_long_df,
+        x="indic_value",
+        y=returns.name,
+        color="indic",
+        facet_row="indic",
+        trendline="ols",
+        title=f"Variable cible {returns.name} en fonction d'indicateurs techniques",
+    )
+fig_target_pairs.show()
+#+END_SRC
+#+BEGIN_SRC python :session start :results html :exports results
+pio.to_html(fig_target_features, include_plotlyjs="cdn",
             full_html=False,
             config={'displayModeBar': False})
 #+END_SRC
