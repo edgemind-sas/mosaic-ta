@@ -230,8 +230,6 @@
 
 # Configuration de l'environnement                           
 # --------------------------------
-# Configuration de l'environnement                           
-# --------------------------------
 #+NAME: python-imports
 #+BEGIN_SRC python :exports none
 import os
