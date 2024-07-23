@@ -129,7 +129,7 @@ Typiquement, les données OHLCV contiennent les variables suivantes :
 Il est courant de visualiser les données OHLC à l'aide du graphique, dit
 en chandeliers. En fonction, des valeurs d'ouverture (/open/) et de
 fermeture (/close/), on parle également de chandeliers haussiers et
-baissiers, cf. Figure ref:fig-candles.
+baissiers, cf. Figure [[fig-candles]].
 
 #+NAME: fig-candles
 #+CAPTION: Représentation du symbole de chandelier.
@@ -591,27 +591,15 @@ Dans ce projet, le but de l'analyse exploratoire multivariée consiste à identi
 liens entre les variables explicatives retenues et la
 variable cible (rendements à 1h).
 
-Pour ce faire, nous pouvons réaliser une analyse visuelle avec un diagramme en paires.
-#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
-data_pairs_df = pd.concat([indics_df, returns], axis=1)
-fig_pairs = px.scatter_matrix(data_pairs_df.head(10000),
-    title="Diagramme en paire")
-fig_pairs
-#+END_SRC
-#+BEGIN_SRC python :session start :results html :exports results
-pio.to_html(fig_pairs, include_plotlyjs="cdn",
-            full_html=False,
-            config={'displayModeBar': False})
-#+END_SRC
-
-Nous pouvons également visualiser uniquement les nuages de points de la variable cible avec les différentes
+Nous pouvons visualiser les nuages de points de la variable cible avec les différentes
 variables explicatives en y ajoutant une droite de régression linéaires (option =trendline= de la
 fonction =px.scatter=).
 #+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+data_indic = pd.concat([indics_df, returns], axis=1)
 data_target_features_long_df = \
-    pd.melt(data_pairs_df.reset_index().head(10000),
+    pd.melt(data_indic.reset_index().head(10000),
             id_vars=["time", returns.name],
-            value_vars=list(indics_df.columns),
+            value_vars="RSI_5",
             var_name="indic",
             value_name="indic_value",
             )
@@ -620,10 +608,8 @@ fig_target_pairs = \
         data_target_features_long_df,
         x="indic_value",
         y=returns.name,
-        color="indic",
-        facet_row="indic",
         trendline="ols",
-        title=f"Variable cible {returns.name} en fonction d'indicateurs techniques",
+        title=f"Variable cible {returns.name} en fonction de l'indicateur RSI_5",
     )
 fig_target_pairs
 #+END_SRC
@@ -633,7 +619,18 @@ pio.to_html(fig_target_pairs, include_plotlyjs="cdn",
             config={'displayModeBar': False})
 #+END_SRC
 
+En ne faisant ressortir uniquement que le résultat de la régression, on peut observer une corrélation entre la valeur de l'indicateur et le rendement.
+(Attention bien faire attention à l'échelle)
 
+#+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
+fig_target_pairs.update_traces(visible=False, selector=dict(mode="markers"))
+fig_target_pairs
+#+END_SRC
+#+BEGIN_SRC python :session start :results html :exports results
+pio.to_html(fig_target_pairs, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
 *Questions à méditer :*
 - Quelles sont les informations à retenir de cette première analyse visuelle ?
 - Par quelle(s) méthode(s) poursuivre l'analyse multivariée ? 
