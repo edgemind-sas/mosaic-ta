@@ -919,7 +919,7 @@ fig_mod1_perf = px.line(mod1_trades_df["USDT:perf"], title=f"Modèle 1 : Perform
                   labels=dict(
                       value="Performance"))
 fig_mod1_perf.update_layout(showlegend=False)
-fig_mod1_perf.update_yaxes(range=[0, mod2_trades_df["USDT:perf"].max()*1.05])
+fig_mod1_perf.update_yaxes(range=[0, mod1_trades_df["USDT:perf"].max()*1.05])
 fig_mod1_perf.update_traces(line=dict(width=5))
 fig_mod1_perf
 #+END_SRC
