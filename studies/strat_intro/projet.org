@@ -117,13 +117,13 @@ mesure au cours d'intervalles de temps réguliers successifs caractérisés
 par une période d'échantillonnage notée $\Delta t$ (e.g. une minute,
 cinq minutes, une heure, une journée, etc).
 
-Typiquement, les données OHLCV contiennent les variables suivantes : 
+Typiquement, les données OHLCV contiennent les variables suivantes :
 - =timestamp= : timestamp caractérisant le début de la période de mesure (par exemple exprimé en
-  millisecondes), la fin étant déterminée par la période d'échantillonnage $\Delta t$ utilisée. 
-- =open= : valeur de l'actif au début de la période. 
-- =high= : valeur maximum de l'actif atteinte sur la période. 
-- =low= : valeur mimimum de l'actif atteinte sur la période. 
-- =close= : valeur de l'actif à la fin de la période. 
+  millisecondes), la fin étant déterminée par la période d'échantillonnage $\Delta t$ utilisée.
+- =open= : valeur de l'actif au début de la période.
+- =high= : valeur maximum de l'actif atteinte sur la période.
+- =low= : valeur mimimum de l'actif atteinte sur la période.
+- =close= : valeur de l'actif à la fin de la période.
 - =volume= : montant cumulé des ventes et des achats de l'actif sur la période.
 
 Il est courant de visualiser les données OHLC à l'aide du graphique, dit
@@ -136,11 +136,11 @@ baissiers, cf. Figure ref:fig-candles.
 [[./candle.jpg]]
 
 Dans un diagramme en chandelier, on retrouve les données OHLC mais
-également les notions de : 
+également les notions de :
 - corps (/body/) représentant la distance entre la cotation d'ouverture et de fermeture de l'actif
-  sur une période ; 
+  sur une période ;
 - mèches ou ombres supérieures (/upper shadow/) représentant la distance entre la partie haute du
-  corps et la cotation la plus haute sur une période ; 
+  corps et la cotation la plus haute sur une période ;
 - mèches ou ombres inférieures (/lower shadow/) représentant la distance entre la partie basse du
   corps et la cotation la plus basse sur une période ;
 
@@ -159,7 +159,7 @@ ohlcv_df = pd.read_csv("btc_5m_2021_2022.csv.bz2",
 ohlcv_df
 #+END_SRC
 
-#+BEGIN_SRC python :session pres_data :results html :exports results :tangle pres_data.py                       
+#+BEGIN_SRC python :session pres_data :results html :exports results :tangle pres_data.py
 ohlcv_df.head().style.format(precision=2, thousands=" ").to_html()
 #+END_SRC
 
@@ -535,7 +535,7 @@ indics_df
 *** Calcul de l'indicateur MFI
 
 Le [[https://en.wikipedia.org/wiki/Money_flow_index][Money Flow Index (MFI)]] est un indicateur
-variant entre 0 et 100 mesurant la pression d'achat et de vente en tenant compte 
+variant entre 0 et 100 mesurant la pression d'achat et de vente en tenant compte
 à la fois des prix et des volumes. Un MFI élevé (proche de 100) est généralement considéré comme
 synonyme d'un actif suracheté, tandis qu'un MFI faible (proche de 0) est généralement considéré
 synonyme d'un actif survendu.
@@ -552,7 +552,7 @@ mfi = ta.mfi(close=ohlcv_df['close'],
 #+END_SRC
 *Notes :*
 Le calcul de l'MFI nécessite les prix de clôture, du minimum, du maximum et les volumes échangés à
-chaque période. 
+chaque période.
 
 Visualisation du MFI sur 1 semaine = 2016*5 min.
 #+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
@@ -818,7 +818,7 @@ buy_thresh = 0.00
 # Signaux d'achat
 idx_mod1_pred_buy = mod1_target_pred > buy_thresh
 # Signaux de vente
-idx_mod1_pred_sell = idx_mod1_pred_buy.shift(k_horizon - 1).fillna(False)
+idx_mod1_pred_sell = idx_mod1_pred_buy.shift(k_horizon).fillna(False)
 #+END_SRC
 
 Maintenant que nous disposons des instants d'achat et de vente de notre stratégie, nous pouvons la
@@ -864,7 +864,7 @@ def backtest_fix_sell(
         quote_trade_invest/ohlcv_df[buy_on]
 
     trades_base_os = \
-        (-trades_base_ob.shift(k_horizon - 1)\
+        (-trades_base_ob.shift(k_horizon)\
          .rename(f"{base_name}:os"))\
          .fillna(0)
     trades_quote_os = \
@@ -979,7 +979,7 @@ période $p$, une vente a lieu à $p + 12$ et le rendement à $p+12$ est obtenu 
 #+BEGIN_SRC python :session start :results silent :exports none :tangle start.py
 buy_thresh = 0.00
 idx_mod2_pred_buy = mod2_target_pred > buy_thresh
-idx_mod2_pred_sell = idx_mod2_pred_buy.shift(k_horizon - 1).fillna(False)
+idx_mod2_pred_sell = idx_mod2_pred_buy.shift(k_horizon).fillna(False)
 
 quote_init = 1
 quote_trade_invest = 1/k_horizon
