@@ -835,6 +835,21 @@ quote_init = 1
 quote_trade_invest = 1/k_horizon
 #+END_SRC
 
+Sur la figure [[fig-strategie]] un exemple de la stratégie mentionnée ci-dessus. On investit à chaque fois que le rendement prédit est positif.
+Dans notre stratégie, le montant d'USDT investi est identique (pour les rendements positifs) quelque soit la période, mais on pourrait imaginer une stratégie avec des investissements variables.
+Le nombre de BTC acquis est calculé avec le prix du BTC à l'ouverture de la période.
+
+#+NAME: fig-strategie
+#+CAPTION: Stratégie d'investissement.
+[[./strategy_invest.png]]
+
+On revend tous les bitcoins obtenus à la période p à la période p+k_horizon.
+On prend comme prix de conversion le prix du BTC à la fermeture de la période.
+
+#+NAME: fig-btc
+#+CAPTION: Stratégie d'investissement.
+[[./revente_btc.png]]
+
 Enfin, nous utilisons la fonction de backtesting suivante permettant de calculer la performance de
 notre stratégie.
 #+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
