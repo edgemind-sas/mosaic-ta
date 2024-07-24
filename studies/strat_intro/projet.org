@@ -619,7 +619,7 @@ pio.to_html(fig_target_pairs, include_plotlyjs="cdn",
             config={'displayModeBar': False})
 #+END_SRC
 
-En ne faisant ressortir uniquement que le résultat de la régression, on peut observer une corrélation entre la valeur de l'indicateur et le rendement.
+On peut ne faire ressortir que le résultat de la régression afin d'observer une tendance entre la valeur de l'indicateur et le rendement.
 (Attention bien faire attention à l'échelle)
 
 #+BEGIN_SRC python :session start :results silent :exports code :tangle start.py
