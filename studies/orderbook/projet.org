@@ -1,0 +1,638 @@
+# -*- coding: utf-8 -*-
+#+TITLE: Prévision du cours du BTC à partir de l'order book
+#+AUTHOR: Roland Donat
+#+DATE: Projet MOSAIC
+
+# ==============================================
+# Document Configuration
+# ======================
+# Orgmode
+:CONFIG:
+#+LANGUAGE: fr
+#+OPTIONS: H:3 num:nil toc:t \n:nil @:t ::t |:t ^:{} f:t TeX:t author:t d:nil timestamp:nil
+#+OPTIONS: html-postamble:nil
+#+STARTUP: content 
+#+STARTUP: hidestars
+#+DRAWERS: CONFIG OPTIONS CACHE MACROS
+#+TODO: TODO(t) INPROGRESS(p) | DONE(d)
+#+BIND: org-latex-table-scientific-notation "{%s}E{%s}"
+# #+export_file_name: index.html
+:END:
+
+# HTML
+# ----
+:CONFIG:
+# Org HTML Macros
+#+MACRO: NEWLINE @@latex:\\@@ @@html:<br>@@
+#+MACRO: HTMLFONTSIZE @@html:<font size="$2">$1</font>@@
+#+MACRO: SUBTITLE @@html:<div class="slidesubtitle">$1</div>@@
+
+# HTML options
+# ------------
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/org/theme-readtheorg.setup
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="https://edgemind-sas.github.io/visual-identity/official_docs/css/edgemind.css" />
+:END:
+
+# ==============================================
+# Document starts here
+# ====================
+
+#+ATTR_HTML: :width 50% :alt woman doing algorithmic trading with many computer, colorful detailed, white background
+#+CAPTION: Image générée par Midjourney
+[[./crypto_trading.png]]
+
+
+* Contexte et objectifs du projet
+
+Le Bitcoin (BTC) est une monnaie numérique décentralisée, première implémentation de la
+technologie blockchain. Contrairement aux monnaies traditionnelles, le BTC n'est régulé par
+aucune banque centrale ou gouvernement, mais par un réseau distribué de participants. La paire
+BTC/USDT représente le taux de change entre le Bitcoin et le Tether, une crypto-monnaie dont la
+valeur est généralement équivalente à un dollar américain (USDT). La prévision du prix du
+Bitcoin en Tether est un sujet de grande importance pour les investisseurs et les acteurs du
+monde de la finance, car elle permet d'élaborer des stratégies de trading et de gestion de
+risques.  
+
+L'order book, ou carnet d'ordres, est un registre en temps réel de tous les ordres d'achat et
+de vente sur une plateforme d'échange pour une paire de devises spécifique, telle que
+BTC/USDT. Il sert de mécanisme pour faciliter les transactions où les /asks/ représentent les
+ordres de vente et les /bids/ représentent les ordres d'achat. La compréhension de la dynamique
+de l'order book peut donner un aperçu précieux des intentions et comportements des acteurs du
+marché, influençant ainsi les mouvements de prix. 
+
+Les méthodes de machine learning peuvent être appliquées à l'analyse de l'order book pour
+prédire le cours futur du BTC. En analysant les patterns historiques et les tendances dans les
+changements de prix, les volumes d'achat et de vente, ainsi que le flux des ordres, les modèles
+prédictifs peuvent être entraînés pour estimer la direction probable des mouvements de prix à
+court terme. Des techniques telles que les réseaux de neurones récurrents (RNN), la régression,
+les arbres de décision ou le deep learning peuvent être utilisées pour capturer les complexités
+et les relations non linéaires présentes dans les données du carnet d'ordres. 
+
+L'objectif de ce projet est triple :
+
+1. Dans un premier temps, analyser et comprendre les données issues d'un carnet d'ordres, en
+   identifiant les patterns clés qui pourraient influencer le prix du BTC. 
+2. Ensuite, appliquer et ajuster une méthode de prévision utilisant le machine learning pour prédire le cours du BTC par rapport à l'USDT.
+3. Enfin, tester la méthode de prévision pour évaluer sa performance en simulant son
+   application dans des conditions de marché historiques, permettant ainsi de mesurer
+   l'efficacité et la fiabilité du modèle prédictif avant toute utilisation réelle. 
+
+* Outils et compétences nécessaires
+
+Le travail requiert une maîtrise du langage Python, notamment la bibliothèque Pandas, un outil
+essentiel pour la manipulation et l'analyse de données complexes.
+
+De plus, il est crucial de se familiariser avec les principes de l'analyse financière. Cette
+connaissance de base permettra de comprendre l'usage des indicateurs techniques, qui sont des
+instruments fondamentaux pour l'analyse des tendances et la prédiction des mouvements futurs
+sur les marchés financiers, y compris le marché des crypto-monnaies. 
+
+Voici quelques ressources à consulter afin de montée en compétences sur la carnet d'ordres en
+finance quantitative :
+- [[https://www.abcbourse.com/apprendre/2_carnet_ordres.html][ABC Bourse]] (carnet d'ordres)
+- [[https://www.botraiders.com/apprendre-bourse/investir-en-bourse/passer-un-ordre-boursier/comprendre-le-carnet-d-ordre][Botraiders]] (carnet d'ordres)
+- [[https://www.quantifiedstrategies.com/limit-order-book-trading-strategy/][Quantified Strategies]] (carnet d'ordres et stratégies)
+
+
+* Formalisation
+   :PROPERTIES:
+   :CUSTOM_ID: notations-mathématiques
+   :END:
+
+Le carnet d'ordres est donc un registre qui liste l'ensemble des ordres d'achat et de vente pour un
+actif financier donné, comme une crypto-monnaie ou une action.
+
+Dans un premier temps, nous pouvons noter :
+- $B(t)$ représente l'ensemble des ordres d'achat (ou /bids/) à un temps $t$.
+- $A(t)$ représente l'ensemble des ordres de vente (ou /asks/) à un temps $t$.
+
+Chaque ordre d'achat $b \in B(t)$ ou de vente $a \in A(t)$ peut être représenté comme un couple
+$(p, q)$, où $p$ est le prix et $q$ est la quantité (ou /amount/).
+
+Pour un ordre d'achat $b(p_{b}, q_{b})$, $p_b$ est le prix que l'acheteur est prêt à payer et $q_b$ est la
+quantité qu'il souhaite acheter. Par analogie, pour un ordre de vente $a(p_{a}, q_{a})$, $p_a$
+est le prix que le vendeur demande et $q_a$ est la quantité qu'il souhaite vendre. 
+
+Nous pouvons ensuite définir la fonction de demande d'achat cumulée à un prix $p$ comme $D(p, t) =
+     \sum_{b \in B(t), p_b \geq p} q_b$, c'est-à-dire la somme des quantités d'ordres d'achat
+     dont le prix est supérieur ou égal à $p$.
+     
+De même, la fonction d'offre de vente cumulée à un prix $p$ est définie comme $S(p, t) = \sum_{a
+     \in A(t), p_a \leq p} q_a$, c'est-à-dire la somme des quantités d'ordres de vente dont le
+     prix est inférieur ou égal à $p$. 
+
+
+Le prix de la meilleure demande d'achat (ou /best bid/) est le plus haut prix d'achat dans le
+     carnet d'ordres à un temps $t$, noté $p_b^*(t) = \max \{ p_b | b \in B(t) \}$.  
+Le prix de la meilleure offre de vente (ou /best ask/) est le plus bas prix de vente dans le carnet
+     d'ordres à un temps $t$, noté $p_a^*(t) = \min \{ p_a | a \in A(t) \}$.   
+
+# 5. **Profondeur du carnet d'ordres** :
+#    - La profondeur du carnet d'ordres à un niveau de prix $p$ peut être mesurée comme $L(p, t)
+#      = D(p, t) + S(p, t)$, la somme des fonctions de demande et d'offre cumulatives à ce prix. 
+
+# 6. **Prix médian du carnet d'ordres** :
+#    - Le prix médian $M(t)$ peut être défini comme le prix qui équilibre la demande d'achat et l'offre
+#      de vente dans le carnet d'ordres, où $D(M(t), t) = S(M(t), t)$. 
+
+Ces premières notations permettent d'exprimer mathématiquement certaines caractéristiques du carnet
+d'ordres et de réaliser des analyses quantitatives sur la dynamique du marché. La Figure
+[[fig-orderbook]] donne un exemple de carnet d'ordres afin d'illustrer ces notions.
+
+
+#+NAME: fig-orderbook
+#+ATTR_HTML: :width 100% :alt Exemple de carnet d'ordres
+#+CAPTION: Exemple de carnet d'ordres.
+[[./orderbook.png]]
+
+# En analysant 
+# l'évolution de $D(p, t)$ et $S(p, t)$ au fil du temps, on peut par exemple étudier
+# l'impact des nouvelles informations sur le comportement des acteurs du marché et la formation
+# des prix. 
+   
+
+* Présentation des données d'un carnet d'ordres
+
+Dans cette partie, nous décrivons la composition des données relatives aux carnets d'ordres,
+essentielle à notre projet d'analyse de marché.
+
+- *measure* : Type de mesure enregistrée ; peut être "amount" ou "price" :
+  - "amount" indique la quantité de BTC offerte à la vente ou à l'achat.
+  - "price" indique le prix auquel le BTC est proposé à la vente ("ask") ou à l'achat ("bid").
+- *position* : Rang ou niveau de l'ordre dans le carnet d'ordres, allant de 0 à 99, où 0 correspond à la meilleure offre ou demande.
+- *side* : Spécifie la nature de l'ordre dans le carnet d'ordres :
+  - "ask" pour les ordres de vente.
+  - "bid" pour les ordres d'achat.
+- *symbol* : Indique la paire de trading, ici BTC/USDT, représentant les ordres d'achat ou de vente de Bitcoin (BTC) en échange de Tether (USDT).
+- *datetime* : Date et heure exactes de l'enregistrement de l'ordre, au format ISO 8601 avec le fuseau horaire UTC.
+- *value* : Selon le *measure*, représente :
+  - La quantité de BTC pour la position d'ordre donnée lorsque *measure* est "amount".
+  - Le prix du BTC pour la position d'ordre donnée lorsque *measure* est "price".
+
+Un exemple de données issues du carnet d'ordres de la cotation BTC/USDT de profondeur 100 est
+téléchargeable ici : [[file:ob_BTC_USDT_100.csv.bz2]]
+
+Une fois téléchargé, voilà un code permettant de charger les données avec =Pandas= :
+#+BEGIN_SRC python :session data_pres :results silent :exports both :tangle data_pres.py
+import pandas as pd
+import plotly.express as px
+import plotly.io as pio
+
+order_book_filename = 'ob_BTC_USDT_100.csv.bz2'
+order_book_df = pd.read_csv(order_book_filename, compression='bz2')
+order_book_df['datetime'] = pd.to_datetime(order_book_df['datetime'])
+
+order_book_df
+#+END_SRC
+#+BEGIN_SRC python :session data_pres :results html :exports results :tangle data_pres.py                       
+order_book_df.head().style.format(precision=2, thousands=" ").to_html()
+#+END_SRC
+
+
+* Analyses exploratoires
+
+#+BEGIN_SRC python :session desc :results silent :exports results :tangle desc.py
+import pandas as pd
+import plotly.express as px
+import plotly.io as pio
+
+order_book_filename = 'ob_BTC_USDT_100.csv.bz2'
+order_book_df = pd.read_csv(order_book_filename, compression='bz2')
+order_book_df['datetime'] = pd.to_datetime(order_book_df['datetime'])
+#+END_SRC
+
+
+** Écart /bid-ask/ ou /spread/
+
+L'écart /bid-ask/, ou /spread/, est une mesure fondamentale de la liquidité et de l'efficacité du
+marché. Il représente la différence entre le meilleur prix d'achat (/bid/) et le meilleur prix de
+vente (/ask/) sur le marché. Cet indicateur est important pour plusieurs raisons : 
+- Liquidité : Un écart /bid-ask/ étroit indique généralement un marché liquide, où les acheteurs
+  et les vendeurs peuvent facilement exécuter leurs ordres sans impact significatif sur le
+  prix. 
+- Efficacité du marché : Un /spread/ plus faible suggère un marché plus efficace, où
+  l'information est rapidement intégrée dans les prix. 
+- Risque : Un écart plus large peut indiquer une plus grande incertitude ou un risque plus
+  élevé sur le marché. 
+- Opportunités d'arbitrage : Des écarts importants peuvent signaler des opportunités pour les
+  market makers et les arbitragistes. 
+
+ 
+En reprenant les notations précédentes, on peut définir le /spread/ absolu, noté $\text{ASP}$,
+à l'instant $t$ comme suit :
+$$
+\text{ASP}(t) = p_{a}^{*}(t) - p_{b}^{*}(t),
+$$
+Où :
+- $p_{a}^{*}(t)$ est le prix de la meilleure offre de vente au temps $t$ ;
+- $p_{b}^{*}(t)$ est le prix de la meilleure demande d'achat au temps $t$.
+
+Le /spread/ relatif, noté $\text{RSP} \in [0,1]$, correspond au /spread/ absolu divisé par le prix moyen
+(/mid-price/). Nous pouvons le définir ainsi : 
+$$
+RSP(t) = \frac{\text{ASP}(t)}{\text{Mid-Price}(t)}
+$$
+avec :
+$$
+\text{Mid-Price}(t) = \frac{p_{a}^{*}(t) + p_{b}^{*}(t)}{2}
+$$
+
+L'écart relatif (souvent exprimé en pourcentage) est particulièrement utile pour comparer la
+liquidité entre différents actifs ou à travers le temps, car il normalise l'écart par rapport
+au niveau de prix. 
+
+Le code suivant calcule à la fois l'écart absolu (en USDT) et l'écart relatif (en pourcentage du prix
+moyen) :
+#+BEGIN_SRC python :session desc :results silent :exports results :tangle desc.py
+# Calcul de l'index idx du carnet d'ordres où measure == "price" et position == 0
+idx = (order_book_df["measure"] == "price") & (order_book_df["position"] == 0)
+
+# Récupération du dataframe indexé par idx
+order_book_sel_df = order_book_df.loc[idx]
+
+# Pivotement du dataframe sur side pour avoir une colonne ask et bid
+order_book_spread_df = order_book_sel_df.pivot(
+    index="datetime", columns="side", values="value"
+).reset_index()
+order_book_spread_df.columns.name = None
+
+# Ajout des colonnes spread_abs et spread_rel
+order_book_spread_df["asp"] = (
+    order_book_spread_df["ask"] - order_book_spread_df["bid"]
+)
+order_book_spread_df["mid_price"] = (order_book_spread_df["ask"] + order_book_spread_df["bid"]) / 2
+
+
+order_book_spread_df["rsp"] = (
+    order_book_spread_df["asp"]/order_book_spread_df["mid_price"]
+)
+#+END_SRC
+
+Nous pouvons à présent réprésenter le /spread/ absolu au cours du temps :
+#+BEGIN_SRC python :session desc :results silent :exports both :tangle desc.py
+fig = px.line(
+    order_book_spread_df,
+    x="datetime",
+    y="asp",
+    markers=True,
+    title="Évolution du spread relatif du cours BTC/USDT",
+    labels=dict(asp="Spread absolu (USDT)",
+                datetime="Date",
+                ),
+)
+fig
+
+# Sauvegarder la figure en tant que fichier HTML
+fig_filename = 'asp.html'  
+pio.write_html(fig, file=fig_filename,
+               include_plotlyjs='cdn',
+               full_html=False,
+               config={'displayModeBar': False})
+#+END_SRC
+#+BEGIN_SRC python :session desc :results html :exports results
+pio.to_html(fig, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
+Nous observons un spread quasiment constant au cours du temps et égal à 0.01 USDT. Ce spread
+étant très faible, nous pouvons considérer que le marché du BTC/USDT est très liquide.
+
+Représentons à présent le /spread/ relatif au cours du temps :
+#+BEGIN_SRC python :session desc :results silent :exports both :tangle desc.py
+fig = px.line(
+    order_book_spread_df,
+    x="datetime",
+    y="rsp",
+    markers=True,
+    title="Évolution du spread relatif du cours BTC/USDT",
+    labels=dict(rsp="Spread relatif",
+                datetime="Date",
+                ),
+    custom_data=["asp"], # Ajout de la colonne asp dans les données du graphique
+)
+# Configurer l'axe y pour afficher les valeurs en pourcentage
+fig.update_yaxes(tickformat='.2%')
+# Personnaliser le format de la tooltip
+fig.update_traces(
+    hovertemplate="<br>".join([
+        "Date: %{x}",
+        "Spread relatif: %{y:.7%}",
+        "Spread absolu: %{customdata[0]:.2f} USDT",
+    ])
+)
+fig
+#+END_SRC
+#+BEGIN_SRC python :session desc :results silent :exports results :tangle desc.py
+# Sauvegarder la figure en tant que fichier HTML
+fig_filename = 'rsp.html'  
+pio.write_html(fig, file=fig_filename,
+               include_plotlyjs='cdn',
+               full_html=False,
+               config={'displayModeBar': False})
+#+END_SRC
+#+BEGIN_SRC python :session desc :results html :exports results
+pio.to_html(fig, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
+Sans surprise, on observe la même tendance que pour le /spread/ absolu avec cette fois-ci, une
+concentration autour de 0%. Toutefois, en retirant en supprimant les 0.5% de
+/spread/ les plus hauts (i.e. suppression des /spreads/ au délà du quantile 0.995), on observe
+le graphique suivant :
+#+BEGIN_SRC python :session desc :results silent :exports both :tangle desc.py
+idx_keep = order_book_spread_df["rsp"] <= order_book_spread_df["rsp"].quantile(0.995)
+
+fig = px.line(
+    order_book_spread_df.loc[idx_keep],
+    x="datetime",
+    y="rsp",
+    markers=True,
+    title="Évolution du spread relatif du cours BTC/USDT (sans valeur extrême)",
+    labels=dict(rsp="Spread relatif",
+                datetime="Date",
+                ),
+    custom_data=["asp"], # Ajout de la colonne asp dans les données du graphique
+)
+fig.update_yaxes(tickformat='.7%')
+# Personnaliser le format de la tooltip
+fig.update_traces(
+    hovertemplate="<br>".join([
+        "Date: %{x}",
+        "Spread relatif: %{y:.7%}",
+        "Spread absolu: %{customdata[0]:.2f} USDT",
+    ])
+)
+fig
+#+END_SRC
+#+BEGIN_SRC python :session desc :results silent :exports results :tangle desc.py
+# Sauvegarder la figure en tant que fichier HTML
+fig_filename = 'rsp_noext.html'  
+pio.write_html(fig, file=fig_filename,
+               include_plotlyjs='cdn',
+               full_html=False,
+               config={'displayModeBar': False})
+#+END_SRC
+#+BEGIN_SRC python :session desc :results html :exports results
+pio.to_html(fig, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
+Ce graphique permet d'observer plus finement l'évolution du /spread/ relatif autour de 0%.
+
+** Évolution du prix du marché
+
+Dans les marchés financiers, et particulièrement dans le contexte volatil des crypto-monnaies,
+la détermination précise du prix du marché est un défi complexe. Bien qu'il soit tentant de
+considérer la meilleure offre de vente (/best ask/) comme le prix du marché, cette approche
+simpliste ne capture pas la réalité du marché. Le véritable prix du marché
+est influencé par divers facteurs tels que la profondeur du carnet d'ordres, l'écart bid-ask,
+la volatilité à court terme, et l'équilibre global entre l'offre et la demande. De plus, des
+phénomènes comme les ordres cachés, la fragmentation du marché, et les potentielles
+manipulations ajoutent à la complexité de cette détermination. 
+
+*** Meilleur offre de vente
+
+Néanmoins, pour des raisons de simplicité ou comme point de départ d'une analyse plus
+approfondie, il est parfois utile de considérer la meilleure offre de vente comme prix du
+marché. Voici comment nous pouvons extraire cette information de notre carnet d'ordres : 
+#+BEGIN_SRC python :session desc :results silent :exports both :tangle desc.py
+idx = (order_book_df["side"] == "ask") & (order_book_df["measure"] == "price")
+market_price_best_ask_df = (
+    order_book_df.loc[idx].groupby("datetime")["value"].min().reset_index()
+)
+#+END_SRC
+
+Nous pouvons alors représenter graphiquement l'évolution de la cotation BTC/USDT à partir de la
+meilleur offre du carnet d'ordres.
+#+BEGIN_SRC python :session desc :results silent :exports both :tangle desc.py
+import plotly.express as px
+import plotly.io as pio
+
+fig = px.line(
+    market_price_best_ask_df,
+    x="datetime",
+    y="value",
+    markers=True,
+    title="Évolution de la cotation BTC/USDT (best ask)",
+    labels=dict(value="Best ask",
+                datetime="Date",
+                ),
+)
+fig
+#+END_SRC
+#+BEGIN_SRC python :session desc :results silent :exports results :tangle desc.py
+# Sauvegarder la figure en tant que fichier HTML
+fig_filename = 'market_price_best_ask.html'  
+pio.write_html(fig, file=fig_filename,
+               include_plotlyjs='cdn',
+               full_html=False,
+               config={'displayModeBar': False})
+#+END_SRC
+#+BEGIN_SRC python :session desc :results html :exports results
+pio.to_html(fig, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
+
+
+*** Prix moyen /mid-price/
+
+Il est également possible d'utiliser le prix moyen pour évaluer la
+cotation du BTC/USDT :
+#+BEGIN_SRC python :session desc :results silent :exports both :tangle desc.py
+fig = px.line(
+    order_book_spread_df,
+    x="datetime",
+    y="mid_price",
+    markers=True,
+    title="Évolution de la cotation BTC/USDT (mid-price)",
+    labels=dict(mid_price="Mid price",
+                datetime="Date",
+                ),
+)
+fig
+#+END_SRC
+#+BEGIN_SRC python :session desc :results silent :exports results :tangle desc.py
+# Sauvegarder la figure en tant que fichier HTML
+fig_filename = 'market_price_mid_price.html'  
+pio.write_html(fig, file=fig_filename,
+               include_plotlyjs='cdn',
+               full_html=False,
+               config={'displayModeBar': False})
+#+END_SRC
+#+BEGIN_SRC python :session desc :results html :exports results
+pio.to_html(fig, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
+Le marché étant très liquide, cette approche est équivalente à celle de la meilleur offre de vente.
+
+*** Méthode WOBP
+
+Le prix pondéré par la profondeur du carnet d'ordres, que nous pouvons appeler /Weighted Order
+Book Price/ (WOBP), est une mesure qui prend en compte les différents niveaux de prix et leurs
+volumes correspondants dans le carnet d'ordres. Cette méthode donne plus d'importance aux
+niveaux de prix où il y a plus de volume, reflétant ainsi la liquidité disponible à chaque
+niveau. 
+
+Formellement, nous pouvons définir le WOBP à l'instant $t$ comme suit :
+
+$$
+\text{WOBP}(t) = \frac{\sum_{i=1}^{n_{a}} p_{i,a}(t) q_{a,i}(t) + \sum_{j=1}^{n_{b}} p_{j,b}(t)
+q_{b,j}(t)}{\sum_{i=1}^{n_{a}} q_{a,i} + \sum_{j=1}^{n_{b}} q_{b,j}},
+$$
+où :
+- $p_{a, i}(t)$ est le prix du i-ème niveau d'offre de vente (/ask/) à l'instant $t$ ;
+- $q_{a, i}(t)$ est le volume (ou quantité) du i-ème niveau d'offre de vente à l'instant $t$ ;
+- $p_{b, j}(t)$ est le prix du j-ème niveau d'offre d'achat (/bid/) à l'instant $t$ ;
+- $q_{b, j}(t)$ est le volume (ou quantité) du j-ème niveau d'offre d'achat à l'instant $t$ ;
+- $n_{a}$ est le nombre de niveaux d'offre de vente considérés ;
+- $n_{b}$ est le nombre de niveaux d'offre d'achat considérés.
+
+Remarquons que dans les données utilisées dans cet exemple $n_{a} = n_{b} = 100$.
+
+Cette formule peut être adaptée pour ne considérer que les offres de vente ou les offres
+d'achat, selon l'analyse souhaitée : 
+- Prix pondéré côté vente : $WOBP_{a}(t) = \frac{\sum_{i=1}^{n_{a}} p_{a,i}(t)
+  q_{a,i}(t)}{\sum_{i=1}^{n} q_{a,i}(t)}$
+- Prix pondéré côté achat : $WOBP_{b}(t) = \frac{\sum_{j=1}^{n_{b}} p_{b,j}(t)
+  q_{b,j}(t)}{\sum_{j=1}^{n} q_{b,j}(t)}$
+
+Le calcul du WOBP est présenté dans le code suivant :
+#+BEGIN_SRC python :session desc :results silent :exports both :tangle desc.py
+order_book_pivot_df = order_book_df.pivot_table(
+    index=["symbol", "datetime", "position", "side"], columns="measure", values="value"
+).reset_index()
+
+# Supprimer le nom des colonnes de mesure pour éviter la confusion
+order_book_pivot_df.columns.name = None
+
+def calculate_wobp(order_book):
+    ask_sum = (order_book[order_book['side'] == 'ask']['price'] * order_book[order_book['side'] == 'ask']['amount']).sum()
+    bid_sum = (order_book[order_book['side'] == 'bid']['price'] * order_book[order_book['side'] == 'bid']['amount']).sum()
+    total_volume = order_book['amount'].sum()
+    return (ask_sum + bid_sum) / total_volume
+
+wobp_df = order_book_pivot_df.groupby('datetime').apply(calculate_wobp).reset_index(name='wobp')
+#+END_SRC
+
+Cette méthode offre plusieurs avantages pour l'analyse du marché BTC/USDT :
+1. Elle prend en compte la structure complète du carnet d'ordres, pas seulement les meilleurs prix.
+2. Elle reflète la liquidité disponible à différents niveaux de prix.
+3. Elle peut aider à identifier des niveaux de support et de résistance potentiels.
+4. Elle peut être utilisée pour détecter des déséquilibres dans le carnet d'ordres qui pourraient indiquer des mouvements de prix imminents.
+
+#+BEGIN_SRC python :session desc :results silent :exports both :tangle desc.py
+fig = px.line(
+    wobp_df,
+    x="datetime",
+    y="wobp",
+    markers=True,
+    title="Évolution de la cotation BTC/USDT (WOBP)",
+    labels=dict(wobp="WOBP",
+                datetime="Date",
+                ),
+)
+fig
+#+END_SRC
+#+BEGIN_SRC python :session desc :results silent :exports results :tangle desc.py
+# Sauvegarder la figure en tant que fichier HTML
+fig_filename = 'market_price_wobp.html'  
+pio.write_html(fig, file=fig_filename,
+               include_plotlyjs='cdn',
+               full_html=False,
+               config={'displayModeBar': False})
+#+END_SRC
+#+BEGIN_SRC python :session desc :results html :exports results
+pio.to_html(fig, include_plotlyjs="cdn",
+            full_html=False,
+            config={'displayModeBar': False})
+#+END_SRC
+
+
+
+** Profondeur relative                                             :noexport:
+
+#+BEGIN_SRC python :session desc :results silent :exports results :tangle desc.py :eval no
+import pandas as pd
+import numpy as np
+
+# Assuming order_book_df is already loaded and datetime is converted to datetime type
+order_book_filename = "ob_BTC_USDT_100.csv.bz2"
+order_book_df = pd.read_csv(order_book_filename, compression="bz2")
+order_book_df["datetime"] = pd.to_datetime(order_book_df["datetime"])
+
+order_book_pivot_df = order_book_df.pivot_table(
+    index=["symbol", "datetime", "position", "side"], columns="measure", values="value"
+).reset_index()
+
+# Supprimer le nom des colonnes de mesure pour éviter la confusion
+order_book_pivot_df.columns.name = None
+
+# Define your bins as a list of percentages
+bin_edges = [-float("inf")] + list(np.arange(-0.001, 0.001, 0.0001)) + [float("inf")]
+# Create labels for the bins
+bin_labels = [
+    "{:.2%}<P<={:.2%}".format(left, right)
+    for left, right in zip(bin_edges[1:-2], bin_edges[2:-1])
+]
+bin_labels.insert(0, f"P<={bin_edges[1]:.2%}")
+bin_labels.append(f"P>{bin_edges[-2]:.2%}")
+              
+
+# Get the best ask price for each datetime
+idx_ask_best_prices = (order_book_pivot_df["position"] == 0) & (
+    order_book_pivot_df["side"] == "ask"
+)
+
+ask_best_prices_df = order_book_pivot_df.loc[idx_ask_best_prices, ["datetime", "price"]]
+
+# Merge the best ask price back to the original order_book_df to compute percentage differences
+order_book_bis_df = order_book_pivot_df.merge(
+    ask_best_prices_df, on="datetime", suffixes=("", "_best_ask")
+)
+
+# Calculate the percentage difference for each price from the best ask
+order_book_bis_df["price_rdiff"] = (
+    order_book_bis_df["price"] - order_book_bis_df["price_best_ask"]
+) / order_book_bis_df["price_best_ask"]
+
+
+order_book_bis_df["price_rdiff_bin"] = pd.cut(
+    order_book_bis_df["price_rdiff"], bins=bin_edges, labels=bin_labels,
+)
+
+order_book_bin_amount_df = (
+    order_book_bis_df.groupby(["symbol", "datetime", "side", "price_rdiff_bin"])[
+        "amount"
+    ]
+    .sum()
+    .reset_index()
+)
+#+END_SRC
+
+#+BEGIN_SRC python :session desc :results silent :exports results :tangle desc.py :eval no
+import plotly.io as pio
+import plotly.express as px
+
+# Créer une figure d'animation avec Plotly Express
+fig = px.bar(order_book_bin_amount_df,
+             x='price_rdiff_bin', 
+             y='amount', 
+             color='side', 
+             animation_frame='datetime', 
+             title="Evolution de l'Order Book pour BTC/USDT au cours du temps")
+
+# Améliorer la lisibilité
+fig.update_layout(showlegend=True)
+
+
+# Sauvegarder la figure en tant que fichier HTML
+order_book_pivot_filename = 'order_book_ret.html'  
+pio.write_html(fig, file=order_book_pivot_filename,
+               include_plotlyjs='cdn',
+               full_html=False,
+               config={'displayModeBar': False})
+
+print(f"La figure a été sauvegardée en tant que {order_book_pivot_filename}")
+#+END_SRC
