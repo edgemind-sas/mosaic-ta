@@ -243,7 +243,7 @@ au niveau de prix.
 
 Le code suivant calcule à la fois l'écart absolu (en USDT) et l'écart relatif (en pourcentage du prix
 moyen) :
-#+BEGIN_SRC python :session desc :results silent :exports results :tangle desc.py
+#+BEGIN_SRC python :session desc :results silent :exports both :tangle desc.py
 # Calcul de l'index idx du carnet d'ordres où measure == "price" et position == 0
 idx = (order_book_df["measure"] == "price") & (order_book_df["position"] == 0)
 
