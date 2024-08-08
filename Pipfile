@@ -11,6 +11,7 @@ pandas = "*"
 plotly = "*"
 tabulate = "*"
 jinja2 = "*"
+argparse = "*"
 
 [dev-packages]
 ipython = "*"

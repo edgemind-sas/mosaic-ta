@@ -1,0 +1,3 @@
+%run -i load_datas.py
+%run -i train_test_dataset.py --k_horizon 7
+%run -i logistic_regression_model.py -b 0 -l 0.5
